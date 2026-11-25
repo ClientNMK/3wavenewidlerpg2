@@ -1,0 +1,4 @@
+﻿PixelLab character: girl_base_pro
+character_id: abbfbb86-0855-4f8d-86ef-094bfc9bf55c
+mode: pro (concept sheet reference), canvas 96x96, figure ~62px, view: low top-down
+note: north.png was cleaned locally (concept-sheet fragments removed). The copy stored on PixelLab still has them.

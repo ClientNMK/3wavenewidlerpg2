@@ -30,6 +30,8 @@ export const meta = {
     flareL: 0,
     ringR: 0,
     second: 0,
+    trace: 1, // 0 = no dotted trace left behind the smear (flat painted look)
+    echo: 1, // 0 = no thin echo crescent inside the main one
     seed: 2,
   },
 };
@@ -62,14 +64,14 @@ function crescent(p, s, ta, L, W, age) {
   }
 }
 
-function drawSlash(p, s, t) {
+function drawSlash(p, s, t, trace = 1) {
   const u = t - s.t0;
   if (u < 0) return;
   const span = s.a1 - s.a0, head = ease.outExpo(clamp(u / s.sweep)), tail = smooth(s.sweep + s.hold, s.sweep + s.hold + s.trail, u);
   const age = clamp(u / (s.sweep + s.hold + s.trail));
   if (tail < 1) crescent(p, s, s.a0 + span * tail, span * (head - tail), s.W * (1 - tail * 0.55), age);
   const th = 0.6 * (1 - clamp((u - s.sweep - s.hold) / (s.trail + 0.15)));
-  if (tail > 0.02 && th > 0)
+  if (trace && tail > 0.02 && th > 0)
     for (let k = 0; k <= tail; k += 0.6 / (Math.abs(span) * s.R)) {
       const [x, y] = onArc(s, s.R - 0.5, s.a0 + span * k);
       p.dot(x, y, s.ramp[1], th * (0.4 + 0.6 * k));
@@ -122,9 +124,9 @@ export function create(o) {
       ps.update(dt);
     },
     draw(p) {
-      drawSlash(p, E, t);
-      drawSlash(p, A, t);
-      if (B2) drawSlash(p, B2, t);
+      if (o.echo !== 0) drawSlash(p, E, t, o.trace);
+      drawSlash(p, A, t, o.trace);
+      if (B2) drawSlash(p, B2, t, o.trace);
       const g = t - A.sweep * 0.6;
       if (g > 0 && g < 0.2) sparkle(p, tip.x, tip.y, o.glint * ease.outBack(Math.min(1, g / 0.05)) * (1 - g / 0.2), C[5], C[3], 0.6);
       pop(p, tip, t - A.sweep, 1, true);

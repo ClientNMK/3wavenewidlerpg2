@@ -1,0 +1,22 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using LitJson;
+using BackEnd;
+
+public class DataManager : Singleton<DataManager>
+{
+    [Header("String Data")]
+    public SerializableStringData StringData = new();
+
+    [Header("System Data")]
+    public SerializableSystemData SystemData = new();
+
+    [Header("Character Data")]
+    public SerializableStatData StatData = new();
+    public SerializableMonsterData MonsterData = new();
+    public SerializableSkillData SkillData = new();
+
+    [Header("Stage Data")]
+    public SerializableStageData StageData = new();
+}

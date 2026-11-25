@@ -1,0 +1,18 @@
+﻿PixelLab character: girl_base_se_t2
+character_id: 9c0b102d-da86-4de9-8afe-fe35a9fdd81b
+direction used in game: south-east (right three-quarter). Flip horizontally for left.
+rotation: rotations/south-east.png (96x96)
+animations (frames in animations/<name>/frame_NNN.png):
+  idle 8 (v3 custom, feet planted, upper body bob)        canvas 124x124  group cfc39704-9c7f-473f-af1a-828b530ca48f
+  walk 6 (skeleton-v3, walking)                           canvas 96x96    group 42610733-9cff-41c3-902b-4ae4230425b2
+  run 6 (skeleton-v3, running-6-frames)                   canvas 96x96    group 20352cae-2dd1-4314-8552-a7572e087101
+  attack_slash 8 (v3 custom, dagger slash with swoosh)    canvas 124x124  group 28554d31-9a81-4268-8e9d-ef94ea3ecb3e
+  attack_stab 3 (skeleton-v3, lead-jab)                   group 24c9d250-83b4-4380-9d07-330aec4985ea
+Align different canvas sizes by bottom-center.
+_old_v1, _old_v2_4dir: earlier versions.
+
+[aligned] (recommended for the game)
+aligned/<anim>/frame_NNN.png : every frame 128x128, flat ground line at y=112 (feet bottom sits on row 111), horizontal center x=64
+aligned/<anim>_strip.png     : one horizontal strip per animation (128px cells)
+pivot for the engine: (64, 112) in pixels  = (0.5, 0.125) from bottom-left
+offsets applied (dx,dy): idle 4,7 | walk 3,6 | run 0,7 | attack_slash 6,8 | attack_stab 1,7  (one offset per animation, so foot lift in walk/run is kept)

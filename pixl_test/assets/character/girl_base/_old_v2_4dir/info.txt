@@ -1,0 +1,7 @@
+﻿PixelLab character: girl_base_v2
+character_id: 4eaecd24-fbc1-47d8-947a-2465657ea205
+rotations: 96x96 (south/east/north/west), dagger in LEFT hand, reverse grip, blade behind
+animations (frames): idle 8 (v3 custom, feet planted, upper body bob) | walk 6 (template walking) | run 6 (template running-6-frames) | attack 8 (v3 custom dagger slash)
+canvas: idle/attack 120-128px (south 124, east/west 120, north 128), walk/run 96px  -> align by bottom-center
+animation_group_ids: idle 883a64f8-9be6-45bb-9036-96686a553283 | walk a5238ebc-686e-4cff-9128-763fe0d8a926 | run 97bfefc1-6525-4717-98a7-4ea1c8ba1560 | attack 1755bdd3-b7b4-4c44-854e-5ddae941e793
+_old_v1: previous version (pro character abbfbb86-0855-4f8d-86ef-094bfc9bf55c)

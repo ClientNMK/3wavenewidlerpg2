@@ -4,7 +4,8 @@
 
 ## 폴더 구성 (원본과 동일)
 - `pose/mob_slime_pink_se.png`: 기본 자세, 96×96
-- `animations/idle`, `move`, `attack`: 128×128, 바닥선 y=112, 중심 x=64
+- `animations/idle`, `move`, `attack`, `dead`: 128×128, 바닥선 y=112, 중심 x=64
+- `dead`: 9프레임, 0.10초/프레임 1회 (2026-11-26 추가). 마지막 두 프레임(frame_007~008, 바닥에 남은 해초)은 색을 바꾸지 않고 초록 원본 그대로 씀 → 4색 모두 같은 해초로 끝남
 - `projectile/fly` (32×32, 4프레임 반복), `projectile/hit` (48×48, 7프레임)
 - 구체 생성: attack frame_007, 입 위치 (90, 95)
 
