@@ -112,6 +112,12 @@ public class InGameManager : MonoBehaviour
         RefreshStageUI();
     }
 
+    // 히트스톱 도중 씬이 바뀌거나 플레이를 멈춰도 게임 속도가 0으로 남지 않게
+    private void OnDestroy()
+    {
+        Time.timeScale = 1f;
+    }
+
     private void Update()
     {
         if (!isBossChallenge)

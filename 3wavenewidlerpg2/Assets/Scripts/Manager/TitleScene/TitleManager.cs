@@ -26,6 +26,8 @@ public class TitleManager : MonoBehaviour
 
     private void Start()
     {
+        // 에디터에서 히트스톱 도중 플레이를 멈추면 0으로 남아 로그인 대기가 끝나지 않음
+        Time.timeScale = 1f;
         bStart = false;
         SoundManager.Instance.PlayBgm(BGMType.Title);
         GameManager.Instance.gameType = GameType.Title;
