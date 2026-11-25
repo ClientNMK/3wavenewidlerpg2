@@ -23,6 +23,11 @@ ArtSource/girl_base/
 │  ├─ run_strip.png                   ← 가로 스트립 (칸 128px, 6칸)
 │  ├─ run_x1.gif                      ← 원본 크기, 투명, 0.08초/프레임 (약 12fps)
 │  └─ run_preview_x3.gif              ← 확인용 3배, 베이지 배경 + 빨간 바닥선
+├─ animations/attack/                 ← attack 확정본 (2026-11-25)
+│  ├─ frames/frame_000~008.png        ← 128×128, 바닥선 y=112, 중심 x=64, 투명 배경 (000 = 시작 자세)
+│  ├─ attack_strip.png                ← 가로 스트립 (칸 128px, 9칸)
+│  ├─ attack_x1.gif                   ← 원본 크기, 투명, 0.08초/프레임
+│  └─ attack_preview_x3.gif           ← 확인용 3배, 베이지 배경 + 빨간 바닥선
 └─ tools/GifMaker.cs                  ← 확인용 GIF 인코더 (PowerShell Add-Type로 사용)
 ```
 Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 넣을 최종 스프라이트는 확정 후 별도로 옮긴다.
@@ -46,7 +51,8 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 | 단검 | 낮게 역수로 쥐고 칼날은 아래·뒤로, 앞쪽 손 |
 | idle 규칙 | **다리는 절대 움직이지 않고 상체·옷·머리카락만 흔들림** |
 | run 규칙 | 몸·다리는 옆모습(east) 달리기, **얼굴은 idle과 같은 반측면 각도로 고정**(고개 좌우로 돌리지 않음), 머리카락은 흔들림 |
-| 애니메이션 속도 | idle 0.12초/프레임, run 0.08초/프레임 (엔진에서 조절) |
+| attack 규칙 | 반측면 그대로 유지(정면으로 돌지 않음), 역수 단검 한 자루, 끝 프레임은 시작 자세로 복귀 |
+| 애니메이션 속도 | idle 0.12초/프레임, run 0.08초/프레임, attack 0.08초/프레임 (엔진에서 조절) |
 | 캔버스 정렬 | 모든 애니메이션을 128×128에 놓고 발바닥 바닥선 y=112, 가로 중심 x=64. 엔진 pivot (64,112) |
 
 ## 5. PixelLab ID
@@ -56,6 +62,9 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 | └ idle_a | group `3bc7cb70-8841-4595-9a13-09113d618925` | v3 custom 8프레임 (124×124). 다리 고정 후처리 + 정렬(dx=4, dy=8) → **확정** (`animations/idle/`) |
 | └ idle_b | group `96a5b540-90ec-40f2-ab8d-e576ff1ee375` | 다리 더 많이 움직임 (탈락) |
 | └ run | group `2be876c6-2c45-4e03-9b76-e1d3c3bff920` | skeleton-v3 `running-6-frames`. south-east는 다리가 대각선이라 탈락 → **east 방향** 사용 → 얼굴 수정 + 얼굴 고정 후처리 → **확정** (`animations/run/`) |
+| └ attack_slash_v2 | group `aa3ac889-d310-46d1-893b-e0fd12b3afd4` | v3 custom 8프레임(+시작 1) south-east, end_frame = south-east 회전 이미지 → 남는 칼날 지움 + 정렬 → **확정** (`animations/attack/`) |
+| └ attack_slash (v1) | group `288f51cd-2880-4145-9699-48e9f041c15c` | 후반에 몸이 정면으로 돎 (탈락) |
+| └ attack_slash_east | group `263ce08b-d01f-41a8-86e7-56ceed5fcaa5` | 칼 두 자루로 보임 (탈락) |
 
 다운로드: `https://api.pixellab.ai/mcp/characters/<character_id>/download` (ZIP), GIF: `export_asset(format="gif", animation_group_id=..., direction="south-east")`
 
@@ -72,10 +81,17 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
   4. 128×128에 (dx=−3, dy=6)로 배치, 발바닥 111행
 - 알려진 작은 흠: 마지막 2프레임에 얼굴 왼쪽 아래 원래 볼 픽셀 1~2개가 남음 (원래 크기에선 거의 안 보임)
 
-**현재 단계:** attack 생성 전
+**완료:** attack 확정 (2026-11-25) → `animations/attack/`
+- 만든 방법:
+  1. v3 custom, south-east, 8프레임. `end_frame_url`에 south-east 회전 이미지를 넣어 끝 자세가 시작 자세로 돌아오게 함. 설명에 "stays facing right in three-quarter view, body does not turn to the front" 명시
+  2. 4~8번째 프레임(frame_003~007)에 손 위로 겹친 잔상 칼날을 직접 지움 (손 아래 칼날만 남김)
+  3. 124×96 원본을 128×128에 (dx=20, dy=8)로 배치, 발바닥 111행, 머리 중심 x를 idle과 맞춤
+- 알려진 점: 베기 동작이 작은 편 (칼이 가슴 높이까지만 올라옴). 필요하면 더 큰 동작으로 재생성
+
+**현재 단계:** walk(선택) 또는 0차 후드 버전
 
 **다음 순서 (사용자 확인을 받으며):**
-1. p2 캐릭터로 attack (필요하면 walk) 생성, 한 동작씩 GIF로 확인받기
+1. (선택) walk 생성, GIF로 확인받기
    - walk: `mode="skeleton-v3"` + 템플릿 `walking`. 반측면은 다리가 대각선이 되므로 run처럼 east 방향 + 얼굴 고정 방식 사용
    - attack: v3 custom "베기"가 가장 나았음 (lead-jab 찌르기는 3프레임뿐이라 약함)
 2. 128×128, 바닥선 y=112로 정렬 → 확정본만 `animations/<동작>/` 에 커밋 (idle과 같은 파일 구성)
