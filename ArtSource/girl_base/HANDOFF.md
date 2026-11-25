@@ -1,0 +1,69 @@
+# HANDOFF — 소라게 후드 소녀 메인 캐릭터 (방치형 RPG)
+
+다른 세션(클라우드 포함)이 작업을 이어받기 위한 인수인계 메모입니다. 작성일: 2026-11-25
+**이 폴더에는 확정본만 둡니다.** 후보와 이전 버전은 올리지 않으며, 필요하면 아래 PixelLab ID로 다시 받습니다.
+
+## 1. 한 줄 요약
+방치형 RPG 메인 캐릭터 "소라게 후드 소녀". 기본형(후드 없음)을 PixelLab MCP로 만들고, 보스를 잡으면 나오는 후드를 장착하는 식으로 단계별 후드 버전(0차, 1차…)을 추가한다.
+
+## 2. 이 폴더 구성
+```
+ArtSource/girl_base/
+├─ HANDOFF.md                         ← 이 문서
+├─ concept/shellgirl_concept_sheet.png ← 콘셉트 시트 (확정)
+├─ pose/girl_base_se_p2.png           ← 기본 포즈 p2, 96×96 (확정)
+├─ pose/girl_base_se_p2_x3.png        ← 3배 확대 미리보기
+└─ tools/GifMaker.cs                  ← 확인용 GIF 인코더 (PowerShell Add-Type로 사용)
+```
+Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 넣을 최종 스프라이트는 확정 후 별도로 옮긴다.
+
+## 3. 사용자 작업 방식 (꼭 지킬 것)
+- **단계마다 결과 이미지를 보여주고 확인을 받은 뒤 다음으로 넘어간다.**
+- 결과물은 **GIF로 보여준다.** (HTML 미리보기는 환경에 따라 스크립트가 막혀 안 보일 수 있음) `tools/GifMaker.cs` 사용 예:
+  `Add-Type -Path tools/GifMaker.cs -ReferencedAssemblies System.Drawing; [GifMaker]::Make($framePaths, 'out.gif', 3, 12, '#ebe4d6', 104)` (배율 3, 0.12초, 배경색, 바닥선 행 / 바닥선 없으면 -1)
+- 파일을 저장하면 **전체 경로를 항상 알려준다.**
+- 한국어로 짧게, 다음 행동을 먼저, 단계는 번호로 (사용자는 ADHD).
+- **확정된 것만 저장소에 커밋한다.**
+
+## 4. 확정된 결정 사항
+| 항목 | 결정 |
+|---|---|
+| 카메라 | 탑뷰 (PixelLab view: low top-down) |
+| 사용 방향 | **오른쪽 반측면(south-east) 한 방향만.** 왼쪽은 좌우 반전. 정면·뒷모습 불필요 (팀 피드백: 리소스량 절감) |
+| 이동 | 화면 가로로 일직선 이동. **바닥은 평지(수평선)**. 발 배치가 대각선이면 안 됨 |
+| 기본 포즈 | **p2**: 반측면 상체 + 두 다리 평행, 두 발이 같은 수평선 → `pose/girl_base_se_p2.png` |
+| 디자인 | 웨이브 애쉬 크림 머리, 금빛 눈, 진갈색 원피스+금단추, 금방울 달린 큰 빨간 리본, 크림 프릴, 갈색 부츠 |
+| 단검 | 낮게 역수로 쥐고 칼날은 아래·뒤로, 앞쪽 손 |
+| idle 규칙 | **다리는 절대 움직이지 않고 상체·옷·머리카락만 흔들림** |
+| 캔버스 정렬 | 모든 애니메이션을 128×128에 놓고 발바닥 바닥선 y=112, 가로 중심 x=64. 엔진 pivot (64,112) |
+
+## 5. PixelLab ID
+| 이름 | character_id | 비고 |
+|---|---|---|
+| **girl_base_se_p2 (현재)** | `91ce750a-fd6e-4cbd-9898-4e0fe19fc089` | south-east = p2 포즈. 8방향 중 south-east만 사용 |
+| └ idle_a | group `3bc7cb70-8841-4595-9a13-09113d618925` | v3 custom 8프레임 (124×124). 다리가 조금 움직여서 후처리로 고정한 버전이 확인 대기 중 |
+| └ idle_b | group `96a5b540-90ec-40f2-ab8d-e576ff1ee375` | 다리 더 많이 움직임 (탈락) |
+
+다운로드: `https://api.pixellab.ai/mcp/characters/<character_id>/download` (ZIP), GIF: `export_asset(format="gif", animation_group_id=..., direction="south-east")`
+
+## 6. 현재 상태와 다음 할 일
+**현재 단계:** p2 캐릭터의 idle 확인 대기 중 (아직 미확정이라 저장소에 없음)
+- 다리 고정 후처리 방법: idle_a 프레임을 받아서, 각 프레임의 다리·부츠 영역(124×124 기준 y=93~103행)을 frame 0의 같은 영역으로 덮어쓴다. 프레임 이동은 필요 없었음(부츠 위치 일치).
+- 사용자 피드백 가능성: 상체 좌우 흔들림이 큼 → 줄여서 재생성할 수도 있음
+
+**다음 순서 (사용자 확인을 받으며):**
+1. idle 확정 (다리 고정본 또는 흔들림 줄여 재생성) → 확정되면 `ArtSource/girl_base/animations/idle/` 에 128×128 정렬본으로 커밋
+2. p2 캐릭터로 walk · run · attack 생성 (south-east만)
+   - walk/run: `mode="skeleton-v3"` + 템플릿 `walking`, `running-6-frames` (단검 유지가 가장 좋았음)
+   - **주의:** 반측면이라 다리가 대각선으로 나갈 수 있음 → 그러면 east 방향 동작을 쓰는 방식으로 재시도
+   - attack: v3 custom "베기"가 가장 나았음 (lead-jab 찌르기는 3프레임뿐이라 약함)
+3. 128×128, 바닥선 y=112로 정렬 → 확정본만 커밋
+4. 0차 후드 버전: 같은 설명 + "wearing a hood made of a cracked egg shell, one big round eye on top of the hood" → `ArtSource/hood_0/`. 같은 캐릭터에 장비만 바뀐 상태로 만들기 위해 `create_character_state` 사용 검토
+
+## 7. 기술 메모
+- `edit_image`에 같은 이미지를 4번 넣으면 같은 비용(10회)으로 변형 4개를 받음 (포즈 수정에 유용)
+- 템플릿 애니메이션(template 모드)은 손에 든 무기를 자주 지움 → skeleton-v3 권장
+- v3 reference 캐릭터: `reference_image_url`(정면) + `direction_images`로 원하는 방향 그림을 그대로 넣을 수 있음 (south-east를 넣으려면 `n_directions=8`)
+- PixelLab `create_image_pro` 작은 크기 결과는 큰 시트를 잘못 자른 것일 수 있음 → 이어 붙여 확인
+- PowerShell 변수는 대소문자를 구분하지 않음 ($C와 $c 충돌 주의)
+- PixelLab Job 슬롯 최대 10개
