@@ -33,6 +33,12 @@ ArtSource/girl_base/
 │  ├─ hurt_strip.png                  ← 가로 스트립 (칸 128px, 9칸)
 │  ├─ hurt_x1.gif                     ← 원본 크기, 투명, 0.08초/프레임
 │  └─ hurt_preview_x3.gif             ← 확인용 3배, 베이지 배경 + 빨간 바닥선
+├─ effects/attack_slash/              ← 공격 베기 이펙트 확정본 (2026-11-25, pixelfx)
+│  ├─ dagger-slash.png / .json        ← 스프라이트 시트 (칸 220×140, 4열, 19프레임) + Aseprite식 JSON (meta.pixelfx에 fps·pivot)
+│  ├─ frames/frame_000~018.png        ← 같은 프레임 낱장, 투명 배경 (빛 번짐은 반투명 픽셀로 들어 있음)
+│  ├─ attack_slash_x1.gif             ← 이펙트만, 원본 크기 (GIF라 반투명 빛은 빠짐)
+│  ├─ attack_with_slash_preview_x3.gif ← 공격 애니메이션 + 이펙트 겹친 확인용
+│  └─ source/dagger-slash.js, options.json ← pixelfx 이펙트 코드와 이 버전 옵션 (다시 렌더할 때 사용)
 └─ tools/GifMaker.cs                  ← 확인용 GIF 인코더 (PowerShell Add-Type로 사용)
 ```
 Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 넣을 최종 스프라이트는 확정 후 별도로 옮긴다.
@@ -100,6 +106,16 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
   1. v3 custom, south-east, 8프레임. `end_frame_url`에 south-east 회전 이미지. 설명: "getting hit and hurt: flinches backward from an impact in front, head and upper body jerk back, eyes squeeze shut... Feet stay planted on the ground, stays facing right in three-quarter view, body does not turn to the front, still holding the dagger low in reverse grip"
   2. 96×124 원본을 128×128에 (dx=18, dy=8)로 배치, 발바닥 111행 (모든 프레임 발바닥 행 동일). 후처리 없음
 - 알려진 점: 젖혀지는 정도가 작은 편. 가운데 프레임(003~005)에서 다리가 살짝 벌어짐(발은 바닥에 붙어 있음)
+
+**완료:** 공격 베기 이펙트 확정 (2026-11-25) → `effects/attack_slash/`
+- 모양: 흰색 반달 궤적이 캐릭터 앞에서 머리 높이~발끝 높이로 크게 베고, 곧바로 반대 방향으로 한 번 더 베어 X자. 첫 궤적 끝에 8갈래 섬광 + 흰 충격 링, 흰 불꽃·조각
+- **엔진 연결:**
+  1. 이펙트 프레임(220×140)의 pivot **(40, 128)** 을 캐릭터 pivot **(64, 112)** 에 맞춘다 (캐릭터 128 캔버스 기준 이펙트 왼쪽 위 = (24, −16))
+  2. attack 시작 후 **0.24초(frame_003 시작)** 에 이펙트 재생, **30fps**, 19프레임, 1회
+  3. 타격 순간(히트스톱·데미지 숫자)은 이펙트 시작 후 약 0.05초
+  4. 캐릭터 앞쪽(오른쪽)으로 캐릭터 칸 밖까지 나가므로 캐릭터와 별도 스프라이트로 그린다. 왼쪽을 볼 때는 캐릭터와 함께 좌우 반전
+  5. 빛 번짐은 반투명이라 어두운 배경에서 더 잘 보인다. 밝은 배경이면 `options.json`의 `light`를 0으로 다시 렌더
+- 만든 방법: pixelfx(`C:\Users\HP\Documents\Claude\pixelfx`, github.com/patch-gg/pixelfx)의 `melee/sword-slash`를 바탕으로 `melee/dagger-slash`를 새로 작성 (위치·크기·호 모양·X자 두 번째 베기·섬광·링 옵션 추가). 다시 렌더: pixelfx 폴더에서 `node tools/render.mjs melee/dagger-slash --sheet --opts "<options.json 내용>"` (PowerShell 5.1에서는 따옴표를 `\"`로 이스케이프)
 
 **현재 단계:** walk(선택) 또는 0차 후드 버전
 
