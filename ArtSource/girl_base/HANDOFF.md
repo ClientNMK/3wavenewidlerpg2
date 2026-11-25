@@ -13,6 +13,11 @@ ArtSource/girl_base/
 ├─ concept/shellgirl_concept_sheet.png ← 콘셉트 시트 (확정)
 ├─ pose/girl_base_se_p2.png           ← 기본 포즈 p2, 96×96 (확정)
 ├─ pose/girl_base_se_p2_x3.png        ← 3배 확대 미리보기
+├─ animations/idle/                   ← idle 확정본 (2026-11-25)
+│  ├─ frames/frame_000~007.png        ← 128×128, 바닥선 y=112, 중심 x=64, 투명 배경
+│  ├─ idle_strip.png                  ← 가로 스트립 (칸 128px, 8칸)
+│  ├─ idle_x1.gif                     ← 원본 크기, 투명, 0.12초/프레임
+│  └─ idle_preview_x3.gif             ← 확인용 3배, 베이지 배경 + 빨간 바닥선
 └─ tools/GifMaker.cs                  ← 확인용 GIF 인코더 (PowerShell Add-Type로 사용)
 ```
 Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 넣을 최종 스프라이트는 확정 후 별도로 옮긴다.
@@ -41,24 +46,25 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 | 이름 | character_id | 비고 |
 |---|---|---|
 | **girl_base_se_p2 (현재)** | `91ce750a-fd6e-4cbd-9898-4e0fe19fc089` | south-east = p2 포즈. 8방향 중 south-east만 사용 |
-| └ idle_a | group `3bc7cb70-8841-4595-9a13-09113d618925` | v3 custom 8프레임 (124×124). 다리가 조금 움직여서 후처리로 고정한 버전이 확인 대기 중 |
+| └ idle_a | group `3bc7cb70-8841-4595-9a13-09113d618925` | v3 custom 8프레임 (124×124). 다리 고정 후처리 + 정렬(dx=4, dy=8) → **확정** (`animations/idle/`) |
 | └ idle_b | group `96a5b540-90ec-40f2-ab8d-e576ff1ee375` | 다리 더 많이 움직임 (탈락) |
 
 다운로드: `https://api.pixellab.ai/mcp/characters/<character_id>/download` (ZIP), GIF: `export_asset(format="gif", animation_group_id=..., direction="south-east")`
 
 ## 6. 현재 상태와 다음 할 일
-**현재 단계:** p2 캐릭터의 idle 확인 대기 중 (아직 미확정이라 저장소에 없음)
-- 다리 고정 후처리 방법: idle_a 프레임을 받아서, 각 프레임의 다리·부츠 영역(124×124 기준 y=93~103행)을 frame 0의 같은 영역으로 덮어쓴다. 프레임 이동은 필요 없었음(부츠 위치 일치).
-- 사용자 피드백 가능성: 상체 좌우 흔들림이 큼 → 줄여서 재생성할 수도 있음
+**완료:** idle 확정 (2026-11-25) → `animations/idle/`
+- 만든 방법: idle_a 프레임의 다리·부츠 영역(124×124 기준 y=93~103행)을 frame 0으로 덮어써 다리를 고정 → 128×128 캔버스에 (dx=4, dy=8)로 배치해 발바닥이 111행(바닥선 112 바로 위)에 오게 함
+- 다른 애니메이션도 같은 규칙으로 정렬해야 idle과 전환할 때 캐릭터가 튀지 않음
+
+**현재 단계:** walk 생성 전
 
 **다음 순서 (사용자 확인을 받으며):**
-1. idle 확정 (다리 고정본 또는 흔들림 줄여 재생성) → 확정되면 `ArtSource/girl_base/animations/idle/` 에 128×128 정렬본으로 커밋
-2. p2 캐릭터로 walk · run · attack 생성 (south-east만)
+1. p2 캐릭터로 walk · run · attack 생성 (south-east만), 한 동작씩 GIF로 확인받기
    - walk/run: `mode="skeleton-v3"` + 템플릿 `walking`, `running-6-frames` (단검 유지가 가장 좋았음)
    - **주의:** 반측면이라 다리가 대각선으로 나갈 수 있음 → 그러면 east 방향 동작을 쓰는 방식으로 재시도
    - attack: v3 custom "베기"가 가장 나았음 (lead-jab 찌르기는 3프레임뿐이라 약함)
-3. 128×128, 바닥선 y=112로 정렬 → 확정본만 커밋
-4. 0차 후드 버전: 같은 설명 + "wearing a hood made of a cracked egg shell, one big round eye on top of the hood" → `ArtSource/hood_0/`. 같은 캐릭터에 장비만 바뀐 상태로 만들기 위해 `create_character_state` 사용 검토
+2. 128×128, 바닥선 y=112로 정렬 → 확정본만 `animations/<동작>/` 에 커밋 (idle과 같은 파일 구성)
+3. 0차 후드 버전: 같은 설명 + "wearing a hood made of a cracked egg shell, one big round eye on top of the hood" → `ArtSource/hood_0/`. 같은 캐릭터에 장비만 바뀐 상태로 만들기 위해 `create_character_state` 사용 검토
 
 ## 7. 기술 메모
 - `edit_image`에 같은 이미지를 4번 넣으면 같은 비용(10회)으로 변형 4개를 받음 (포즈 수정에 유용)
