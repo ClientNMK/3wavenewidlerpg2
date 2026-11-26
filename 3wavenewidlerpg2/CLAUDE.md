@@ -9,6 +9,7 @@
 주석 내용은 반드시 알아야 하는 내용으로만 간결하게 작성.
 다시 반복될 만한 실수일 때만 배운 점을 이 파일에 한 줄로 기록하고 중복은 정리.
 - Spine JSON을 문자열 치환으로 고칠 때 같은 패턴이 스킨과 애니메이션에 여러 번 나오므로 한 곳만 바뀌는지 확인.
+- 새 SkeletonAnimation을 코드로 만들 때 tintBlack = true 설정 (프로젝트 Spine 재질이 Tint Black 셰이더).
 
 # CLAUDE.md
 

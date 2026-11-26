@@ -94,6 +94,11 @@ ArtSource/girl_base/
 │  ├─ xslash_impact_demo_x3.gif       ← 평타 동작에 겹친 예시 (어느 스킬 동작에 붙일지는 미정)
 │  ├─ source/double-slash-big.js, _lib.js, options.json
 │  └─ backstab/                       ← backstab용 (교차점을 캐릭터 가까이 49px로, flipX로 뒤쪽에 사용): xslash_backstab.png/.json, frames/, options.json, backstab_xslash_demo_x3.gif
+├─ effects/vanish_burst/              ← vanish(사라짐)용 크림 반짝 링 확정본 (2026-11-26, pixelfx collect-burst 색만 변경)
+│  ├─ collect-burst.png / .json       ← 스프라이트 시트 (칸 112×108, 7열, 42프레임, 30fps, pivot (56, 94))
+│  ├─ frames/frame_000~041.png, vanish_burst_x1.gif
+│  ├─ vanish_fx_demo_x3.gif           ← vanish + 이펙트 겹친 확인용
+│  └─ source/collect-burst.js, options.json
 └─ tools/GifMaker.cs                  ← 확인용 GIF 인코더 (PowerShell Add-Type로 사용)
 ```
 Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 넣을 최종 스프라이트는 확정 후 별도로 옮긴다.
@@ -110,7 +115,7 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 | 항목 | 결정 |
 |---|---|
 | 카메라 | 탑뷰 (PixelLab view: low top-down) |
-| 사용 방향 | **오른쪽 반측면(south-east) 한 방향만.** 왼쪽은 좌우 반전. 정면·뒷모습 불필요 (팀 피드백: 리소스량 절감). **모든 몬스터·캐릭터도 같은 각도만** 만든다 (몬스터: `ArtSource/monsters/mob_slime/` 초록 원본 + 색만 바꾼 `mob_slime_blue`·`mob_slime_pink`·`mob_slime_gold`. 만드는 방법은 각 폴더 HANDOFF 참고). 아이템: `ArtSource/items/item_gold_coin/` (골드 동전, 위에서 보는 한 방향) |
+| 사용 방향 | **오른쪽 반측면(south-east) 한 방향만.** 왼쪽은 좌우 반전. 정면·뒷모습 불필요 (팀 피드백: 리소스량 절감). **모든 몬스터·캐릭터도 같은 각도만** 만든다 (몬스터: `ArtSource/monsters/mob_slime/` 초록 원본 + 색만 바꾼 `mob_slime_blue`·`mob_slime_pink`·`mob_slime_gold`. 만드는 방법은 각 폴더 HANDOFF 참고). 아이템: `ArtSource/items/item_gold_coin/` (골드 동전), `pet_egg_1`·`pet_egg_2` (펫 알, 각 폴더 `skins/`에 색 스킨 4종, idle 흔들기는 엔진 처리) — 모두 위에서 보는 한 방향. 펫: `ArtSource/pets/pet_hood/` (크림 망토 정령 후드 `hood_001`(lv1)·`hood_002`(lv2)·조개 모자 코스튬 `hood_001_skin_shell`, idle + 포식(devour), 리소스 이름은 `Chart/HoodChart_Dev.xlsx` Resorce 기준, 진화 단계 확장 규칙은 폴더 HANDOFF 참고). 상태이상 아이콘: `ArtSource/ui/status_icons/` (16px 색 기호, 포식 표식 포함). 공용 바닥 그림자: `ArtSource/common/shadow/` (메인 캐릭터는 +4px 오른쪽) |
 | 이동 | 화면 가로로 일직선 이동. **바닥은 평지(수평선)**. 발 배치가 대각선이면 안 됨 |
 | 기본 포즈 | **p2**: 반측면 상체 + 두 다리 평행, 두 발이 같은 수평선 → `pose/girl_base_se_p2.png` |
 | 디자인 | 웨이브 애쉬 크림 머리, 금빛 눈, 진갈색 원피스+금단추, 금방울 달린 큰 빨간 리본, 크림 프릴, 갈색 부츠 |
@@ -253,6 +258,12 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 - 만든 방법 (AI 생성 아님, 비용 0): `source/Dissolve.cs`로 idle frame_000을 분해. 14프레임: 0 = 원래 자세, 1~2 = 밝아지며 기 모음, 3~9 = 머리→발 순서로 부서짐(부서지기 직전 픽셀이 밝게 빛남), 부서진 픽셀의 26%가 밝은 점이 되어 위·앞뒤로 흩어지며 3~6프레임 뒤 사라짐, 13 = 빈 그림. 호출: `[Dissolve]::Make(<시작 png>, <출력 폴더>, 14, 3, 9, 4242)` (프레임 수, 부서짐 시작·끝 프레임, 랜덤 시드)
 - appear는 vanish 프레임을 역순으로 저장한 것
 - 다른 자세에서 사라지기, 점 색 바꾸기 등은 스크립트로 바로 다시 만들 수 있음
+
+**완료:** vanish 이펙트(크림 반짝 링) 확정 (2026-11-26) → `effects/vanish_burst/`
+- 모양: pixelfx `pickups/collect-burst`를 그대로 쓰고 색만 크림 팔레트로 바꿈. 몸 중앙이 반짝 → 링 두 개가 퍼짐 → 반짝이가 흩어지며 사라짐. 흩어지는 점(vanish 그림)과 어울리게 고름
+- 옵션(`source/options.json`): palette `#5a4a3c #7d6a58 #a89480 #cdb9a4 #e6d6c4 #f3e6d8 #fdf2e8 #ffffff`, light 0.4. 코드 수정 없음(원본 그대로)
+- 엔진 연결: 이펙트 pivot (56, 94)을 **캐릭터 pivot (64,112)에서 아래로 2px** 지점에 맞춤 (반짝임 중심이 몸 중앙에 옴), vanish 시작 **0.30초(frame_005)** 에 30fps 1회. 캐릭터와 별도 스프라이트, 캐릭터 앞에 그림
+- 데모: `effects/vanish_burst/vanish_fx_demo_x3.gif`
 
 **완료:** 스킬용 X자 베기 이펙트 확정 (2026-11-26) → `effects/skill_xslash/`
 - 모양: pixelfx `melee/double-slash`(사용자가 고른 스타일)를 메인 캐릭터 크기로 키움. 위에서 아래로 베고 0.14초 뒤 아래에서 위로 올려 베어 X자가 닫힘 → 닫히는 순간 두 획이 하얗게 번쩍이고 교차점에서 섬광·빛 조각·불꽃, 점선 X 자국이 잠깐 남음. 색은 크림·흰색 팔레트 `#a89480 #cdb9a4 #e6d6c4 #f3e6d8 #fdf2e8 #fffaf4 #ffffff`

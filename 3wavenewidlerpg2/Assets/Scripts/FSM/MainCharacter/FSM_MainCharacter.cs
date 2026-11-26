@@ -127,6 +127,7 @@ public class MainCharacter_Skill : FSM
     public override void Exit()
     {
         MainCharacter.HpBar.gameObject.SetActive(true);
+        MainCharacter.ShadowRenderer.enabled = true;
     }
 
     public override void Update()
@@ -156,6 +157,7 @@ public class MainCharacter_Skill : FSM
         MainCharacter.SetFlip(MainCharacter.Target.transform.position.x < MainCharacter.transform.position.x ? -1 : 1);
         MainCharacter.UpdateSkeletonAnimSortingOrder();
         MainCharacter.HpBar.gameObject.SetActive(true);
+        MainCharacter.ShadowRenderer.enabled = true;
         MainCharacter.SkeletonAnim.AnimationState.SetAnimation(0, BackstabAnimName, false);
         MainCharacter.SkeletonAnim.timeScale = (float)MainCharacter.Status.TotalAttackSpeed;    // 평타와 같은 공격 속도
     }
@@ -173,7 +175,7 @@ public class MainCharacter_Skill : FSM
         else if (e.Data.Name.Equals("damage"))
         {
             // 휘두르는 순간 (attack3 타격감 수치)
-            SkillData skill = MainCharacter.SkillData;
+            SkillData skill = MainCharacter.CurSkillSlot.SkillData;
             MainCharacter.HitTargets(MainCharacter.Status.Attack * skill.Damage, skill.Max_Hits, 0.12f, 6f, 3f, true);
         }
     }
@@ -185,8 +187,9 @@ public class MainCharacter_Skill : FSM
 
         if (trackEntry.Animation.Name.Equals(VanishAnimName))
         {
-            // 마지막 프레임이 빈 그림이라 캐릭터가 안 보이는 동안 체력바도 숨김
+            // 마지막 프레임이 빈 그림이라 캐릭터가 안 보이는 동안 체력바·그림자도 숨김
             MainCharacter.HpBar.gameObject.SetActive(false);
+            MainCharacter.ShadowRenderer.enabled = false;
             hideTimer = HideTime;
             isHiding = true;
         }

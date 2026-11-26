@@ -142,6 +142,11 @@ public class CharacterBase : MonoBehaviour
     {
         if (SkeletonAnim != null)
             SkeletonAnim.Skeleton.ScaleX = value;
+
+        // 그림자 좌우 오프셋도 같이 반전 (메인 캐릭터는 발이 기준점보다 오른쪽)
+        Vector3 shadowPosition = ShadowRenderer.transform.localPosition;
+        shadowPosition.x = Mathf.Abs(shadowPosition.x) * value;
+        ShadowRenderer.transform.localPosition = shadowPosition;
     }
     public virtual void SetScale(float scale)
     {

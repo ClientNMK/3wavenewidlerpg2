@@ -18,5 +18,6 @@ public class DataManager : Singleton<DataManager>
     public SerializableSkillData SkillData = new();
 
     [Header("Stage Data")]
+    public SerializableWorldData WorldData = new();
     public SerializableStageData StageData = new();
 }

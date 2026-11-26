@@ -1,0 +1,62 @@
+{
+  "object": {
+    "id": "a254e8c4-26ec-4b63-bb01-00695b47e5da",
+    "name": "base",
+    "prompt": "cute hooded spirit pet in cream cloak with red ribbon and gold bell, glowing amber eyes",
+    "size": {
+      "width": 96,
+      "height": 96
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "pet_hood_lv1_c1.png",
+    "cell_size": {
+      "width": 96,
+      "height": 96
+    },
+    "sheet_size": {
+      "width": 1248,
+      "height": 384
+    },
+    "columns": 13,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "idle2",
+        "animation_group_id": "4df2954b-c343-4bac-a157-75555c177885",
+        "direction": "unknown"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "idle",
+        "animation_group_id": "7d6a56be-6980-46df-85c8-1eea6b814a20",
+        "direction": "unknown"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour",
+        "animation_group_id": "a258102c-8b05-4e69-8a4c-21583ce78e5a",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-11-26T09:31:05.657988+00:00"
+}

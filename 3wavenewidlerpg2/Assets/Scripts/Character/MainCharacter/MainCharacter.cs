@@ -5,6 +5,7 @@ using UnityEngine;
 public class MainCharacter : CharacterBase
 {
     public JoystickController Controller = null;
+    public Hood Hood = null;
     public Vector3 RollDirection = Vector3.zero;
     float lastRollTime = 0f;
 
@@ -28,6 +29,7 @@ public class MainCharacter : CharacterBase
             Controller = InGameManager.Instance.UIInGameScene.JoystickController;
         Controller.onDrag += this.HandleDrag;
         Controller.onDragEnd += this.HandleDragEnd;
+        InitSkillSlots();
 
         bInitialized = true;
     }
@@ -41,17 +43,18 @@ public class MainCharacter : CharacterBase
             CurHp = GetTotalHp();
     }
 
-    // 화면에 보이거나 공격 범위 안에 있는 몬스터 중 가장 가까운 몬스터
+    // 전투 영역(멀리 볼 때 화면) 안이거나 공격 범위 안에 있는 몬스터 중 가장 가까운 몬스터 (후드가 삼키는 중인 몬스터 제외)
     public Monster FindTarget()
     {
         Monster target = null;
         float minDist = float.MaxValue;
         foreach (Monster monster in InGameManager.Instance.Monsters)
         {
+            if (monster.State == State.Pause)
+                continue;
+
             float dist = Vector2.Distance(transform.position, monster.transform.position);
-            Vector3 viewPos = InGameManager.Instance.MainCamera.WorldToViewportPoint(monster.transform.position);
-            bool isVisible = viewPos.x >= 0f && viewPos.x <= 1f && viewPos.y >= 0f && viewPos.y <= 1f;
-            if (!isVisible && dist > Status.Attack_Range)
+            if (!InGameManager.Instance.BattleArea.Contains(monster.transform.position) && dist > Status.Attack_Range)
                 continue;
 
             if (dist < minDist)
@@ -69,7 +72,7 @@ public class MainCharacter : CharacterBase
         Vector3 center = Target.transform.position;
         float splashRange = DataManager.Instance.SystemData.GetFloat("Attack_Splash_Range");
         return InGameManager.Instance.Monsters
-            .Where(x => Vector2.Distance(center, x.transform.position) <= splashRange)
+            .Where(x => x.State != State.Pause && Vector2.Distance(center, x.transform.position) <= splashRange)
             .OrderBy(x => Vector2.Distance(center, x.transform.position))
             .Take(_count)
             .ToList();
@@ -101,32 +104,73 @@ public class MainCharacter : CharacterBase
                 PlayEffect(HitSparkKey, sparkPosition, SkeletonAnim.Skeleton.ScaleX, target.SkeletonRenderer.sortingOrder + 1);
             }
 
-            target.TakeDamage(_damage, this, AttackType.Normal);
+            // 맞을 때마다 공격력 대비 최소~최대 배율 사이 랜덤 데미지
+            BigDouble damage = _damage * Random.Range((float)Status.Damage_Min_Per, (float)Status.Damage_Max_Per);
+            if (TryPredation(target, damage))
+                continue;
+
+            target.TakeDamage(damage, this, AttackType.Normal);
             target.PlayHitReaction(-side, _hitStopTime, _knockback);
 
             // 여러 번 맞아도 겹치지 않게 체력바 위에서 좌우로 살짝 흩뿌림
             DamageText damageText = ObjectPoolManager.Instance.GetObject<DamageText>("Effect", DamageTextKey);
             damageText.key = DamageTextKey;
-            damageText.Play(new Vector3(target.transform.position.x + Random.Range(-0.15f, 0.15f), target.HpBar.transform.position.y + 0.15f, 0f), _damage);
+            damageText.Play(new Vector3(target.transform.position.x + Random.Range(-0.15f, 0.15f), target.HpBar.transform.position.y + 0.15f, 0f), damage);
         }
         InGameManager.Instance.HitStop(_hitStopTime, _shake);
     }
 
-    const int SkillId = 20000;  // 스킬 장착 기능 전까지 고정
-    float lastSkillTime = 0f;
-    public SkillData SkillData { get { return DataManager.Instance.SkillData.GetSkillData(SkillId); } }
-
-    public float SkillRemainTime { get { return Mathf.Max(0f, SkillData.Cooltime - (Time.time - lastSkillTime)); } }
-
-    // 자동 전투 중 쿨타임이 차면 스킬 사용
-    public bool TryUseSkill()
+    // 평타로 포식 상태이상(Predation_Per)이 뜨면, 이번 타격 후 체력이 후드 스탯 비율 이하가 될 일반 몬스터를 데미지 대신 후드가 잡아먹음 (보스 제외)
+    bool TryPredation(Monster _target, BigDouble _damage)
     {
-        if (SkillRemainTime > 0f)
+        if (State != State.Attack || Hood.IsDevouring || InGameManager.Instance.IsBossChallenge || Random.value >= Status.Predation_Per)
             return false;
 
-        lastSkillTime = Time.time;
-        ChangeState(State.Skill);
+        double hoodHpPer = DataManager.Instance.StatData.GetStatData(StatType.Hood_Predation_Hp_Per).Stat_Default_Value;
+        if (_target.CurHp - _damage > _target.GetTotalHp() * hoodHpPer)
+            return false;
+
+        Hood.Devour(_target);
         return true;
+    }
+
+    // 스킬 슬롯 (SkillId 0 = 빈 칸)
+    public class SkillSlot
+    {
+        public int SkillId = 0;
+        public float LastUseTime = 0f;
+        public bool IsAuto = true;      // 슬롯 버튼으로 켜고 끔
+
+        public SkillData SkillData { get { return DataManager.Instance.SkillData.GetSkillData(SkillId); } }
+        public float RemainTime { get { return Mathf.Max(0f, SkillData.Cooltime - (Time.time - LastUseTime)); } }
+    }
+
+    const int EquipSkillId = 20000;     // 스킬 장착 기능 전까지 1번 슬롯 고정
+    public List<SkillSlot> SkillSlots = new();
+    public SkillSlot CurSkillSlot = null;   // 지금 사용 중인 스킬
+
+    void InitSkillSlots()
+    {
+        int slotMax = (int)DataManager.Instance.SystemData.GetFloat("Skill_Slot_Max");
+        for (int i = 0; i < slotMax; i++)
+            SkillSlots.Add(new SkillSlot());
+        SkillSlots[0].SkillId = EquipSkillId;
+    }
+
+    // 자동 전투 중 앞 슬롯부터, 자동 사용이 켜져 있고 쿨타임이 찬 스킬 사용
+    public bool TryUseSkill()
+    {
+        foreach (SkillSlot slot in SkillSlots)
+        {
+            if (slot.SkillId == 0 || !slot.IsAuto || slot.RemainTime > 0f)
+                continue;
+
+            slot.LastUseTime = Time.time;
+            CurSkillSlot = slot;
+            ChangeState(State.Skill);
+            return true;
+        }
+        return false;
     }
 
     public bool IsTargetInAttackRange()

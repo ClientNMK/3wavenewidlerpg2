@@ -1,0 +1,62 @@
+{
+  "object": {
+    "id": "45702588-79e3-4d0f-bcea-42f9cd9159b9",
+    "name": "base",
+    "prompt": "cute hooded spirit pet costume: spiral seashell cap, dark face with glowing amber eyes, red ribbon and gold bell, cream cloak",
+    "size": {
+      "width": 96,
+      "height": 96
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "pet_hood_lv1_costume_shell.png",
+    "cell_size": {
+      "width": 96,
+      "height": 96
+    },
+    "sheet_size": {
+      "width": 1248,
+      "height": 384
+    },
+    "columns": 13,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour2",
+        "animation_group_id": "59524a09-9f78-4898-ab55-8f1bd3daa64c",
+        "direction": "unknown"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "idle",
+        "animation_group_id": "6ca9e8dd-240a-4f5a-bf5a-2ff9a8db8fde",
+        "direction": "unknown"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour",
+        "animation_group_id": "992d6bcb-47e6-4106-8f16-f15c37dbd1a0",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-11-26T10:23:32.623838+00:00"
+}

@@ -1,0 +1,54 @@
+{
+  "object": {
+    "id": "b2f74b96-be5e-421d-8980-79ddf3986870",
+    "name": "base",
+    "prompt": "cute hooded spirit pet level 2, cream cloak with two little horn tips on the hood, red ribbon and gold bell, glowing amber eyes",
+    "size": {
+      "width": 96,
+      "height": 96
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "pet_hood_lv2.png",
+    "cell_size": {
+      "width": 96,
+      "height": 96
+    },
+    "sheet_size": {
+      "width": 1248,
+      "height": 288
+    },
+    "columns": 13,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour",
+        "animation_group_id": "84576f7f-0103-41ee-a8d3-2e03bbdf5516",
+        "direction": "unknown"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "idle",
+        "animation_group_id": "c01a3219-efa1-4a72-9ee9-078425218bad",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-11-26T10:17:59.870735+00:00"
+}

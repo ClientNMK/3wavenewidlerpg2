@@ -19,7 +19,13 @@ public enum StatType
     Attack_Speed_Per,           // 공격 속도 증가율
     Attack_Range,               // 공격 범위
     Attack_Number,              // 한 번에 공격하는 마릿수
+    Damage_Min_Per,             // 최소 데미지 배율 (공격력 대비)
+    Damage_Max_Per,             // 최대 데미지 배율 (공격력 대비)
+    Predation_Per = 601,        // 평타 타격 시 포식 상태이상 확률
     Recovery_Hp_Per = 602,      // 1초마다 최대 체력 비례 회복 (0.01 = 1%)
+
+    // 1001~ 후드 스탯: 메인 캐릭터 스탯에 넣지 않음
+    Hood_Predation_Hp_Per = 1001,   // 후드가 포식할 수 있는 일반 몬스터 체력 비율 (최대 체력 대비)
 
     Max,
 }
@@ -43,6 +49,9 @@ public class Status
     public double Attack_Speed_Per;
     public double Attack_Range;
     public double Attack_Number;
+    public double Damage_Min_Per;
+    public double Damage_Max_Per;
+    public double Predation_Per;
     public double Recovery_Hp_Per;
 
     public double TotalMoveSpeed { get { return Move_Speed * (1 + Move_Speed_Per); } }
@@ -85,6 +94,15 @@ public class Status
             case StatType.Attack_Number:
                 Attack_Number = value;
                 break;
+            case StatType.Damage_Min_Per:
+                Damage_Min_Per = value;
+                break;
+            case StatType.Damage_Max_Per:
+                Damage_Max_Per = value;
+                break;
+            case StatType.Predation_Per:
+                Predation_Per = value;
+                break;
             case StatType.Recovery_Hp_Per:
                 Recovery_Hp_Per = value;
                 break;
@@ -117,6 +135,12 @@ public class Status
                 return Attack_Range;
             case StatType.Attack_Number:
                 return Attack_Number;
+            case StatType.Damage_Min_Per:
+                return Damage_Min_Per;
+            case StatType.Damage_Max_Per:
+                return Damage_Max_Per;
+            case StatType.Predation_Per:
+                return Predation_Per;
             case StatType.Recovery_Hp_Per:
                 return Recovery_Hp_Per;
         }

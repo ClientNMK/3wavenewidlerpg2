@@ -45,6 +45,7 @@
 | attack3 베기 | `effects/attack3_slash/dagger-slash.png/.json` | 220×140 | 30 | (40, 128) | 캐릭터 pivot에 맞춤. attack3 시작 0.21초에 1회 |
 | 타격 불꽃 | `effects/hit_spark/hit-spark.png/.json` | 220×140 | 30 | (70, 120) | **맞은 몬스터 앞면 바닥**에 pivot. 평타는 0.54초, attack3는 0.28초, backstab은 0.35·0.45초(2타) |
 | 스킬 X자 베기 (backstab용) | `effects/skill_xslash/backstab/xslash_backstab.png/.json` | 240×160 | 30 | (40, 148) | 캐릭터 pivot에 맞추고 **flipX = true** (캐릭터 뒤쪽에 그려짐). backstab 시작 0.28초에 1회. 자세한 건 4장 |
+| vanish 반짝 링 | `effects/vanish_burst/collect-burst.png/.json` | 112×108 | 30 | (56, 94) | 캐릭터 pivot에서 **아래로 2px** 지점에 맞춤, 캐릭터 앞에 그림. vanish 시작 0.30초에 1회 |
 | 스킬 X자 베기 (앞쪽용, 예비) | `effects/skill_xslash/xslash.png/.json` | 240×160 | 30 | (40, 148) | 캐릭터 앞을 벨 때. 캐릭터 pivot에 맞춤. 이펙트 시작 후 0.067초(1타)·0.167초(2타). 붙일 동작 미정 |
 
 이펙트는 캐릭터 칸 밖으로 나가므로 **캐릭터와 별도 스프라이트**로 그리고, 왼쪽을 볼 때 캐릭터와 함께 반전합니다.
@@ -59,7 +60,7 @@
 
 데모: `animations/backstab/skill_vanish_backstab_demo_x2.gif`
 
-1. 스킬 시작 → `vanish` 재생 (0.84초). 마지막 프레임은 비어 있음 = 캐릭터 안 보임
+1. 스킬 시작 → `vanish` 재생 (0.84초). 마지막 프레임은 비어 있음 = 캐릭터 안 보임. **0.30초에 `effects/vanish_burst` 이펙트 1회** (3장 표 참고, 데모 `effects/vanish_burst/vanish_fx_demo_x3.gif`)
 2. 사라진 상태로 **0.2초 정도** 대기 (이 동안 판정 무시/무적 처리는 기획 판단)
 3. 캐릭터 위치를 **목표 몬스터의 뒤쪽 바로 옆**으로 순간이동. 방향은 **몬스터를 바라보게** 함 (몬스터가 캐릭터 왼쪽이면 flipX — 보통 이 경우)
    - 데모 기준: 몬스터 중심에서 캐릭터 pivot까지 약 42px

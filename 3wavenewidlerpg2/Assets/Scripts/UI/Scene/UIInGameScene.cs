@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -13,18 +14,25 @@ public class UIInGameScene : MonoBehaviour
     [SerializeField] TMP_Text rollCoolText = null;
 
     [Header("Skill")]
-    [SerializeField] Image skillCoolImage = null;
-    [SerializeField] TMP_Text skillCoolText = null;
+    [SerializeField] UISkillSlot[] skillSlots = null;
 
     [Header("Stage")]
     [SerializeField] TMP_Text stageText = null;
     [SerializeField] TMP_Text killCountText = null;
+    [SerializeField] Image stageProgressFill = null;
     [SerializeField] Button bossButton = null;
     [SerializeField] TMP_Text bossButtonText = null;
 
     [Header("Profile")]
     [SerializeField] TMP_Text nicknameText = null;
     [SerializeField] TMP_Text goldText = null;
+
+    [Header("Camera")]
+    [SerializeField] Button cameraZoomButton = null;
+    [SerializeField] TMP_Text cameraZoomText = null;
+
+    [Header("Black Screen")]
+    [SerializeField] Image blackScreen = null;  // 켜져 있는 동안 터치도 막음
 
     [Header("Kill Log")]
     [SerializeField] TMP_Text killLogText = null;
@@ -36,23 +44,25 @@ public class UIInGameScene : MonoBehaviour
     private void Start()
     {
         bossButton.onClick.AddListener(InGameManager.Instance.StartBossChallenge);
+        cameraZoomButton.onClick.AddListener(InGameManager.Instance.ToggleCameraZoom);
         nicknameText.text = BackEnd.Backend.UserNickName;
+    }
+
+    // 캐릭터 슬롯이 만들어진 뒤 호출
+    public void SetupSkillSlots(List<MainCharacter.SkillSlot> _slots)
+    {
+        for (int i = 0; i < skillSlots.Length; i++)
+            skillSlots[i].Setup(_slots[i]);
     }
 
     private void Update()
     {
-        MainCharacter mainCharacter = InGameManager.Instance.MainCharacter;
-        SetCoolBox(rollCoolImage, rollCoolText, mainCharacter.RollRemainTime, DataManager.Instance.SystemData.GetFloat("Roll_Cooltime"));
-        SetCoolBox(skillCoolImage, skillCoolText, mainCharacter.SkillRemainTime, mainCharacter.SkillData.Cooltime);
+        float remainTime = InGameManager.Instance.MainCharacter.RollRemainTime;
+        rollCoolImage.fillAmount = remainTime / DataManager.Instance.SystemData.GetFloat("Roll_Cooltime");
+        rollCoolText.text = remainTime > 0f ? remainTime.ToString("0.0") : string.Empty;
 
         if (killLogs.Count > 0)
             RefreshKillLog();
-    }
-
-    void SetCoolBox(Image _coolImage, TMP_Text _coolText, float _remainTime, float _coolTime)
-    {
-        _coolImage.fillAmount = _remainTime / _coolTime;
-        _coolText.text = _remainTime > 0f ? _remainTime.ToString("0.0") : string.Empty;
     }
 
     // 처치할 때마다 한 줄 추가, 최근 KillLogMax줄만 표시
@@ -75,10 +85,29 @@ public class UIInGameScene : MonoBehaviour
         }));
     }
 
-    public void SetStageText(string _stage, string _killCount)
+    public void SetStageText(string _stage, int _killCount, int _maxCount)
     {
         stageText.text = _stage;
-        killCountText.text = _killCount;
+        killCountText.text = $"{_killCount}/{_maxCount}";
+        stageProgressFill.fillAmount = (float)_killCount / _maxCount;
+    }
+
+    // 검은 화면 투명도 _from → _to
+    public IEnumerator CoFadeBlack(float _from, float _to, float _time)
+    {
+        blackScreen.gameObject.SetActive(true);
+        for (float timer = 0f; timer < _time; timer += Time.unscaledDeltaTime)
+        {
+            blackScreen.color = new Color(0f, 0f, 0f, Mathf.Lerp(_from, _to, timer / _time));
+            yield return null;
+        }
+        blackScreen.color = new Color(0f, 0f, 0f, _to);
+        blackScreen.gameObject.SetActive(_to > 0f);
+    }
+
+    public void SetCameraZoomText(string _text)
+    {
+        cameraZoomText.text = _text;
     }
 
     public void SetGold(double _gold)

@@ -1,0 +1,86 @@
+{
+  "object": {
+    "id": "b7fa4dff-eab9-4d4d-8c33-b5d6e609667e",
+    "name": "base",
+    "prompt": "pet_hood lv1 A: tiny floating shadow spirit with hood-shaped head, glowing cyan eyes",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "pet_hood_lv1_A.png",
+    "cell_size": {
+      "width": 96,
+      "height": 96
+    },
+    "sheet_size": {
+      "width": 1248,
+      "height": 672
+    },
+    "columns": 13,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "idle",
+        "animation_group_id": "3cb0b829-ba26-4a6c-82ff-bb4ba7f75350",
+        "direction": "unknown"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour3",
+        "animation_group_id": "509e2245-906f-442a-bae3-c0352151ab6c",
+        "direction": "unknown"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "idle2",
+        "animation_group_id": "79c21ebc-a0f5-43f2-9c87-7d0aff213317",
+        "direction": "unknown"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour",
+        "animation_group_id": "84dfcc1c-5a10-4f5b-a377-78e720d384d0",
+        "direction": "unknown"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour2",
+        "animation_group_id": "89bddc1c-c89c-4da2-9f8d-c81124c382ab",
+        "direction": "unknown"
+      },
+      {
+        "row": 6,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour4",
+        "animation_group_id": "9be9402b-9500-4ef3-be45-d63d29653bb6",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-11-26T05:57:24.860591+00:00"
+}

@@ -1,0 +1,78 @@
+{
+  "object": {
+    "id": "d98c662a-d386-4972-b7d6-9bd21b2bd718",
+    "name": "base",
+    "prompt": "pet_hood lv1 B: tiny round shadow spirit with droopy hood-like ears, glowing cyan eyes",
+    "size": {
+      "width": 96,
+      "height": 96
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "pet_hood_lv1_B.png",
+    "cell_size": {
+      "width": 96,
+      "height": 96
+    },
+    "sheet_size": {
+      "width": 1248,
+      "height": 576
+    },
+    "columns": 13,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour4",
+        "animation_group_id": "53b226a2-f076-4947-aabe-310486992ed0",
+        "direction": "unknown"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "idle",
+        "animation_group_id": "5c2ed253-1a22-4437-92b8-8e9e3dced98a",
+        "direction": "unknown"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour",
+        "animation_group_id": "849761bc-9506-4857-b1a2-44f805e91eb1",
+        "direction": "unknown"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "idle2",
+        "animation_group_id": "a40bf541-99f4-40b7-8304-cf201fa9a532",
+        "direction": "unknown"
+      },
+      {
+        "row": 5,
+        "type": "animation",
+        "frame_count": 13,
+        "animation": "devour3",
+        "animation_group_id": "c92ee059-7c3c-4e2d-a2ac-42ce4543a0f2",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-11-26T05:57:27.458104+00:00"
+}
