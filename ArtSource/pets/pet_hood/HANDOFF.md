@@ -29,10 +29,14 @@ ArtSource/pets/pet_hood/
    │  ├─ collect-burst.png / .json     ← 칸 112×108, 7열, 42프레임, 30fps, pivot (56, 94)
    │  ├─ frames/, devour_burst_x1.gif, devour_burst_demo_x3.gif
    │  └─ source/collect-burst.js, options.json
-   └─ move_trail/                      ← hood_001 이동 이펙트 확정본 (2026-11-26): 망토 끝에서 흘러나오는 반짝이 꼬리 (반복)
-      ├─ hood-trail.png / .json        ← 칸 96×56, 6열, 60프레임(2초 반복), 30fps, pivot (64, 48)
-      ├─ frames/, move_trail_x1.gif, move_trail_demo_x3.gif
-      └─ source/hood-trail.js, options.json
+   ├─ move_trail/                      ← hood_001 이동 이펙트 확정본 (2026-11-26): 망토 끝에서 흘러나오는 반짝이 꼬리 (반복)
+   │  ├─ hood-trail.png / .json        ← 칸 96×56, 6열, 60프레임(2초 반복), 30fps, pivot (64, 48)
+   │  ├─ frames/, move_trail_x1.gif, move_trail_demo_x3.gif
+   │  └─ source/hood-trail.js, options.json
+   └─ levelup/                         ← hood_001 레벨업 이펙트 확정본 (2026-11-27): 머리 위로 빛이 모였다가 터짐 (1회)
+      ├─ hood-levelup.png / .json      ← 칸 112×128, 49프레임(1.6초), 30fps, pivot (56, 112)
+      ├─ frames/, levelup_x1.gif, levelup_demo_x3.gif
+      └─ source/hood-levelup.js, options.json
 ```
 **리소스 이름 규칙**: `Chart/HoodChart_Dev.xlsx`의 `Resorce` 열과 같게 레벨 순서대로 `hood_001`(lv1), `hood_002`(lv2), `hood_003`… 폴더 이름과 pose 파일 이름(`hood_00N_se.png`)을 맞춘다.
 
@@ -69,10 +73,12 @@ ArtSource/pets/pet_hood/
 |---|---|---|---|---|
 | 포식 반짝 링 | `effects/devour_burst/collect-burst.png/.json` | 후드 pivot (64,112)에서 **오른쪽 6px, 아래 19px** = 128 캔버스 (70, 131) | 후드 **앞** | devour **frame_005(0.40초)** 에 30fps 1회 |
 | 이동 꼬리 | `effects/move_trail/hood-trail.png/.json` | 후드 pivot에서 **왼쪽 4px** = (60, 112) | 후드 **뒤** | 후드가 움직이는 동안 30fps 반복, 멈추면 끔 (끌 때 0.3초쯤 페이드하면 자연스러움) |
+| 레벨업 | `effects/levelup/hood-levelup.png/.json` | 후드 pivot (64,112)에 그대로 | 후드 **앞** | 레벨업 버튼을 누를 때 idle 그대로 30fps 1회 (포식 동작 대신). 터지는 순간 = 0.28초(frame_008) |
 
 - 포식 링: pixelfx `pickups/collect-burst`를 색만 호박·금색으로 바꿈(코드 수정 없음). 옵션 `source/options.json`. 링이 몸통 크기보다 조금 크게 퍼지는 게 의도
 - 이동 꼬리: 라이브러리에 맞는 게 없어 새로 만든 pixelfx `pets/hood-trail` (반짝이 알갱이가 망토 끝에서 뒤·아래로 흘러감, 연기 방울은 끔). 옵션 count 40, wisp 0, speed 34, hem 7, light 0.9, 팔레트 기본값(크림·호박). 오른쪽을 향할 때 꼬리가 왼쪽으로 흐르게 그려져 있음
 - 예전 어두운 후드용 청록 연기 `effects/devour_poof`는 2026-11-26 ArtSource에서 삭제함. 게임 쪽 `Assets/Resource/Textures/Effect/devour_poof` + 프리팹 `Prefabs/Effect/devour_poof`(Hood.cs `PoofKey`)는 아직 그대로라서, 개발에서 `devour_burst`로 바꿔야 함
+- 레벨업: pixelfx `ui/level-up`에서 빛기둥·링·글자를 빼고 파티클만 남긴 복사본 `pets/hood-levelup`. 머리 위 한 점으로 빛줄기가 모임 → 번쩍임 + 위로 솟는 짧은 빛줄기 + 사방으로 뻗는 선·불꽃 → 반짝이가 남았다 사라짐. 색은 포식 링과 같은 크림·호박 팔레트. 옵션 `head` −46 = 터지는 중심이 pivot에서 46px 위 (hood_001 머리 바로 위). hood_002 이상은 키가 달라 `head`만 바꿔 다시 렌더
 - 다시 렌더: pixelfx 폴더 `C:\Users\HP\Documents\Claude\pixelfx`에서 `node tools/render.mjs <id> --sheet --opts '<options.json 내용>'`
 - 데모: 각 폴더의 `*_demo_x3.gif` (이동 데모는 바닥 눈금을 흘려 움직이는 느낌을 냄)
 

@@ -13,6 +13,7 @@ public enum StatType
     Defence = 201,              // 방어력
     Penetrate = 301,            // 관통
     Cri = 401,                  // 치명타 확률
+    Cri_Dmg = 402,              // 치명타 피해 배율
     Move_Speed = 501,           // 이동 속도
     Move_Speed_Per,             // 이동 속도 증가율
     Attack_Speed,               // 공격 속도
@@ -43,6 +44,7 @@ public class Status
     public double Defence;
     public double Penetrate;
     public double Cri;
+    public double Cri_Dmg;
     public double Move_Speed;
     public double Move_Speed_Per;
     public double Attack_Speed;
@@ -75,6 +77,9 @@ public class Status
                 break;
             case StatType.Cri:
                 Cri = value;
+                break;
+            case StatType.Cri_Dmg:
+                Cri_Dmg = value;
                 break;
             case StatType.Move_Speed:
                 Move_Speed = value;
@@ -123,6 +128,8 @@ public class Status
                 return Penetrate;
             case StatType.Cri:
                 return Cri;
+            case StatType.Cri_Dmg:
+                return Cri_Dmg;
             case StatType.Move_Speed:
                 return Move_Speed;
             case StatType.Move_Speed_Per:

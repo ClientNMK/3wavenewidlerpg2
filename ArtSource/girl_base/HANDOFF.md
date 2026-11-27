@@ -56,7 +56,7 @@ ArtSource/girl_base/
 │  ├─ dead_strip.png                  ← 가로 스트립 (칸 128px, 11칸)
 │  └─ dead_x1.gif / dead_preview_x3.gif ← 0.1초/프레임 (preview는 마지막 자세 1초 유지)
 ├─ animations/vanish/                 ← 스킬: 점으로 흩어져 사라짐 확정본 (2026-11-26, 스크립트 제작)
-│  ├─ frames/frame_000~013.png        ← 128×128 (000 = idle frame_000, 013 = 빈 그림)
+│  ├─ frames/frame_000~013.png        ← 128×128 (000 = hurt frame_005, 013 = 빈 그림. 2026-11-27 idle → 피격 자세에서 시작으로 교체)
 │  ├─ vanish_strip.png, vanish_x1.gif, vanish_preview_x3.gif ← 0.06초/프레임
 │  ├─ skill_vanish_appear_demo_x2.gif ← 사라짐 → 적 뒤 등장 → 공격 연출 예시
 │  └─ source/Dissolve.cs              ← 만든 스크립트 (다른 자세·색으로 다시 만들 때)
@@ -256,6 +256,7 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 **완료:** vanish(점으로 사라짐)·appear(점이 모여 등장) 확정 (2026-11-26) → `animations/vanish/`, `animations/appear/`
 - 용도: 스킬로 사라졌다가 적 뒤에서 등장. 순서·엔진 처리는 `ENGINE_REQUEST.md` 4장
 - 만든 방법 (AI 생성 아님, 비용 0): `source/Dissolve.cs`로 idle frame_000을 분해. 14프레임: 0 = 원래 자세, 1~2 = 밝아지며 기 모음, 3~9 = 머리→발 순서로 부서짐(부서지기 직전 픽셀이 밝게 빛남), 부서진 픽셀의 26%가 밝은 점이 되어 위·앞뒤로 흩어지며 3~6프레임 뒤 사라짐, 13 = 빈 그림. 호출: `[Dissolve]::Make(<시작 png>, <출력 폴더>, 14, 3, 9, 4242)` (프레임 수, 부서짐 시작·끝 프레임, 랜덤 시드)
+- **2026-11-27 교체:** 스킬이 맞은 자세에서 흩어지도록 시작 그림을 idle frame_000 → **hurt frame_005**로 바꿔 같은 설정으로 다시 만듦: `[Dissolve]::Make(hurt/frames/frame_005.png, <출력>, 14, 3, 9, 4242)`. appear는 예전(idle) 버전 그대로
 - appear는 vanish 프레임을 역순으로 저장한 것
 - 다른 자세에서 사라지기, 점 색 바꾸기 등은 스크립트로 바로 다시 만들 수 있음
 

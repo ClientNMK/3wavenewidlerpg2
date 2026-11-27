@@ -16,6 +16,8 @@ public class InGameBuffManager : MonoBehaviour
 
     public DefaultStatData defaultStatData;
     public MainCharacterStatus BuffStatus = new();
+    public Dictionary<int, int> GoldUpgradeLevels = new();    // Gold_Id별 레벨 (저장 전까지 이번 플레이만)
+    public Dictionary<int, int> StatPointLevels = new();      // StatPoint_Id별 레벨 (저장 전까지 이번 플레이만)
 
     public void Setup()
     {
@@ -24,5 +26,17 @@ public class InGameBuffManager : MonoBehaviour
             defaultStatData.Init();
             BuffStatus.SetDefaultStatData(defaultStatData);
         }
+    }
+
+    public void SetGoldUpgradeLevel(int _goldId, int _level)
+    {
+        GoldUpgradeLevels[_goldId] = _level;
+        BuffStatus.SetGoldUpgradeStatData(DataManager.Instance.GoldUpgradeData.GetGoldUpgradeData(_goldId, _level), _level);
+    }
+
+    public void SetStatPointLevel(int _statPointId, int _level)
+    {
+        StatPointLevels[_statPointId] = _level;
+        BuffStatus.SetStatPointStatData(DataManager.Instance.StatPointData.GetStatPointData(_statPointId, _level), _level);
     }
 }

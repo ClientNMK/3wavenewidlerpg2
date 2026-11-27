@@ -10,6 +10,9 @@
 다시 반복될 만한 실수일 때만 배운 점을 이 파일에 한 줄로 기록하고 중복은 정리.
 - Spine JSON을 문자열 치환으로 고칠 때 같은 패턴이 스킨과 애니메이션에 여러 번 나오므로 한 곳만 바뀌는지 확인.
 - 새 SkeletonAnimation을 코드로 만들 때 tintBlack = true 설정 (프로젝트 Spine 재질이 Tint Black 셰이더).
+- 에디터 스크립트로 UI 오브젝트를 만들 때 layer = 5(UI) 설정 (UI 카메라가 UI 레이어만 그림, 안 하면 안 보임).
+- DNFBitBitv2 SDF는 Dynamic이라 1024 아틀라스가 차면 새 한글이 빠짐 → Multi Atlas Textures 켜 둠 (끄지 말 것).
+- 프로젝트는 Linear 색 공간 + Straight Alpha → Spine 텍스처 임포트 sRGB 켜기 (꺼지면 색이 밝게 바램).
 
 # CLAUDE.md
 

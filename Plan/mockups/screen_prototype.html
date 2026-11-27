@@ -1,0 +1,200 @@
+<!doctype html>
+<!-- PROTOTYPE (버릴 시안): 2번 HUD(어두운 반투명 + 금선) 위에 성장 창 2종. ?variant=A|B. 하단 '성장' 탭으로 창 열고 닫기 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HUD + 성장 창 시안</title>
+<style>
+@font-face { font-family: 'DNF'; src: url('../../3wavenewidlerpg2/Assets/Resource/Font/DNFBitBitv2.ttf'); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #20201f; font-family: 'DNF', 'Malgun Gothic', sans-serif; display: flex; justify-content: center; padding: 24px 0 90px; }
+button { font-family: inherit; cursor: pointer; border: 0; color: inherit; }
+.phone { width: 360px; height: 640px; position: relative; overflow: hidden; zoom: 1.25; border-radius: 6px; color: var(--text, var(--ink));
+  background: #e8c890 url('../../3wavenewidlerpg2/Assets/Resource/Textures/Bg/bg_world_2.png') center top / auto 640px; }
+.phone > * { position: absolute; }
+.sprite { image-rendering: pixelated; width: 70px; height: 70px; }
+svg { display: block; }
+
+/* 공통 알약 판: 종이색 + 굵은 외곽선 + 아래 두께 */
+.pill { background: var(--card); border: var(--bw, 2px) solid var(--ink); border-radius: 999px; box-shadow: 0 2px 0 var(--lip, var(--ink)); }
+
+/* 초상화 (장식 1) */
+.me { left: 6px; top: 6px; width: 64px; height: 70px; }
+.me .face { position: absolute; left: 10px; top: 10px; width: 44px; height: 44px; border-radius: 50%; image-rendering: pixelated;
+  background: var(--chip) url('../../ArtSource/girl_base/animations/idle/frames/frame_000.png') -108px -122px / 256px 256px; }
+.me svg { position: absolute; left: 0; top: 0; }
+.me .lv { color: var(--dark, var(--ink)); position: absolute; left: 13px; top: 53px; width: 38px; height: 15px; font-size: 9px; text-align: center; line-height: 11px; background: var(--btn); }
+.who { left: 66px; top: 12px; width: 104px; height: 22px; padding: 0 10px; font-size: 10px; line-height: 18px; white-space: nowrap; }
+.exp { left: 72px; top: 38px; width: 92px; height: 8px; border: 2px solid var(--ink); border-radius: 4px; background: var(--chip); overflow: hidden; }
+.exp i { display: block; width: 42%; height: 100%; background: var(--up); }
+
+/* 재화 */
+.money { right: 6px; top: 8px; display: flex; gap: 5px; }
+.money .pill { height: 22px; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 2px; font-size: 10px; }
+.money .dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ink); background: var(--amber); }
+.money .gem { width: 12px; height: 12px; margin: 0 2px; transform: rotate(45deg); border: 2px solid var(--ink); background: var(--sel); border-radius: 2px; }
+.money .plus { width: 16px; height: 16px; margin-right: -5px; border-radius: 50%; background: var(--up); border: 2px solid var(--ink); color: #fff; font-size: 11px; line-height: 10px; }
+
+/* 스테이지 바 (장식 2) */
+.stage { left: 60px; top: 62px; width: 240px; height: 60px; }
+.stage .txt { position: absolute; left: 44px; right: 44px; top: 18px; display: flex; justify-content: space-between; font-size: 10px; }
+.stage .bar { position: absolute; left: 44px; right: 44px; top: 33px; height: 7px; border: 2px solid var(--ink); border-radius: 4px; background: var(--chip); overflow: hidden; }
+.stage .bar i { display: block; width: 70%; height: 100%; background: var(--sel); }
+
+/* 오른쪽 버튼 */
+.side { right: 6px; top: 130px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.side .round { width: 30px; height: 30px; display: grid; place-items: center; position: relative; }
+.side .round b { position: absolute; right: -3px; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: #e8533f; border: 2px solid var(--ink); }
+.side .auto { height: 20px; padding: 0 8px 0 3px; display: flex; align-items: center; gap: 4px; font-size: 9px; }
+.side .auto i { width: 12px; height: 12px; border-radius: 50%; background: var(--up); border: 2px solid var(--ink); }
+.side .auto.off { background: var(--off); }
+.side .auto.off i { background: var(--card); }
+
+/* 획득 기록 */
+.log { left: 8px; bottom: 170px; font-size: 9px; line-height: 14px; color: #fff; text-shadow: 1px 0 var(--dark, var(--ink)), -1px 0 var(--dark, var(--ink)), 0 1px var(--dark, var(--ink)), 0 -1px var(--dark, var(--ink)); opacity: .92; }
+
+/* 보스 도전, 스킬 칸, 하단 탭 */
+.boss { left: 105px; bottom: 118px; width: 150px; height: 32px; font-size: 12px; background: var(--btn); color: var(--dark, var(--ink)); border: 2.5px solid var(--ink); border-radius: 16px; box-shadow: 0 3px 0 var(--lip, var(--ink)); }
+.boss:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.slots { left: 0; right: 0; bottom: 64px; display: flex; justify-content: center; gap: 6px; }
+.slot { width: 40px; height: 40px; border-radius: 11px; background: var(--card); border: var(--bw, 2px) solid var(--ink); box-shadow: 0 2px 0 var(--lip, var(--ink)); display: grid; place-items: center; position: relative; overflow: hidden; font-size: 11px; }
+.slot.empty { background: var(--off); color: var(--muted); }
+.slot .cd { position: absolute; inset: 0; background: rgba(40,26,20,.6); color: #fff; display: grid; place-items: center; }
+.nav { left: 0; right: 0; bottom: 0; height: 56px; background: var(--sheet); border-top: var(--bw, 3px) solid var(--ink); border-radius: 16px 16px 0 0; display: flex; padding: 5px 6px 0; }
+.nav button { flex: 1; background: none; font-size: 9px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--sub); }
+.nav button span { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; }
+.nav button.on { color: var(--text, var(--ink)); }
+.nav button.on span { background: var(--sel); border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink); }
+
+/* ---------- 성장 창 ---------- */
+.win { left: 0; right: 0; bottom: 56px; height: 336px; background: var(--sheet); border-top: var(--bw) solid var(--ink); border-radius: 18px 18px 0 0; padding: 18px 10px 0; color: var(--text); }
+.win.paper { --ink: #4a3226; --text: #4a3226; --sheet: #f7f0e4; --card: #fffdf8; --chip: #ecdfcb; --sel: #4ca7a1; --on: #fff; --btn: #eaa544; --btntext: #4a3226; --muted: #9a8468; --up: #3f8f8a; --off: #ddd0bc; --gold: #c9a45c; --bw: 2px; --lip: #4a3226; --inv: #f7f0e4; --flo: #4a3226; }
+.win.dark { --ink: #e6c27a; --text: #fff3dc; --sheet: rgba(38,24,19,.95); --card: rgba(84,54,40,.75); --chip: rgba(0,0,0,.32); --sel: #e6c27a; --on: #2a1a14; --btn: #f2b544; --btntext: #2a1a14; --muted: #c2a888; --up: #9bd65a; --off: rgba(120,96,80,.5); --gold: #e6c27a; --bw: 1.5px; --lip: transparent; --inv: #2a1a14; --flo: #e6c27a; }
+.win::before { content: ''; position: absolute; inset: 4px 4px 0; border: 1px solid var(--gold); border-bottom: 0; border-radius: 14px 14px 0 0; pointer-events: none; opacity: .85; }
+.win .crest { position: absolute; left: 50%; top: -14px; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; }
+.win .crest b { height: 24px; padding: 0 16px; font-weight: normal; font-size: 11px; line-height: 20px; background: var(--card); border: var(--bw) solid var(--ink); border-radius: 12px; box-shadow: 0 2px 0 var(--lip); }
+.win.dark .crest b { background: #3a251c; }
+.win .x { position: absolute; right: 10px; top: -13px; width: 24px; height: 24px; border-radius: 50%; background: #e2765e; border: var(--bw) solid var(--ink); color: #fff; font-size: 11px; }
+.win .tabs { display: flex; gap: 6px; position: relative; }
+.win .tab { flex: 1; height: 28px; border: var(--bw) solid var(--ink); border-radius: 10px; background: var(--chip); font-size: 11px; color: var(--muted); box-shadow: 0 2px 0 var(--lip); }
+.win .tab.on { background: var(--sel); color: var(--on); }
+.win .rule { height: 8px; position: relative; margin: 8px 0 6px; }
+.win .rule::before { content: ''; position: absolute; left: 6px; right: 6px; top: 3.5px; height: 1px; background: var(--gold); }
+.win .rule i { position: absolute; left: 50%; top: 0.5px; width: 7px; height: 7px; background: var(--gold); transform: translateX(-50%) rotate(45deg); }
+.win .mult { display: flex; gap: 6px; align-items: center; font-size: 9px; color: var(--muted); margin-bottom: 7px; }
+.win .mult button { height: 20px; padding: 0 11px; border: var(--bw) solid var(--ink); border-radius: 10px; background: transparent; font-size: 10px; }
+.win .mult button.on { background: var(--ink); color: var(--inv); }
+.win .list { display: flex; flex-direction: column; gap: 6px; height: 222px; overflow: hidden; }
+.win .row { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 8px; flex: none; border: var(--bw) solid var(--ink); border-radius: 12px; background: var(--card); box-shadow: 0 2px 0 var(--lip); }
+.win .badge { width: 30px; height: 30px; border-radius: 50%; border: var(--bw) solid var(--ink); display: grid; place-items: center; flex: none; color: #3a251c; }
+.win .info { flex: 1; min-width: 0; }
+.win .name { font-size: 11px; }
+.win .name small { font-size: 9px; color: var(--muted); margin-left: 4px; }
+.win .delta { display: inline-block; margin-top: 2px; padding: 1px 7px; border-radius: 6px; background: var(--chip); font-size: 9px; color: var(--muted); }
+.win .delta b { color: var(--up); font-weight: normal; }
+.win .go { width: 74px; height: 30px; border: var(--bw) solid var(--ink); border-radius: 15px; background: var(--btn); box-shadow: 0 2px 0 var(--lip); font-size: 10px; color: var(--btntext); line-height: 1.15; }
+.win .go small { display: block; font-size: 8px; }
+.win .go.off { background: var(--off); color: var(--muted); }
+.win .go:active { transform: translateY(1px); }
+
+.switcher { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: #000; color: #fff; padding: 8px 12px; border-radius: 999px; font: 13px/1 'Malgun Gothic', sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.5); z-index: 9; }
+.switcher button { width: 28px; height: 28px; border-radius: 50%; background: #333; color: #fff; font-size: 14px; }
+.switcher span { min-width: 250px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone"></div>
+<div class="switcher"><button id="prev" aria-label="이전 색">←</button><span id="label"></span><button id="next" aria-label="다음 색">→</button></div>
+<script>
+const P = {
+  mail: 'M3 6h18v12H3zM3 6l9 7 9-7', rank: 'M5 20V11h4v9M10 20V5h4v15M15 20v-7h4v7', gear: 'M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2',
+  grow: 'M12 4l7 8h-4v8H9v-8H5z', hood: 'M4 19C4 10 7 5 12 5s8 5 8 14zM12 11a2 2 0 100 4 2 2 0 000-4z', skill: 'M12 2l2.6 6.2L21 9l-5 4.3L17.5 20 12 16.4 6.5 20 8 13.3 3 9l6.4-.8L12 2z',
+  nest: 'M3 13c2 5 6 7 9 7s7-2 9-7zM8 13a4 5 0 018 0', shop: 'M5 9h14l-1 11H6zM9 9V7a3 3 0 016 0v2', slash: 'M5 19L19 5M9 19l10-10' };
+const ic = (k, size, fill) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${fill || 'none'}" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="${P[k]}"/></svg>`;
+// 외눈: 호박색 눈 + 세로 동공
+const eye = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="var(--amber)" stroke="var(--ink)" stroke-width="2"/><ellipse cx="${x}" cy="${y}" rx="${r * .28}" ry="${r * .62}" fill="var(--dark, var(--ink))"/>`;
+const portraitRing = `<svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round">
+  <path d="M18 9C12 4 6 6 7 11c1 3 5 3 5 0" /><path d="M46 9c6-5 12-3 11 2-1 3-5 3-5 0" />
+  <circle cx="32" cy="32" r="25" stroke="var(--bone)" stroke-width="7"/><circle cx="32" cy="32" r="28.5"/><circle cx="32" cy="32" r="21.5"/>
+  <g fill="var(--coral)" stroke="none"><circle cx="9" cy="26" r="2"/><circle cx="12" cy="45" r="1.6"/><circle cx="55" cy="26" r="2"/><circle cx="52" cy="45" r="1.6"/><circle cx="20" cy="11" r="1.5"/><circle cx="44" cy="11" r="1.5"/></g>
+  ${eye(32, 6, 5)}</svg>`;
+const stageFrame = `<svg width="240" height="60" viewBox="0 0 240 60" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M30 30C16 30 8 24 12 17c3-5 10-3 8 3" /><path d="M210 30c14 0 22-6 18-13-3-5-10-3-8 3" />
+  <circle cx="20" cy="21" r="3" fill="var(--sel)"/><circle cx="220" cy="21" r="3" fill="var(--sel)"/>
+  <path d="M98 14a22 13 0 0144 0z" fill="var(--bone)"/><path d="M108 13c1-4 3-7 5-8M132 13c-1-4-3-7-5-8" stroke-width="1.5"/>
+  <rect x="30" y="13" width="180" height="36" rx="18" fill="var(--card)"/><path d="M32 50h176" stroke-width="3" opacity=".9"/>
+  <g fill="var(--coral)" stroke="none"><circle cx="104" cy="9" r="1.6"/><circle cx="136" cy="9" r="1.6"/></g>
+  ${eye(120, 8, 5.5)}
+  <path d="M120 49l4 4-4 4-4-4z" fill="var(--btn)"/>
+  <circle cx="44" cy="31" r="9" fill="var(--chip)"/><circle cx="41" cy="30" r="1.6" fill="var(--ink)" stroke="none"/><circle cx="47" cy="30" r="1.6" fill="var(--ink)" stroke="none"/><path d="M41 35h6" stroke-width="1.5"/></svg>`;
+const scene = `
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime_blue/animations/idle/frames/frame_000.png" style="left:118px;top:160px">
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime/animations/idle/frames/frame_000.png" style="left:152px;top:154px;transform:scaleX(-1)">
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime_pink/animations/idle/frames/frame_000.png" style="left:70px;top:206px">
+  <img class="sprite" alt="" src="../../ArtSource/girl_base/animations/idle/frames/frame_000.png" style="left:106px;top:212px">
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime/animations/idle/frames/frame_000.png" style="left:196px;top:232px;transform:scaleX(-1)">
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime_blue/animations/idle/frames/frame_000.png" style="left:254px;top:260px;transform:scaleX(-1)">`;
+const HUD = { ink: '#e6c27a', text: '#fff3dc', dark: '#2a1a14', lip: 'transparent', bw: '1.5px', sheet: 'rgba(42,26,20,.88)', card: 'rgba(58,34,24,.72)', chip: 'rgba(0,0,0,.38)', sel: '#ee7a5c', btn: '#f2b544', muted: '#b89a7c', up: '#8ccb4f', sub: '#b89a7c', off: 'rgba(58,34,24,.45)', bone: '#5a3826', coral: '#ee7a5c', amber: '#f2b544' };
+const ICON = {
+  atk: 'M5 19l2-5L17 4h3v3L10 17l-5 2zM7 13l4 4', hp: 'M12 20s-8-5-8-11a4.5 4.5 0 018-2.5A4.5 4.5 0 0120 9c0 6-8 11-8 11z',
+  regen: 'M12 20s-8-5-8-11a4.5 4.5 0 018-2.5A4.5 4.5 0 0120 9c0 6-8 11-8 11zM12 8v6M9 11h6', def: 'M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6l8-3z',
+  pierce: 'M13 4h7v7l-2.5-2.5L8 18l-4 2 2-4 9.5-9.5L13 4z', crit: 'M12 2l2.6 6.2L21 9l-5 4.3L17.5 20 12 16.4 6.5 20 8 13.3 3 9l6.4-.8L12 2z' };
+const stats = [
+  { k: 'atk', name: '공격력', lv: 130000, a: '562만', b: '712만', cost: '45양', c: '#ff8a5c', ok: true },
+  { k: 'hp', name: '체력', lv: 114400, a: '57만2000', b: '57만2005', cost: '2067자', c: '#ff6f7d', ok: true },
+  { k: 'regen', name: '체력 재생', lv: 120800, a: '1194자', b: '1195자', cost: '2774자', c: '#8ccb4f', ok: true },
+  { k: 'def', name: '방어력', lv: 141100, a: '14만1101', b: '14만1102', cost: '1961자', c: '#6fb6f2', ok: true },
+  { k: 'pierce', name: '관통', lv: 165100, a: '16만5101', b: '16만5102', cost: '55양', c: '#b58cf0', ok: false } ];
+const lvText = n => 'Lv.' + (n / 10000).toFixed(n % 10000 ? 1 : 0) + '만';
+const flo = flip => `<svg width="34" height="16" viewBox="0 0 34 16" fill="none" stroke="var(--flo)" stroke-width="1.5" stroke-linecap="round" style="${flip ? 'transform:scaleX(-1)' : ''}"><path d="M33 8H14c-6 0-9-5-5-7 3-1 5 2 3 4"/><path d="M26 8c-3 5-9 6-13 4"/><circle cx="4" cy="11" r="1.6" fill="var(--flo)" stroke="none"/></svg>`;
+const WINS = { A: { name: '밝은 종이 창 + 금선 장식', cls: 'paper' }, B: { name: '어두운 창 + 금선', cls: 'dark' } };
+function win() {
+  if (state.tab !== 0) return `<div class="log">골드 +1 경험치 +1<br>골드 +1 경험치 +1<br>골드 +1 경험치 +1</div>
+  <button class="boss">보스 도전</button>
+  <div class="slots"><div class="slot">${ic('slash', 22)}<div class="cd">2.9</div></div><div class="slot">${ic('skill', 22, 'var(--btn)')}</div><div class="slot empty">+</div><div class="slot empty">+</div><div class="slot empty">+</div></div>`;
+  return `<div class="win ${WINS[cur].cls}"><div class="crest">${flo(false)}<b>성장</b>${flo(true)}</div><button class="x" data-tab="0">✕</button>
+    <div class="tabs">${['강화', '레벨', '전직', '어빌리티'].map((t, i) => `<button class="tab ${i ? '' : 'on'}">${t}</button>`).join('')}</div>
+    <div class="rule"><i></i></div>
+    <div class="mult">한 번에 ${[1, 10, 100].map(m => `<button data-mult="${m}" class="${state.mult === m ? 'on' : ''}">x${m}</button>`).join('')}</div>
+    <div class="list">${stats.map((s, i) => `<div class="row">
+      <div class="badge" style="background:${s.c}"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="${ICON[s.k]}"/></svg></div>
+      <div class="info"><div class="name">${s.name}<small>${lvText(s.lv)}</small></div><span class="delta">${s.a} → <b>${s.b}</b></span></div>
+      <button class="go ${s.ok ? '' : 'off'}" data-up="${i}">강화<small>${s.cost}</small></button></div>`).join('')}</div></div>`;
+}
+const VARS = ['ink', 'text', 'dark', 'lip', 'bw', 'sheet', 'card', 'chip', 'sel', 'btn', 'muted', 'up', 'sub', 'off', 'bone', 'coral', 'amber'];
+const tabs = [['grow', '성장'], ['hood', '후드'], ['skill', '스킬'], ['nest', '둥지'], ['shop', '상점']];
+const state = { auto: true, tab: 0, mult: 1 };
+function render() { return `${scene}
+  <div class="me"><div class="face"></div>${portraitRing}<div class="pill lv">Lv.1</div></div>
+  <div class="pill who">소라게 소녀</div><div class="exp"><i></i></div>
+  <div class="money"><div class="pill"><i class="dot"></i>137</div><div class="pill"><i class="gem"></i>0<button class="plus">+</button></div></div>
+  <div class="stage">${stageFrame}<div class="txt"><span style="padding-left:24px">Stage 1-1</span><span>7/10</span></div><div class="bar" style="left:68px"><i></i></div></div>
+  <div class="side"><button class="pill round">${ic('mail', 16)}<b></b></button><button class="pill round">${ic('rank', 16)}</button><button class="pill round">${ic('gear', 16)}</button>
+    <button class="pill auto ${state.auto ? '' : 'off'}" data-auto="1"><i></i>자동</button></div>
+  ${win()}
+  <div class="nav">${tabs.map((t, i) => `<button class="${state.tab === i ? 'on' : ''}" data-tab="${i}"><span>${ic(t[0], 20)}</span>${t[1]}</button>`).join('')}</div>`; }
+const keys = Object.keys(WINS);
+let cur = new URLSearchParams(location.search).get('variant'); if (!WINS[cur]) cur = 'A';
+const phone = document.getElementById('phone');
+function draw() {
+  for (const n of VARS) if (HUD[n]) phone.style.setProperty('--' + n, HUD[n]);
+  phone.innerHTML = render();
+  document.getElementById('label').textContent = `${cur} · ${WINS[cur].name}`;
+}
+function go(d) { cur = keys[(keys.indexOf(cur) + d + keys.length) % keys.length]; history.replaceState(null, '', '?variant=' + cur); draw(); }
+document.getElementById('prev').onclick = () => go(-1);
+document.getElementById('next').onclick = () => go(1);
+addEventListener('keydown', e => { if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1); });
+phone.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.auto) state.auto = !state.auto;
+  if (b.dataset.mult) state.mult = +b.dataset.mult;
+  if (b.dataset.up && stats[b.dataset.up].ok) stats[b.dataset.up].lv += state.mult * 100;
+  if (b.dataset.tab) state.tab = state.tab === +b.dataset.tab ? -1 : +b.dataset.tab;
+  draw();
+});
+draw();
+</script>
+</body>
+</html>

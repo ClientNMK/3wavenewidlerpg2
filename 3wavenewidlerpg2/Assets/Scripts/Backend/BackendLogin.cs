@@ -24,9 +24,9 @@ public class BackendLogin
     // success, errMsg, token
     public Action<bool, string, string> OnSignInWithApple = null;
 
-    public void GuestLogin(Action<BackendReturnObject> _OnComplete = null)
+    // 테스트: 입력한 ID로 로그인, 없으면 가입 (비밀번호도 ID)
+    public void GuestLogin(string _uniqueIdentifier, Action<BackendReturnObject> _OnComplete = null)
     {
-        string _uniqueIdentifier = SystemInfo.deviceUniqueIdentifier;
         CustomLogin(_uniqueIdentifier, _uniqueIdentifier, callback =>
         {
             if (callback.IsSuccess())
@@ -44,7 +44,7 @@ public class BackendLogin
                     {
                         if (signCallback.IsSuccess())
                         {
-                            GuestLogin(_OnComplete);
+                            GuestLogin(_uniqueIdentifier, _OnComplete);
                         }
                     });
                     return;

@@ -1,0 +1,149 @@
+<!doctype html>
+<!-- PROTOTYPE (버릴 시안): HUD 2종. 1·3 = 종이 알약(색 4가지), 2 = 어두운 반투명 + 금선(색 2가지). 장식은 스테이지 바와 초상화 틀 두 곳에만. ?variant= 로 전환 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HUD 시안</title>
+<style>
+@font-face { font-family: 'DNF'; src: url('../../3wavenewidlerpg2/Assets/Resource/Font/DNFBitBitv2.ttf'); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #20201f; font-family: 'DNF', 'Malgun Gothic', sans-serif; display: flex; justify-content: center; padding: 24px 0 90px; }
+button { font-family: inherit; cursor: pointer; border: 0; color: inherit; }
+.phone { width: 360px; height: 640px; position: relative; overflow: hidden; zoom: 1.25; border-radius: 6px; color: var(--text, var(--ink));
+  background: #e8c890 url('../../3wavenewidlerpg2/Assets/Resource/Textures/Bg/bg_world_2.png') center top / auto 640px; }
+.phone > * { position: absolute; }
+.sprite { image-rendering: pixelated; width: 70px; height: 70px; }
+svg { display: block; }
+
+/* 공통 알약 판: 종이색 + 굵은 외곽선 + 아래 두께 */
+.pill { background: var(--card); border: var(--bw, 2px) solid var(--ink); border-radius: 999px; box-shadow: 0 2px 0 var(--lip, var(--ink)); }
+
+/* 초상화 (장식 1) */
+.me { left: 6px; top: 6px; width: 64px; height: 70px; }
+.me .face { position: absolute; left: 10px; top: 10px; width: 44px; height: 44px; border-radius: 50%; image-rendering: pixelated;
+  background: var(--chip) url('../../ArtSource/girl_base/animations/idle/frames/frame_000.png') -108px -122px / 256px 256px; }
+.me svg { position: absolute; left: 0; top: 0; }
+.me .lv { color: var(--dark, var(--ink)); position: absolute; left: 13px; top: 53px; width: 38px; height: 15px; font-size: 9px; text-align: center; line-height: 11px; background: var(--btn); }
+.who { left: 66px; top: 12px; width: 104px; height: 22px; padding: 0 10px; font-size: 10px; line-height: 18px; white-space: nowrap; }
+.exp { left: 72px; top: 38px; width: 92px; height: 8px; border: 2px solid var(--ink); border-radius: 4px; background: var(--chip); overflow: hidden; }
+.exp i { display: block; width: 42%; height: 100%; background: var(--up); }
+
+/* 재화 */
+.money { right: 6px; top: 8px; display: flex; gap: 5px; }
+.money .pill { height: 22px; display: flex; align-items: center; gap: 4px; padding: 0 8px 0 2px; font-size: 10px; }
+.money .dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ink); background: var(--amber); }
+.money .gem { width: 12px; height: 12px; margin: 0 2px; transform: rotate(45deg); border: 2px solid var(--ink); background: var(--sel); border-radius: 2px; }
+.money .plus { width: 16px; height: 16px; margin-right: -5px; border-radius: 50%; background: var(--up); border: 2px solid var(--ink); color: #fff; font-size: 11px; line-height: 10px; }
+
+/* 스테이지 바 (장식 2) */
+.stage { left: 60px; top: 62px; width: 240px; height: 60px; }
+.stage .txt { position: absolute; left: 44px; right: 44px; top: 18px; display: flex; justify-content: space-between; font-size: 10px; }
+.stage .bar { position: absolute; left: 44px; right: 44px; top: 33px; height: 7px; border: 2px solid var(--ink); border-radius: 4px; background: var(--chip); overflow: hidden; }
+.stage .bar i { display: block; width: 70%; height: 100%; background: var(--sel); }
+
+/* 오른쪽 버튼 */
+.side { right: 6px; top: 130px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.side .round { width: 30px; height: 30px; display: grid; place-items: center; position: relative; }
+.side .round b { position: absolute; right: -3px; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: #e8533f; border: 2px solid var(--ink); }
+.side .auto { height: 20px; padding: 0 8px 0 3px; display: flex; align-items: center; gap: 4px; font-size: 9px; }
+.side .auto i { width: 12px; height: 12px; border-radius: 50%; background: var(--up); border: 2px solid var(--ink); }
+.side .auto.off { background: var(--off); }
+.side .auto.off i { background: var(--card); }
+
+/* 획득 기록 */
+.log { left: 8px; bottom: 170px; font-size: 9px; line-height: 14px; color: #fff; text-shadow: 1px 0 var(--dark, var(--ink)), -1px 0 var(--dark, var(--ink)), 0 1px var(--dark, var(--ink)), 0 -1px var(--dark, var(--ink)); opacity: .92; }
+
+/* 보스 도전, 스킬 칸, 하단 탭 */
+.boss { left: 105px; bottom: 118px; width: 150px; height: 32px; font-size: 12px; background: var(--btn); color: var(--dark, var(--ink)); border: 2.5px solid var(--ink); border-radius: 16px; box-shadow: 0 3px 0 var(--lip, var(--ink)); }
+.boss:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+.slots { left: 0; right: 0; bottom: 64px; display: flex; justify-content: center; gap: 6px; }
+.slot { width: 40px; height: 40px; border-radius: 11px; background: var(--card); border: var(--bw, 2px) solid var(--ink); box-shadow: 0 2px 0 var(--lip, var(--ink)); display: grid; place-items: center; position: relative; overflow: hidden; font-size: 11px; }
+.slot.empty { background: var(--off); color: var(--muted); }
+.slot .cd { position: absolute; inset: 0; background: rgba(40,26,20,.6); color: #fff; display: grid; place-items: center; }
+.nav { left: 0; right: 0; bottom: 0; height: 56px; background: var(--sheet); border-top: var(--bw, 3px) solid var(--ink); border-radius: 16px 16px 0 0; display: flex; padding: 5px 6px 0; }
+.nav button { flex: 1; background: none; font-size: 9px; display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--sub); }
+.nav button span { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; }
+.nav button.on { color: var(--text, var(--ink)); }
+.nav button.on span { background: var(--sel); border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink); }
+
+.switcher { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: #000; color: #fff; padding: 8px 12px; border-radius: 999px; font: 13px/1 'Malgun Gothic', sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.5); z-index: 9; }
+.switcher button { width: 28px; height: 28px; border-radius: 50%; background: #333; color: #fff; font-size: 14px; }
+.switcher span { min-width: 250px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone"></div>
+<div class="switcher"><button id="prev" aria-label="이전 색">←</button><span id="label"></span><button id="next" aria-label="다음 색">→</button></div>
+<script>
+const P = {
+  mail: 'M3 6h18v12H3zM3 6l9 7 9-7', rank: 'M5 20V11h4v9M10 20V5h4v15M15 20v-7h4v7', gear: 'M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2',
+  grow: 'M12 4l7 8h-4v8H9v-8H5z', hood: 'M4 19C4 10 7 5 12 5s8 5 8 14zM12 11a2 2 0 100 4 2 2 0 000-4z', skill: 'M12 2l2.6 6.2L21 9l-5 4.3L17.5 20 12 16.4 6.5 20 8 13.3 3 9l6.4-.8L12 2z',
+  nest: 'M3 13c2 5 6 7 9 7s7-2 9-7zM8 13a4 5 0 018 0', shop: 'M5 9h14l-1 11H6zM9 9V7a3 3 0 016 0v2', slash: 'M5 19L19 5M9 19l10-10' };
+const ic = (k, size, fill) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${fill || 'none'}" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="${P[k]}"/></svg>`;
+// 외눈: 호박색 눈 + 세로 동공
+const eye = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="var(--amber)" stroke="var(--ink)" stroke-width="2"/><ellipse cx="${x}" cy="${y}" rx="${r * .28}" ry="${r * .62}" fill="var(--dark, var(--ink))"/>`;
+const portraitRing = `<svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round">
+  <path d="M18 9C12 4 6 6 7 11c1 3 5 3 5 0" /><path d="M46 9c6-5 12-3 11 2-1 3-5 3-5 0" />
+  <circle cx="32" cy="32" r="25" stroke="var(--bone)" stroke-width="7"/><circle cx="32" cy="32" r="28.5"/><circle cx="32" cy="32" r="21.5"/>
+  <g fill="var(--coral)" stroke="none"><circle cx="9" cy="26" r="2"/><circle cx="12" cy="45" r="1.6"/><circle cx="55" cy="26" r="2"/><circle cx="52" cy="45" r="1.6"/><circle cx="20" cy="11" r="1.5"/><circle cx="44" cy="11" r="1.5"/></g>
+  ${eye(32, 6, 5)}</svg>`;
+const stageFrame = `<svg width="240" height="60" viewBox="0 0 240 60" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M30 30C16 30 8 24 12 17c3-5 10-3 8 3" /><path d="M210 30c14 0 22-6 18-13-3-5-10-3-8 3" />
+  <circle cx="20" cy="21" r="3" fill="var(--sel)"/><circle cx="220" cy="21" r="3" fill="var(--sel)"/>
+  <path d="M98 14a22 13 0 0144 0z" fill="var(--bone)"/><path d="M108 13c1-4 3-7 5-8M132 13c-1-4-3-7-5-8" stroke-width="1.5"/>
+  <rect x="30" y="13" width="180" height="36" rx="18" fill="var(--card)"/><path d="M32 50h176" stroke-width="3" opacity=".9"/>
+  <g fill="var(--coral)" stroke="none"><circle cx="104" cy="9" r="1.6"/><circle cx="136" cy="9" r="1.6"/></g>
+  ${eye(120, 8, 5.5)}
+  <path d="M120 49l4 4-4 4-4-4z" fill="var(--btn)"/>
+  <circle cx="44" cy="31" r="9" fill="var(--chip)"/><circle cx="41" cy="30" r="1.6" fill="var(--ink)" stroke="none"/><circle cx="47" cy="30" r="1.6" fill="var(--ink)" stroke="none"/><path d="M41 35h6" stroke-width="1.5"/></svg>`;
+const scene = `
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime_blue/animations/idle/frames/frame_000.png" style="left:118px;top:160px">
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime/animations/idle/frames/frame_000.png" style="left:152px;top:154px;transform:scaleX(-1)">
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime_pink/animations/idle/frames/frame_000.png" style="left:70px;top:206px">
+  <img class="sprite" alt="" src="../../ArtSource/girl_base/animations/idle/frames/frame_000.png" style="left:106px;top:212px">
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime/animations/idle/frames/frame_000.png" style="left:196px;top:232px;transform:scaleX(-1)">
+  <img class="sprite" alt="" src="../../ArtSource/monsters/mob_slime_blue/animations/idle/frames/frame_000.png" style="left:254px;top:260px;transform:scaleX(-1)">`;
+const COLORS = {
+  '1': { name: '종이 알약 · 크림 + 산호', v: { ink: '#402820', sheet: '#f8e0c8', card: '#fffaf2', chip: '#f0dcc6', sel: '#ee7a5c', btn: '#f2b544', muted: '#a08070', up: '#5e8f4e', sub: '#8a6a58', off: '#dccdbd', bone: '#fff1dc', coral: '#ee7a5c', amber: '#f2b544' } },
+  '1b': { name: '종이 알약 · 산호 + 청록', v: { ink: '#402820', sheet: '#f8e0c8', card: '#fffaf2', chip: '#f0dcc6', sel: '#6cc6be', btn: '#ee7a5c', muted: '#a08070', up: '#3e8e8a', sub: '#8a6a58', off: '#dccdbd', bone: '#fff1dc', coral: '#ee7a5c', amber: '#f2b544' } },
+  '1c': { name: '종이 알약 · 바다 유리', v: { ink: '#1f2a4a', sheet: '#eaf5f6', card: '#ffffff', chip: '#d8ecee', sel: '#6fd8d8', btn: '#f6c544', muted: '#7b8aa3', up: '#2f9e6b', sub: '#6a7690', off: '#d3dbe3', bone: '#f3fbfb', coral: '#ff9c8a', amber: '#f6c544' } },
+  '3': { name: '종이 알약 · 모래 + 청록 + 호박 (추천 조합)', v: { ink: '#4a3226', sheet: '#ead2b4', card: '#f7f0e4', chip: '#e7cdb8', sel: '#4ca7a1', btn: '#eaa544', muted: '#9a8468', up: '#3f8f8a', sub: '#8a7458', off: '#d9c9b4', bone: '#f4efe6', coral: '#e2765e', amber: '#eaa544' } },
+  '2': { name: '어두운 반투명 + 금선 · 코코아', v: { ink: '#e6c27a', text: '#fff3dc', dark: '#2a1a14', lip: 'transparent', bw: '1.5px', sheet: 'rgba(42,26,20,.88)', card: 'rgba(58,34,24,.72)', chip: 'rgba(0,0,0,.38)', sel: '#ee7a5c', btn: '#f2b544', muted: '#b89a7c', up: '#8ccb4f', sub: '#b89a7c', off: 'rgba(58,34,24,.45)', bone: '#5a3826', coral: '#ee7a5c', amber: '#f2b544' } },
+  '2b': { name: '어두운 반투명 + 금선 · 남색', v: { ink: '#e6c27a', text: '#eef6ff', dark: '#141a33', lip: 'transparent', bw: '1.5px', sheet: 'rgba(20,26,51,.88)', card: 'rgba(28,38,74,.72)', chip: 'rgba(0,0,0,.38)', sel: '#6fd8d8', btn: '#f6c544', muted: '#93a0c0', up: '#7fdcc0', sub: '#93a0c0', off: 'rgba(28,38,74,.45)', bone: '#2a3766', coral: '#6fd8d8', amber: '#f6c544' } } };
+const VARS = ['ink', 'text', 'dark', 'lip', 'bw', 'sheet', 'card', 'chip', 'sel', 'btn', 'muted', 'up', 'sub', 'off', 'bone', 'coral', 'amber'];
+const tabs = [['grow', '성장'], ['hood', '후드'], ['skill', '스킬'], ['nest', '둥지'], ['shop', '상점']];
+const state = { auto: true, tab: -1 };
+function render() { return `${scene}
+  <div class="me"><div class="face"></div>${portraitRing}<div class="pill lv">Lv.1</div></div>
+  <div class="pill who">소라게 소녀</div><div class="exp"><i></i></div>
+  <div class="money"><div class="pill"><i class="dot"></i>137</div><div class="pill"><i class="gem"></i>0<button class="plus">+</button></div></div>
+  <div class="stage">${stageFrame}<div class="txt"><span style="padding-left:24px">Stage 1-1</span><span>7/10</span></div><div class="bar" style="left:68px"><i></i></div></div>
+  <div class="side"><button class="pill round">${ic('mail', 16)}<b></b></button><button class="pill round">${ic('rank', 16)}</button><button class="pill round">${ic('gear', 16)}</button>
+    <button class="pill auto ${state.auto ? '' : 'off'}" data-auto="1"><i></i>자동</button></div>
+  <div class="log">골드 +1 경험치 +1<br>골드 +1 경험치 +1<br>골드 +1 경험치 +1</div>
+  <button class="boss">보스 도전</button>
+  <div class="slots"><div class="slot">${ic('slash', 22)}<div class="cd">2.9</div></div><div class="slot">${ic('skill', 22, 'var(--btn)')}</div><div class="slot empty">+</div><div class="slot empty">+</div><div class="slot empty">+</div></div>
+  <div class="nav">${tabs.map((t, i) => `<button class="${state.tab === i ? 'on' : ''}" data-tab="${i}"><span>${ic(t[0], 20)}</span>${t[1]}</button>`).join('')}</div>`; }
+const keys = Object.keys(COLORS);
+let cur = new URLSearchParams(location.search).get('variant'); if (!COLORS[cur]) cur = '1';
+const phone = document.getElementById('phone');
+function draw() {
+  for (const n of VARS) { const c = COLORS[cur].v[n]; c ? phone.style.setProperty('--' + n, c) : phone.style.removeProperty('--' + n); }
+  phone.innerHTML = render();
+  document.getElementById('label').textContent = `${cur} · ${COLORS[cur].name}`;
+}
+function go(d) { cur = keys[(keys.indexOf(cur) + d + keys.length) % keys.length]; history.replaceState(null, '', '?variant=' + cur); draw(); }
+document.getElementById('prev').onclick = () => go(-1);
+document.getElementById('next').onclick = () => go(1);
+addEventListener('keydown', e => { if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1); });
+phone.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.auto) state.auto = !state.auto;
+  if (b.dataset.tab) state.tab = state.tab === +b.dataset.tab ? -1 : +b.dataset.tab;
+  draw();
+});
+draw();
+</script>
+</body>
+</html>

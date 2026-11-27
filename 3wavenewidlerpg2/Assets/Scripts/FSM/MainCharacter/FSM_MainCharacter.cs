@@ -105,6 +105,7 @@ public class MainCharacter_Skill : FSM
     const string BackstabAnimName = "backstab";
     const string SlashKey = "xslash";
     const float HideTime = 0.2f;
+    const float VanishSpeed = 3f;           // vanish 0.28초 → 약 0.09초
     const float BehindRangeRate = 0.8f;     // 몬스터 중심에서 평타 사거리의 이 비율만큼 뒤에 나타남 (사거리 안이라 항상 맞음)
 
     MainCharacter MainCharacter = null;
@@ -121,7 +122,7 @@ public class MainCharacter_Skill : FSM
     {
         isHiding = false;
         MainCharacter.SkeletonAnim.AnimationState.SetAnimation(0, VanishAnimName, false);
-        MainCharacter.SkeletonAnim.timeScale = 1.0f;
+        MainCharacter.SkeletonAnim.timeScale = VanishSpeed;
     }
 
     public override void Exit()
@@ -390,10 +391,8 @@ public class MainCharacter_Move : FSM
 
         if (!MainCharacter.SkeletonAnim.AnimationName.Equals(MoveAnimName))
         {
-            float defaultMoveSpeed = 0.7f;
-            float rate = moveSpeed * defaultMoveSpeed;
-            float timescale = rate;
-            if (timescale < 1) timescale = 1.0f;
+            float defaultMoveSpeed = 0.25f;  // 이동속도 3 기준 0.75배속
+            float timescale = moveSpeed * defaultMoveSpeed;
 
             MainCharacter.SkeletonAnim.AnimationState.SetAnimation(0, MoveAnimName, true);
             MainCharacter.SkeletonAnim.timeScale = timescale;

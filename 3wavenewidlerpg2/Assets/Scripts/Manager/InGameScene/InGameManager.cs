@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class InGameManager : MonoBehaviour
@@ -34,20 +33,40 @@ public class InGameManager : MonoBehaviour
         float halfHeight = MainCamera.orthographicSize;
         float halfWidth = halfHeight * MainCamera.aspect;
         BattleArea = new Rect(cameraPosition.x - halfWidth, cameraPosition.y - halfHeight, halfWidth * 2f, halfHeight * 2f);
-        UIInGameScene.SetCameraZoomText(CameraZoomNames[cameraZoomIndex]);
+        UIInGameScene.SetCameraZoomStep(cameraZoomIndex);
         playerStartPosition = MainCharacter.transform.position;
         InGameBuffManager.Instance.Setup();
         MainCharacter.OnDeadComplete = HandleMainCharacterDeadComplete;
         MainCharacter.Setup();
         UIInGameScene.SetupSkillSlots(MainCharacter.SkillSlots);
+        // 저장된 최고 스테이지부터
+        stageId = UserManager.Instance.MaxStageId;
         SpawnMonsters();
         RefreshStageUI();
+        ShowIdleReward();
+    }
+
+    // 방치(오프라인) 보상: 최고 스테이지 골드·경험치 × 1분당 처치 수 × 비운 분 (최소 미만이면 없음, 최대에서 멈춤)
+    void ShowIdleReward()
+    {
+        long minutes = (TimeManager.Instance.GetCurrentTimeStamp() - UserManager.Instance.LastAccessTime) / 60;
+        UserManager.Instance.SaveAccessTime();
+        if (minutes < DataManager.Instance.SystemData.GetFloat("Offline_Time_Min_Min"))
+            return;
+
+        int maxMinutes = (int)DataManager.Instance.SystemData.GetFloat("Offline_Time_Max_Min");
+        float killPerMinute = DataManager.Instance.SystemData.GetFloat("Offline_Time_Monster_Count_Min");
+        StageData stage = DataManager.Instance.StageData.GetStageData(UserManager.Instance.MaxStageId);
+        PopupManager.Instance.ShowPopup<UIIdleRewardPopup>().Setup((int)Mathf.Min(minutes, maxMinutes), maxMinutes, stage.Gold_Value * killPerMinute, stage.Exp_Value * killPerMinute);
     }
 
     // 스테이지 진행 저장 전까지 1스테이지부터 시작
     int stageId = 1;
     int killCount = 0;
     bool isBossChallenge = false;
+    bool isBossFailing = false;     // 실패 연출 동안 (히트스톱이 멈춤을 풀지 않게)
+    bool isBossStarting = false;    // 도전 시작(멈춤·검은 화면·등장 연출) 동안: 자동 도전 중복 시작·히트스톱 해제 막음
+    bool isAutoBoss = false;        // 자동 보스 도전 (저장 전까지 이번 플레이만)
     float bossTimer = 0f;
     public bool IsBossChallenge { get { return isBossChallenge; } }
 
@@ -57,16 +76,9 @@ public class InGameManager : MonoBehaviour
     void SpawnMonsters()
     {
         StageData stageData = CurStageData;
-        // 배경은 스테이지가 속한 월드의 World_Resource, 배경 오브젝트는 Bg 아래 같은 이름 묶음만 켬
+        // 배경은 스테이지가 속한 월드의 World_Resource
         string worldResource = DataManager.Instance.WorldData.GetWorldData(stageData.World_Id).World_Resource;
         BgRenderer.sprite = ResourceManager.Instance.GetSprite(AtlasType.Bg, worldResource);
-        obstacles.Clear();
-        foreach (Transform props in BgRenderer.transform)
-        {
-            props.gameObject.SetActive(props.name == worldResource);
-            if (props.name == worldResource)
-                obstacles.AddRange(props.GetComponentsInChildren<SpriteRenderer>().Select(x => x.bounds));
-        }
         // Monster_Id[i]를 Monster_Spawn_Count[i]마리 등장
         for (int idx = 0; idx < stageData.Monster_Id.Length; idx++)
         {
@@ -78,23 +90,6 @@ public class InGameManager : MonoBehaviour
                 float radius = Random.Range(SpawnRadiusMin, SpawnRadiusMax);
                 SpawnMonster(monsterData, stageData.Monster_Attack, stageData.Monster_Hp, stageData.Monster_Penetrate, new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * radius);
             }
-        }
-    }
-
-    // 배경 오브젝트 = 벽. 그림 아래쪽 원 안으로 캐릭터·몬스터가 들어오면 밖으로 밀어냄
-    const float ObstacleRadiusRate = 0.55f;     // 그림 가로 절반 대비 (투명 여백 제외)
-    const float ObstacleCenterDown = 0.3f;      // 그림 세로 절반 대비 아래로 (바닥 쪽)
-    readonly List<Bounds> obstacles = new();
-
-    void PushOutOfObstacles(Transform _tr)
-    {
-        foreach (Bounds obstacle in obstacles)
-        {
-            Vector2 center = obstacle.center + Vector3.down * obstacle.extents.y * ObstacleCenterDown;
-            float radius = obstacle.extents.x * ObstacleRadiusRate;
-            Vector2 diff = (Vector2)_tr.position - center;
-            if (diff.sqrMagnitude < radius * radius)
-                _tr.position = center + (diff.sqrMagnitude > 0f ? diff.normalized : Vector2.up) * radius;
         }
     }
 
@@ -110,74 +105,176 @@ public class InGameManager : MonoBehaviour
         Monsters.Add(monster);
     }
 
+    // 죽는 중(Monsters에서 이미 빠짐)이거나 후드가 삼키던 몬스터, 투사체, 떨어진 재화(이미 획득 처리됨)도 남지 않게 필드에서 모두 정리
     void ClearMonsters()
     {
-        foreach (Monster monster in Monsters)
+        MainCharacter.Hood.StopDevour();
+        foreach (Monster monster in FindObjectsOfType<Monster>())
             ObjectPoolManager.Instance.ReturnObject(monster.MonsterData.Resource, monster.gameObject);
+        ReturnAll<Projectile>();
+        ReturnAll<GoodsDrop>();
         Monsters.Clear();
+    }
+
+    void ReturnAll<T>() where T : PoolinObject
+    {
+        foreach (T obj in FindObjectsOfType<T>())
+            ObjectPoolManager.Instance.ReturnObject(obj.key, obj.gameObject);
     }
 
     static readonly Vector3 BossPlayerPosition = new Vector3(0f, -3f, 0f);
     static readonly Vector3 BossPosition = new Vector3(0f, 3f, 0f);
 
     const float BossFadeTime = 0.2f;
-    const float BossReadyTime = 1f;     // 보스전 시작·끝 검은 화면 유지 시간
+    const float BossReadyTime = 0.3f;   // 보스전 끝 검은 화면 유지 시간 (시작은 보스 등장 연출)
     Vector3 playerStartPosition = Vector3.zero;
 
     // 일반 몬스터를 Boss_Challenge_Count마리 잡으면 도전 가능
     public void StartBossChallenge()
     {
-        if (isBossChallenge || killCount < BossChallengeCount || MainCharacter.State == State.Dead)
+        if (isBossChallenge || isBossStarting || killCount < BossChallengeCount || MainCharacter.State == State.Dead)
             return;
 
+        isBossStarting = true;
         StartCoroutine(CoStartBossChallenge());
     }
 
-    // 검은 화면 동안 일반 몬스터를 치우고 캐릭터는 아래, 보스는 위에 거리를 두고 다시 세운 뒤 시작
+    // 누르는 순간 전투를 멈추고, 멈춘 채 검은 화면 동안 일반 몬스터를 치우고 캐릭터는 아래·보스는 위에 세운 뒤 등장 연출 → 검은 화면 걷고 시작
     IEnumerator CoStartBossChallenge()
     {
         StageData stageData = CurStageData;
+        Time.timeScale = 0f;
         yield return UIInGameScene.CoFadeBlack(0f, 1f, BossFadeTime);
 
         ClearMonsters();
         MainCharacter.SetPosition(BossPlayerPosition);
         MainCharacter.ChangeState(State.Idle);
-        yield return new WaitForSeconds(BossReadyTime);
-
         MonsterData bossData = DataManager.Instance.MonsterData.GetMonsterData(stageData.Boss_Monster_Id);
         SpawnMonster(bossData, stageData.Boss_Monster_Attack, stageData.Boss_Monster_Hp, stageData.Boss_Monster_Penetrate, BossPosition);
-        isBossChallenge = true;
-        bossTimer = DataManager.Instance.SystemData.GetFloat("Boss_Challenge_Time");
-        RefreshStageUI();
+        // 검은 화면 위에서 등장 연출 → 연출이 끝나면 검은 화면을 걷고 다시 움직이며 제한 시간 시작
+        yield return UIInGameScene.CoBossIntro();
         yield return UIInGameScene.CoFadeBlack(1f, 0f, BossFadeTime);
+        Time.timeScale = 1f;
+        isBossChallenge = true;
+        isBossStarting = false;
+        bossTimer = DataManager.Instance.SystemData.GetFloat("Boss_Challenge_Time");
+        UIInGameScene.SetBossBattle(true);
+        RefreshStageUI();
     }
 
     // 성공하면 다음 스테이지, 실패하면 같은 스테이지 일반 몬스터로 복귀
     void EndBossChallenge(bool _isClear)
     {
         isBossChallenge = false;
+        // 클리어하면 VICTORY 연출, 처음 클리어면 StageChart First_Clear 보상도 그 장면에서
+        List<UIRewardPopup.Reward> clearRewards = new();
+        if (_isClear && stageId == UserManager.Instance.MaxStageId && clearedStageIds.Add(stageId))
+            clearRewards.Add(new(CurStageData.First_Clear_Goods_Id, CurStageData.First_Clear_Value));
         if (_isClear)
         {
             if (DataManager.Instance.StageData.HasStageData(stageId + 1))
                 stageId++;
-            killCount = 0;
+            UserManager.Instance.SetMaxStage(stageId);
         }
-        StartCoroutine(CoEndBossChallenge());
+        else
+        {
+            // 실패(시간 초과·사망·포기)하면 자동 도전도 꺼짐
+            isAutoBoss = false;
+            UIInGameScene.SetAutoBoss(false);
+        }
+        // 성공·실패 모두 처음부터 다시 Boss_Challenge_Count마리
+        killCount = 0;
+        StartCoroutine(CoEndBossChallenge(_isClear, clearRewards));
     }
 
     // 검은 화면 동안 보스를 치우고 캐릭터를 처음 자리에 세운 뒤 일반 몬스터 등장
-    IEnumerator CoEndBossChallenge()
+    IEnumerator CoEndBossChallenge(bool _isClear, List<UIRewardPopup.Reward> _clearRewards)
     {
+        if (_isClear)
+            yield return UIInGameScene.BossClear.CoPlay(_clearRewards, _clearRewards.Count);
         yield return UIInGameScene.CoFadeBlack(0f, 1f, BossFadeTime);
 
         ClearMonsters();
+        // 보스전에서 쓰러졌으면 검은 화면 동안 부활 (그 전까지는 쓰러진 채로)
+        if (MainCharacter.State == State.Dead)
+            MainCharacter.Setup();
         MainCharacter.SetPosition(playerStartPosition);
         MainCharacter.ChangeState(State.Idle);
         yield return new WaitForSeconds(BossReadyTime);
 
         SpawnMonsters();
+        UIInGameScene.SetBossBattle(false);
         RefreshStageUI();
         yield return UIInGameScene.CoFadeBlack(1f, 0f, BossFadeTime);
+        // 다음 스테이지 알림은 검은 화면이 걷힌 뒤
+        if (_isClear)
+            UIInGameScene.ShowStageBanner(StageName);
+    }
+
+    // 스테이지 이동 창 (보스전 중에는 스테이지 바가 보스 바라 열지 않음)
+    public void ShowStageMove()
+    {
+        if (isBossChallenge || isBossStarting)
+            return;
+        PopupManager.Instance.ShowPopup<UIStageMovePopup>().Setup(stageId);
+    }
+
+    // 검은 화면 동안 필드를 치우고 고른 스테이지 일반 몬스터부터 다시
+    public void MoveStage(int _stageId)
+    {
+        stageId = _stageId;
+        killCount = 0;
+        StartCoroutine(CoMoveStage());
+    }
+
+    IEnumerator CoMoveStage()
+    {
+        yield return UIInGameScene.CoFadeBlack(0f, 1f, BossFadeTime);
+        ClearMonsters();
+        MainCharacter.SetPosition(playerStartPosition);
+        MainCharacter.ChangeState(State.Idle);
+        SpawnMonsters();
+        RefreshStageUI();
+        yield return UIInGameScene.CoFadeBlack(1f, 0f, BossFadeTime);
+        UIInGameScene.ShowStageBanner(StageName);
+    }
+
+    // 포기 = 시간 초과와 같은 실패 (같은 스테이지 일반 몬스터로)
+    public void GiveUpBossChallenge()
+    {
+        if (isBossChallenge)
+            FailBossChallenge(UIBossDefeat.Reason.GiveUp);
+    }
+
+    // 실패(시간 초과·쓰러짐·포기): 전투를 멈추고 실패 연출·결과 판 → 확인하면 원래 실패 처리, 바로가기면 성장 창 탭 열기
+    void FailBossChallenge(UIBossDefeat.Reason _reason)
+    {
+        isBossChallenge = false;
+        StartCoroutine(CoFailBossChallenge(_reason));
+    }
+
+    IEnumerator CoFailBossChallenge(UIBossDefeat.Reason _reason)
+    {
+        Monster boss = Monsters[0];
+        string bossName = StringManager.Instance.GetStringText(boss.MonsterData.TextCode_Name);
+        float hpRate = (float)(boss.CurHp.ToDouble() / boss.GetTotalHp().ToDouble());
+        // 멈춘 화면에 공격 동작·이펙트가 남지 않게: 서 있는 자세로, 날아가던 것·떠 있던 것은 정리 (쓰러졌으면 쓰러진 채로)
+        if (_reason != UIBossDefeat.Reason.Dead)
+            MainCharacter.ChangeState(State.Idle);
+        boss.ChangeState(State.Idle);
+        MainCharacter.Hood.StopDevour();
+        ReturnAll<Projectile>();
+        ReturnAll<Effect>();
+        ReturnAll<DamageText>();
+        isBossFailing = true;
+        Time.timeScale = 0f;
+        int openTab = -1;
+        yield return UIInGameScene.BossDefeat.CoPlay(_reason, bossName, hpRate, _tab => openTab = _tab);
+        isBossFailing = false;
+        Time.timeScale = 1f;
+        EndBossChallenge(false);
+        if (openTab >= 0)
+            PopupManager.Instance.ShowPopup<UIGoldUpgradePopup>().SelectTab(openTab);
     }
 
     // 히트스톱 도중 씬이 바뀌거나 플레이를 멈춰도 게임 속도가 0으로 남지 않게
@@ -193,27 +290,54 @@ public class InGameManager : MonoBehaviour
 
         bossTimer -= Time.deltaTime;
         if (bossTimer <= 0f)
-            EndBossChallenge(false);
-        else
-            UIInGameScene.SetBossButton(false, string.Format(StringManager.Instance.GetStringText("Msg_BossChallengeTime"), bossTimer.ToString("0.0")));
+        {
+            FailBossChallenge(UIBossDefeat.Reason.TimeOver);
+            return;
+        }
+        // 보스전에는 보스 한 마리만 있음
+        Monster boss = Monsters[0];
+        UIInGameScene.SetBossStage(StringManager.Instance.GetStringText(boss.MonsterData.TextCode_Name), (float)(boss.CurHp.ToDouble() / boss.GetTotalHp().ToDouble()), bossTimer);
     }
+
+    string StageName { get { return $"Stage {CurStageData.World_Id}-{CurStageData.Stage_Number}"; } }
 
     void RefreshStageUI()
     {
-        StageData stageData = CurStageData;
-        int count = Mathf.Min(killCount, BossChallengeCount);
-        UIInGameScene.SetStageText($"Stage {stageData.World_Id}-{stageData.Stage_Number}", count, BossChallengeCount);
         if (isBossChallenge)
             return;
 
-        UIInGameScene.SetBossButton(count >= BossChallengeCount, StringManager.Instance.GetStringText("Name_BossChallenge"));
+        StageData stageData = CurStageData;
+        int count = Mathf.Min(killCount, BossChallengeCount);
+        UIInGameScene.SetStageText(StageName, count, BossChallengeCount);
+        UIInGameScene.SetBossButton(count >= BossChallengeCount, BossChallengeCount, isAutoBoss);
+        if (isAutoBoss)
+            StartBossChallenge();
+    }
+
+    // 켜면 처치 수가 차는 순간 자동으로 도전
+    public void ToggleAutoBoss()
+    {
+        isAutoBoss = !isAutoBoss;
+        UIInGameScene.SetAutoBoss(isAutoBoss);
+        RefreshStageUI();   // 안내 문구 갱신 + 이미 차 있으면 바로 도전
     }
 
     // 사망 모션이 끝나면 부활 (보스전 중이었으면 실패)
+    // 보스전이면 보스 실패 연출, 일반 스테이지면 가벼운 판을 보여 주고 RestartTime 뒤 그 자리에서 부활
+    const float RestartTime = 3f;
     void HandleMainCharacterDeadComplete(CharacterBase _character)
     {
         if (isBossChallenge)
-            EndBossChallenge(false);
+        {
+            FailBossChallenge(UIBossDefeat.Reason.Dead);
+            return;
+        }
+        StartCoroutine(CoDeathRestart());
+    }
+
+    IEnumerator CoDeathRestart()
+    {
+        yield return UIInGameScene.DeathPanel.CoPlay(RestartTime);
         MainCharacter.Setup();
     }
 
@@ -223,7 +347,6 @@ public class InGameManager : MonoBehaviour
 
     // 카메라 멀리(기본)·중간·가까이. 멀리는 화면 가운데 고정, 나머지는 캐릭터를 따라가되 배경 밖은 안 보이게
     static readonly float[] CameraSizes = { 8f, 6f, 4.5f };
-    static readonly string[] CameraZoomNames = { "멀리", "중간", "가까이" };
     int cameraZoomIndex = 0;
     public Rect BattleArea { get; private set; }   // 멀리 볼 때 화면 = 캐릭터가 몬스터를 찾는 범위 (확대해도 전투는 그대로)
 
@@ -231,17 +354,11 @@ public class InGameManager : MonoBehaviour
     {
         cameraZoomIndex = (cameraZoomIndex + 1) % CameraSizes.Length;
         MainCamera.orthographicSize = CameraSizes[cameraZoomIndex];
-        UIInGameScene.SetCameraZoomText(CameraZoomNames[cameraZoomIndex]);
+        UIInGameScene.SetCameraZoomStep(cameraZoomIndex);
     }
 
     private void LateUpdate()
     {
-        // 후드가 삼키는 중(Pause)인 몬스터는 입으로 끌려가야 하므로 제외
-        PushOutOfObstacles(MainCharacter.transform);
-        foreach (Monster monster in Monsters)
-            if (monster.State != State.Pause)
-                PushOutOfObstacles(monster.transform);
-
         Vector3 position = cameraPosition;
         if (cameraZoomIndex > 0)
         {
@@ -267,19 +384,96 @@ public class InGameManager : MonoBehaviour
         Time.timeScale = 0f;
         while (timer < totalTime)
         {
-            if (timer >= _hitStopTime)
+            // 보스 도전 시작으로 멈춘 동안에는 풀지 않음
+            if (timer >= _hitStopTime && !isBossStarting && !isBossFailing)
                 Time.timeScale = 1f;
 
             shakeOffset = (Vector3)Random.insideUnitCircle * _shakePower * (1f - timer / totalTime);
             timer += Time.unscaledDeltaTime;
             yield return null;
         }
-        Time.timeScale = 1f;
+        if (!isBossStarting && !isBossFailing)
+            Time.timeScale = 1f;
         shakeOffset = Vector3.zero;
     }
 
     const string GoldDropKey = "icon_goods_gold";   // 굿즈 차트 골드 Icon
+    const string HoodExpDropKey = "icon_goods_hood_exp";    // 굿즈 차트 Hood_Exp Icon
     double gold = 0;    // 재화 저장 전까지 이번 플레이에서 모은 골드만 표시
+    public double Gold { get { return gold; } }
+
+    public bool TryUseGold(double _cost)
+    {
+        if (gold < _cost)
+            return false;
+
+        gold -= _cost;
+        UIInGameScene.SetGold(gold);
+        return true;
+    }
+
+    // 레벨·경험치·SP도 저장 전까지 이번 플레이만
+    public int Level { get; private set; } = 1;
+    double exp = 0;     // 현재 레벨에서 모은 경험치
+    public double StatPoint { get; private set; } = 0;
+
+    // 필요 경험치를 넘으면 연속 레벨업, 레벨마다 차트 보상(SP)
+    void AddExp(double _exp)
+    {
+        exp += _exp;
+        CharLevelData data = DataManager.Instance.CharLevelData.GetCharLevelData(Level);
+        while (Level < DataManager.Instance.CharLevelData.MaxLevel && exp >= data.GetNeedExp(Level))
+        {
+            exp -= data.GetNeedExp(Level);
+            StatPoint += data.LevelUp_Reward_Goods_Value;
+            Level++;
+            data = DataManager.Instance.CharLevelData.GetCharLevelData(Level) ?? data;
+        }
+        UIInGameScene.SetLevel(Level, Level < DataManager.Instance.CharLevelData.MaxLevel ? (float)(exp / data.GetNeedExp(Level)) : 1f);
+    }
+
+    public bool TryUseStatPoint(double _cost)
+    {
+        if (StatPoint < _cost)
+            return false;
+
+        StatPoint -= _cost;
+        return true;
+    }
+
+    // 후드 레벨업 재화 (스테이지 DropItem, 저장 전까지 이번 플레이만)
+    public double HoodGoods { get; private set; } = 0;
+
+    public double Jewel { get; private set; } = 0;     // 보석 (저장 전까지 이번 플레이만)
+
+    // 보상으로 재화 획득 (GoodsChart Data_Id). 화면 숫자는 보상 연출이 도착할 때 올라감
+    public const int GoldGoodsId = 1;
+    public const int ExpGoodsId = 2;
+    public const int JewelGoodsId = 3;
+    public const int HoodExpGoodsId = 5;
+    public const int StatPointGoodsId = 6;
+    public void AddGoods(int _goodsId, double _value)
+    {
+        switch (_goodsId)
+        {
+            case GoldGoodsId: gold += _value; break;
+            case ExpGoodsId: AddExp(_value); break;
+            case JewelGoodsId: Jewel += _value; break;
+            case HoodExpGoodsId: HoodGoods += _value; break;
+            case StatPointGoodsId: StatPoint += _value; break;
+        }
+    }
+
+    readonly HashSet<int> clearedStageIds = new();     // 처음 클리어 보상 받은 스테이지 (저장 전까지 이번 플레이만)
+
+    public bool TryUseHoodGoods(double _cost)
+    {
+        if (HoodGoods < _cost)
+            return false;
+
+        HoodGoods -= _cost;
+        return true;
+    }
 
     // 일반 몬스터는 모두 잡으면 다시 등장, 보스를 잡으면 도전 성공
     void HandleMonsterDead(CharacterBase _monster)
@@ -289,6 +483,15 @@ public class InGameManager : MonoBehaviour
         UIInGameScene.AddKillLog(stageData.Gold_Value, stageData.Exp_Value);
         gold += stageData.Gold_Value;
         UIInGameScene.SetGold(gold);
+        AddExp(stageData.Exp_Value);
+        if (Random.value < stageData.DropItem_Rate)
+        {
+            HoodGoods += stageData.DropItem_Value;
+            UIInGameScene.AddHoodExpLog(stageData.DropItem_Value);
+            GoodsDrop hoodExpDrop = ObjectPoolManager.Instance.GetObject<GoodsDrop>("Goods", HoodExpDropKey);
+            hoodExpDrop.key = HoodExpDropKey;
+            hoodExpDrop.Play(_monster.transform.position, MainCharacter.transform.localScale);
+        }
 
         GoodsDrop goldDrop = ObjectPoolManager.Instance.GetObject<GoodsDrop>("Goods", GoldDropKey);
         goldDrop.key = GoldDropKey;

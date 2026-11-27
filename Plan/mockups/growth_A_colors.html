@@ -1,0 +1,153 @@
+<!doctype html>
+<!-- PROTOTYPE (버릴 시안): 성장(강화) 창 A 스타일의 색 조합 6종. ?variant=1..6 로 전환. 배경은 실제 인게임 캡처. 도트 제약 없이 Dino Mutant · 레츠고 레전드 톤 참고 -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>성장 창 색 조합</title>
+<style>
+@font-face { font-family: 'DNF'; src: url('../../3wavenewidlerpg2/Assets/Resource/Font/DNFBitBitv2.ttf'); }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #20201f; font-family: 'DNF', 'Malgun Gothic', sans-serif; display: flex; justify-content: center; padding: 24px 0 90px; }
+button { font-family: inherit; cursor: pointer; border: 0; }
+.phone { width: 360px; height: 640px; position: relative; overflow: hidden; zoom: 1.25; border-radius: 6px;
+  background: #e8c890 url('review/ingame_ref.jpg') center top / 360px 640px; }
+.sprite { position: absolute; image-rendering: pixelated; }
+.ico { display: block; }
+
+/* ---------- A: 종이 카드 (Dino Mutant 구조) ---------- */
+.A { color: var(--ink); }
+.A .sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 356px; background: var(--sheet); border-top: 3px solid var(--ink); border-radius: 18px 18px 0 0; padding: 12px 10px 0; }
+.A .tabs { display: flex; gap: 6px; }
+.A .tab { flex: 1; height: 30px; border: 2.5px solid var(--ink); border-radius: 10px; background: var(--chip); font-size: 12px; color: var(--ink); box-shadow: 0 2px 0 var(--ink); }
+.A .tab.on { background: var(--sel); }
+.A .mult { display: flex; gap: 6px; margin: 10px 0 8px; align-items: center; font-size: 10px; color: var(--muted); }
+.A .mult button { height: 22px; padding: 0 12px; border: 2px solid var(--ink); border-radius: 11px; background: var(--card); font-size: 11px; color: var(--ink); }
+.A .mult button.on { background: var(--ink); color: var(--sheet); }
+.A .list { display: flex; flex-direction: column; gap: 7px; height: 268px; overflow: hidden; }
+.A .row { display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 8px; border: 2.5px solid var(--ink); border-radius: 12px; background: var(--card); box-shadow: 0 3px 0 var(--ink); }
+.A .badge { width: 34px; height: 34px; border-radius: 50%; border: 2.5px solid var(--ink); display: grid; place-items: center; flex: none; }
+.A .info { flex: 1; min-width: 0; }
+.A .name { font-size: 12px; color: var(--ink); }
+.A .name small { font-size: 9px; color: var(--muted); margin-left: 4px; }
+.A .delta { display: inline-block; margin-top: 3px; padding: 2px 7px; border-radius: 6px; background: var(--chip); font-size: 9px; color: var(--sub); }
+.A .delta b { color: var(--up); font-weight: normal; }
+.A .go { width: 78px; height: 34px; border: 2.5px solid var(--ink); border-radius: 17px; background: var(--btn); box-shadow: 0 3px 0 var(--ink); font-size: 11px; color: var(--ink); line-height: 1.15; }
+.A .go small { display: block; font-size: 9px; }
+.A .go.off { background: var(--off); color: var(--muted); }
+.A .go:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--ink); }
+
+/* ---------- B: 따뜻한 타일 (레츠고 레전드 구조) ---------- */
+.B .panel { position: absolute; left: 0; right: 0; bottom: 0; height: 372px; background: #eba861; }
+.B .bar { height: 44px; background: #7a4a2e; display: flex; align-items: flex-end; gap: 4px; padding: 0 8px; }
+.B .tab { flex: 1; height: 32px; border-radius: 10px 10px 0 0; background: #9b6440; color: #f3d2a8; font-size: 12px; }
+.B .tab.on { height: 37px; background: #ffd34e; color: #5a3416; box-shadow: inset 0 3px 0 #fff0a8; }
+.B .sub { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px 7px; font-size: 10px; color: #7a4a2e; }
+.B .seg { display: flex; background: #c9844a; border-radius: 12px; padding: 2px; }
+.B .seg button { height: 20px; padding: 0 11px; border-radius: 10px; background: none; font-size: 10px; color: #fbe3c0; }
+.B .seg button.on { background: #fff3dc; color: #7a4a2e; }
+.B .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 10px; }
+.B .tile { background: #fff3dc; border-radius: 14px; box-shadow: 0 3px 0 #c27d45; padding: 8px 6px 7px; text-align: center; }
+.B .sq { width: 40px; height: 40px; border-radius: 12px; margin: 0 auto 5px; display: grid; place-items: center; box-shadow: inset 0 -3px 0 rgba(0,0,0,.14); }
+.B .name { font-size: 11px; color: #5a3416; }
+.B .lv { font-size: 9px; color: #b0794a; margin: 2px 0; }
+.B .up { font-size: 9px; color: #4f9a3a; margin-bottom: 6px; }
+.B .go { width: 100%; height: 26px; border-radius: 9px; background: #ffd34e; box-shadow: 0 3px 0 #e89a2c; font-size: 10px; color: #5a3416; }
+.B .go.off { background: #e3d5bf; box-shadow: 0 3px 0 #c9b89c; color: #a08e75; }
+.B .go:active { transform: translateY(2px); box-shadow: 0 1px 0 #e89a2c; }
+
+/* ---------- C: 집중 카드 + 선택 줄 (혼합, 전투가 더 많이 보임) ---------- */
+.C { --ink: #4a3226; }
+.C .dock { position: absolute; left: 8px; right: 8px; bottom: 8px; height: 274px; background: #fff6e4; border: 3px solid var(--ink); border-radius: 20px; box-shadow: 0 4px 0 rgba(74,50,38,.45); padding: 10px; }
+.C .shell { position: absolute; top: -13px; width: 26px; height: 26px; border-radius: 50%; background: #fff6e4; border: 3px solid var(--ink); }
+.C .shell::after { content: ''; position: absolute; left: 6px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: #f2b544; box-shadow: inset 2px 0 0 #4a3226; }
+.C .tabs { display: flex; gap: 14px; justify-content: center; font-size: 12px; color: #b89a7c; padding: 2px 0 8px; }
+.C .tabs span.on { color: var(--ink); border-bottom: 3px solid #ffd34e; padding-bottom: 2px; }
+.C .hero { display: flex; gap: 10px; background: #ffe9c2; border-radius: 14px; padding: 10px; }
+.C .medal { width: 62px; height: 62px; border-radius: 18px; border: 3px solid var(--ink); display: grid; place-items: center; flex: none; background: #fff; }
+.C .hname { font-size: 15px; color: var(--ink); }
+.C .hlv { font-size: 10px; color: #a07a55; margin: 3px 0 5px; }
+.C .track { height: 8px; border-radius: 4px; background: #e9cfa0; overflow: hidden; }
+.C .track i { display: block; height: 100%; background: #8ccb4f; border-radius: 4px; }
+.C .hdelta { font-size: 11px; color: #7a5c44; margin-top: 6px; }
+.C .hdelta b { color: #4f9a3a; font-weight: normal; font-size: 13px; }
+.C .act { display: flex; gap: 8px; margin-top: 9px; }
+.C .mult { display: flex; flex-direction: column; gap: 3px; }
+.C .mult button { width: 46px; height: 14px; border-radius: 7px; background: #f1dfbd; font-size: 9px; color: #a07a55; }
+.C .mult button.on { background: var(--ink); color: #fff6e4; }
+.C .go { flex: 1; height: 48px; border-radius: 16px; border: 3px solid var(--ink); background: #ffd34e; box-shadow: inset 0 -5px 0 #e89a2c; font-size: 15px; color: var(--ink); }
+.C .go small { display: block; font-size: 10px; }
+.C .go.off { background: #e3d5bf; box-shadow: inset 0 -5px 0 #c9b89c; color: #a08e75; }
+.C .go:active { box-shadow: inset 0 -2px 0 #e89a2c; padding-top: 3px; }
+.C .picks { display: flex; justify-content: space-between; margin-top: 10px; }
+.C .pick { width: 44px; height: 44px; border-radius: 50%; background: #f1dfbd; display: grid; place-items: center; border: 3px solid transparent; position: relative; }
+.C .pick.on { background: #fff; border-color: var(--ink); box-shadow: 0 0 0 3px #ffd34e; }
+.C .pick em { position: absolute; bottom: -9px; font-style: normal; font-size: 8px; color: #a07a55; }
+
+/* ---------- 시안 전환 바 (디자인의 일부가 아님) ---------- */
+.switcher { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: #000; color: #fff; padding: 8px 12px; border-radius: 999px; font: 13px/1 'Malgun Gothic', sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.5); z-index: 9; }
+.switcher button { width: 28px; height: 28px; border-radius: 50%; background: #333; color: #fff; font-size: 14px; }
+.switcher span { min-width: 210px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone"></div>
+<div class="switcher"><button id="prev" aria-label="이전 시안">←</button><span id="label"></span><button id="next" aria-label="다음 시안">→</button></div>
+<script>
+const SCENE = () => '';
+const ICON = {
+  atk: 'M5 19l2-5L17 4h3v3L10 17l-5 2zM7 13l4 4', hp: 'M12 20s-8-5-8-11a4.5 4.5 0 018-2.5A4.5 4.5 0 0120 9c0 6-8 11-8 11z',
+  regen: 'M12 20s-8-5-8-11a4.5 4.5 0 018-2.5A4.5 4.5 0 0120 9c0 6-8 11-8 11zM12 8v6M9 11h6', def: 'M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6l8-3z',
+  pierce: 'M13 4h7v7l-2.5-2.5L8 18l-4 2 2-4 9.5-9.5L13 4z', crit: 'M12 2l2.6 6.2L21 9l-5 4.3L17.5 20 12 16.4 6.5 20 8 13.3 3 9l6.4-.8L12 2z' };
+const icon = (k, fill, ink, size) => `<svg class="ico" width="${size}" height="${size}" viewBox="0 0 24 24" fill="${fill}" stroke="${ink}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="${ICON[k]}"/></svg>`;
+const stats = [
+  { k: 'atk', name: '공격력', lv: 130000, max: 300000, a: '562만', b: '712만', cost: '45양', c: '#ff8a5c', ok: true },
+  { k: 'hp', name: '체력', lv: 114400, max: 400000, a: '57만2000', b: '57만2005', cost: '2067자', c: '#ff6f7d', ok: true },
+  { k: 'regen', name: '체력 재생', lv: 120800, max: 400000, a: '1194자', b: '1195자', cost: '2774자', c: '#8ccb4f', ok: true },
+  { k: 'def', name: '방어력', lv: 141100, max: 400000, a: '14만1101', b: '14만1102', cost: '1961자', c: '#6fb6f2', ok: true },
+  { k: 'pierce', name: '관통', lv: 165100, max: 400000, a: '16만5101', b: '16만5102', cost: '55양', c: '#b58cf0', ok: true },
+  { k: 'crit', name: '치명타', lv: 90000, max: 400000, a: '120%', b: '121%', cost: '3양', c: '#ffd34e', ok: false } ];
+const state = { mult: 1, sel: 0 };
+const lvText = n => 'Lv.' + (n >= 10000 ? (n / 10000).toFixed(n % 10000 ? 1 : 0) + '만' : n);
+const mults = () => [1, 10, 100].map(m => `<button data-mult="${m}" class="${state.mult === m ? 'on' : ''}">x${m}</button>`).join('');
+const tabs = ['강화', '레벨', '전직', '어빌리티'];
+
+const COLORS = {
+  1: { name: '크림 + 산호 (캐릭터 톤)', v: { ink: '#402820', sheet: '#f8e0c8', card: '#fffaf2', chip: '#f0dcc6', sel: '#ee7a5c', btn: '#f2b544', muted: '#a08070', up: '#5e8f4e', sub: '#6b4a3c', off: '#dccdbd' } },
+  2: { name: '산호 + 청록 (바다 포인트)', v: { ink: '#402820', sheet: '#f8e0c8', card: '#fffaf2', chip: '#f0dcc6', sel: '#6cc6be', btn: '#ee7a5c', muted: '#a08070', up: '#3e8e8a', sub: '#6b4a3c', off: '#dccdbd' } },
+  3: { name: '바다 유리 (지금 HUD 톤)', v: { ink: '#1f2a4a', sheet: '#eaf5f6', card: '#ffffff', chip: '#d8ecee', sel: '#6fd8d8', btn: '#f6c544', muted: '#7b8aa3', up: '#2f9e6b', sub: '#44506e', off: '#d3dbe3' } },
+  4: { name: '꿀 + 풀잎', v: { ink: '#4a3226', sheet: '#ffe7ad', card: '#fffaf0', chip: '#f8e8c2', sel: '#9bd65a', btn: '#ffc93c', muted: '#a8875a', up: '#4f9a3a', sub: '#6e5238', off: '#e5d8bc' } },
+  5: { name: '라벤더 + 버터', v: { ink: '#33294a', sheet: '#f1ecfa', card: '#ffffff', chip: '#e4dcf3', sel: '#c7b3f5', btn: '#ffd96a', muted: '#8d82a6', up: '#2f9e6b', sub: '#51466c', off: '#dad5e3' } },
+  6: { name: '진한 산호 바탕', v: { ink: '#402820', sheet: '#f0a088', card: '#fff6ee', chip: '#fbe3d6', sel: '#fff1b8', btn: '#f2b544', muted: '#a8705c', up: '#5e8f4e', sub: '#6b4a3c', off: '#e6d2c6' } } };
+const VARIANTS = {};
+for (const k in COLORS) { const style = Object.entries(COLORS[k].v).map(([n, c]) => `--${n}:${c}`).join(';');
+  VARIANTS[k] = { name: COLORS[k].name, render: () => `<div class="A" style="${style}">${SCENE(120)}
+    <div class="sheet">
+      <div class="tabs">${tabs.map((t, i) => `<button class="tab ${i ? '' : 'on'}">${t}</button>`).join('')}</div>
+      <div class="mult">한 번에 ${mults()}</div>
+      <div class="list">${stats.map((s, i) => `<div class="row">
+        <div class="badge" style="background:${s.c}">${icon(s.k, '#fff', 'currentColor', 20)}</div>
+        <div class="info"><div class="name">${s.name}<small>${lvText(s.lv)}</small></div><span class="delta">${s.a} → <b>${s.b}</b></span></div>
+        <button class="go ${s.ok ? '' : 'off'}" data-up="${i}">강화<small>${s.cost}</small></button></div>`).join('')}</div>
+    </div></div>` }; }
+const keys = Object.keys(VARIANTS);
+let cur = new URLSearchParams(location.search).get('variant'); if (!VARIANTS[cur]) cur = '1';
+function draw() {
+  document.getElementById('phone').innerHTML = VARIANTS[cur].render();
+  document.getElementById('label').textContent = `${cur} · ${VARIANTS[cur].name}`;
+}
+function go(d) { cur = keys[(keys.indexOf(cur) + d + keys.length) % keys.length]; history.replaceState(null, '', '?variant=' + cur); draw(); }
+document.getElementById('prev').onclick = () => go(-1);
+document.getElementById('next').onclick = () => go(1);
+addEventListener('keydown', e => { if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1); });
+document.getElementById('phone').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.mult) state.mult = +b.dataset.mult;
+  if (b.dataset.sel) state.sel = +b.dataset.sel;
+  if (b.dataset.up && stats[b.dataset.up].ok) stats[b.dataset.up].lv += state.mult * 100;
+  draw();
+});
+draw();
+</script>
+</body>
+</html>

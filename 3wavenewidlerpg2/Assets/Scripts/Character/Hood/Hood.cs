@@ -11,7 +11,6 @@ public class Hood : MonoBehaviour
     public SpriteRenderer MoveTrail = null;         // 멀리서 돌아오는 동안 망토 끝 반짝이 꼬리
     public Sprite[] MoveTrailSprites = null;
 
-    const string SkinName = "hood_001";     // 후드 레벨 기능 전까지 고정 (HoodChart Resorce = 스킨 이름)
     const string DevourAnim = "devour";
     const float BehindOffset = 0.6f;        // 캐릭터 뒤쪽 거리
     const float FollowSharpness = 8f;
@@ -39,12 +38,33 @@ public class Hood : MonoBehaviour
     public bool IsDevouring { get { return SkeletonAnim.AnimationState.GetCurrent(0).Animation.Name == DevourAnim; } }
     float Flip { get { return SkeletonAnim.Skeleton.ScaleX; } }
 
+    // 후드 레벨: 저장 전까지 이번 플레이만. 스킨·포식 스탯은 HoodChart 레벨 구간
+    public int Level { get; private set; } = 1;
+    HoodData CurHoodData { get { return DataManager.Instance.HoodData.GetHoodData(Level); } }
+
+    // 포식 가능한 몬스터 체력 비율 = 스탯 기본값 + 레벨 보너스
+    public double PredationHpPer
+    {
+        get { return DataManager.Instance.StatData.GetStatData(StatType.Hood_Predation_Hp_Per).Stat_Default_Value + CurHoodData.GetStatValue(Level); }
+    }
+
     private void Start()
     {
-        SkeletonAnim.Skeleton.SetSkin(SkinName);
-        SkeletonAnim.Skeleton.SetSlotsToSetupPose();
+        SetSkin();
         SkeletonAnim.AnimationState.SetAnimation(0, "idle", true);
         transform.position = FollowPosition;
+    }
+
+    public void LevelUp()
+    {
+        Level++;
+        SetSkin();
+    }
+
+    void SetSkin()
+    {
+        SkeletonAnim.Skeleton.SetSkin(CurHoodData.Resorce);
+        SkeletonAnim.Skeleton.SetSlotsToSetupPose();
     }
 
     Vector3 FollowPosition { get { return MainCharacter.transform.position + Vector3.left * MainCharacter.SkeletonAnim.Skeleton.ScaleX * BehindOffset; } }
@@ -137,6 +157,15 @@ public class Hood : MonoBehaviour
             yield return null;
         }
         SetBlackColor(Color.black);
+    }
+
+    // 몬스터를 정리할 때 삼키던 중이면 멈춤 (정리된 몬스터가 풀에서 보스로 다시 나와도 끌려가지 않게)
+    public void StopDevour()
+    {
+        StopAllCoroutines();
+        DevourMark.gameObject.SetActive(false);
+        SetBlackColor(Color.black);
+        SkeletonAnim.AnimationState.SetAnimation(0, "idle", true);
     }
 
     void SetBlackColor(Color _color)

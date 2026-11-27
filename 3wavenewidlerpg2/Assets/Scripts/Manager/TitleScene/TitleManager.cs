@@ -54,11 +54,8 @@ public class TitleManager : MonoBehaviour
             return;
         }
 
-        int login = PlayerPrefs.GetInt("LoginType", -1);
-        if (login.Equals((int)LoginType.Guest))
-            BackendManager.Instance.GuestLogin(HandleTokenLoginComplete);
-        else
-            HandleTokenLoginComplete(null);
+        // 테스트: 매번 ID 입력 로그인 팝업
+        HandleTokenLoginComplete(null);
     }
     void GetServerStatus()
     {
@@ -229,18 +226,7 @@ public class TitleManager : MonoBehaviour
         if (!_bro.IsSuccess())
             return;
 
-        LitJson.JsonData userInfoJson = _bro.GetReturnValuetoJSON()["row"];
-        string nickname = GameUtils.GameUtils.TryParse<string>("nickname", userInfoJson);
-
-        if (string.IsNullOrEmpty(nickname))
-        {
-            BackendManager.Instance.BackendLogin.UpdateNickname(
-                GameUtils.GameUtils.GenerateRandomNickname(),
-                HandleUpdateNicknameComplete
-            );
-            return;
-        }
-
+        // 테스트 중에는 닉네임 설정 팝업(UINicknamePopup) 없이 바로 차트 불러오기
         LoadAllChartData();
     }
     void LoadAllChartData()
@@ -255,27 +241,19 @@ public class TitleManager : MonoBehaviour
     {
         uiTitleScene.SetGuageBar((float)ChartManager.Instance.CurLoadChartCount / ChartManager.Instance.MaxLoadChartCount);
     }
-    void HandleUpdateNicknameComplete(BackendReturnObject _callback, string _nickname)
-    {
-        if (!_callback.IsSuccess())
-        {
-            string statusCode = _callback.GetStatusCode();
-            if (statusCode.Equals("400"))
-                GameManager.Instance.UISystemScene.ShowToastMessagePanel(StringManager.Instance.GetStringText("Msg_CreateNickNameRule"));
-            else if (statusCode.Equals("409"))
-            {
-                GameManager.Instance.UISystemScene.ShowToastMessagePanel(StringManager.Instance.GetStringText("Msg_DuplicateNickname"));
-                BackendManager.Instance.BackendLogin.UpdateNickname(GameUtils.GameUtils.GenerateRandomNickname(), HandleUpdateNicknameComplete);
-            }
-            return;
-        }
-        LoadAllChartData();
-    }
     void CompleteTitleLoading()
     {
         if (isComplete)
             return;
 
+        if (DataManager.Instance.StringData.IsSetChartString == false)
+            DataManager.Instance.StringData.SetStringData();
+        // 저장 데이터를 불러온 뒤 시작 가능
+        if (!UserManager.Instance.IsLoaded)
+        {
+            UserManager.Instance.Load(CompleteTitleLoading);
+            return;
+        }
         uiTitleScene.SetGuageBar(1f);
         uiTitleScene.SetActiveGaugeBar(false);
         uiTitleScene.SetActiveColorTweener(true);

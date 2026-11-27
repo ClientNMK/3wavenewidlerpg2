@@ -68,11 +68,11 @@ public class BackendManager : Singleton<BackendManager>
         }
     }
 
-    public void GuestLogin(Action<BackendReturnObject> onComplete = null)
+    public void GuestLogin(string id, Action<BackendReturnObject> onComplete = null)
     {
         Debug.Log("GuestLogin");
-       
-        BackendLogin.GuestLogin((callback) =>
+
+        BackendLogin.GuestLogin(id, (callback) =>
         {
             Debug.Log($"GuestLogin callback : {callback}");
 

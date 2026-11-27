@@ -46,7 +46,8 @@ ArtSource/
 │  ├─ HANDOFF.md            ← 후드 씌우기 방법 (후드만 잘라 기본형 위에 합성)
 │  ├─ layer/                ← 후드 레이어, 후드 디자인 원본, 프레임별 머리 좌표(csv)
 │  └─ animations/           ← idle run attack attack2 attack3 hurt dead (2026-11-26 기본형 기준)
-├─ monsters/                ← mob_slime(초록) + blue/pink/gold 색 바꾼 판. 각 폴더 HANDOFF
+├─ monsters/                ← mob_slime(초록) + blue/pink/gold 색 바꾼 판, monster_stage_002(가을 숲 버섯) + red/purple/blue. 각 폴더 HANDOFF
+├─ backgrounds/bg_world_2/  ← 가을 숲 배경 1152×2048 (9:16 세로). HANDOFF
 ├─ items/item_gold_coin/    ← 골드 코인. HANDOFF
 └─ ui/                      ← hud_kit, portrait_girl. 각 폴더 HANDOFF
 ```

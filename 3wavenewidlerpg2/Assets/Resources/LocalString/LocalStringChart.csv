@@ -33,3 +33,20 @@ Msg_Quit,게임을 종료하시겠습니까?,게임을 종료하시겠습니까?
 Name_BossChallenge,보스 도전,Boss Challenge,ボス挑戦,首領挑戰
 Msg_BossChallengeTime,보스 {0}초,Boss {0}s,ボス {0}秒,首領 {0}秒
 Msg_KillReward,골드 +{0}  경험치 +{1},Gold +{0}  EXP +{1},ゴールド +{0}  経験値 +{1},金幣 +{0}  經驗 +{1}
+Msg_NotCorrectNickname_2,닉네임은 2~8글자로 입력해 주세요,Nickname must be 2-8 characters,ニックネームは2~8文字,暱稱需為2~8個字
+Msg_CreateNickNameRule,사용할 수 없는 닉네임 입니다.,This nickname cannot be used,使用できないニックネームです,無法使用此暱稱
+Msg_NicknamePlaceholder,닉네임 입력 (2~8글자),Enter nickname (2-8),ニックネーム入力(2~8文字),輸入暱稱(2~8字)
+Msg_IdPlaceholder,계정 ID 입력 (테스트),Enter account ID (test),アカウントID入力(テスト),輸入帳號ID(測試)
+Name_Login,로그인,Login,ログイン,登入
+Name_StageMove,스테이지 이동,Stage Select,ステージ移動,關卡移動
+Name_World,월드 {0},World {0},ワールド {0},世界 {0}
+Msg_WorldClearCount,{0} / {1} 클리어,{0} / {1} Cleared,{0} / {1} クリア,{0} / {1} 通關
+Msg_StageCurrent,지금 {0}에 있어요,Now at {0},現在 {0} にいます,目前在 {0}
+Msg_PerKill,처치당,Per kill,討伐ごと,每次擊殺
+Msg_BossCleared,보스 깸,Boss cleared,ボス撃破,已擊敗首領
+Msg_Challenging,도전 중,Challenging,挑戦中,挑戰中
+Msg_GoBestStage,최고 {0}로,Go to best {0},最高 {0}へ,前往最高 {0}
+Name_Move,이동,Go,移動,前往
+Name_Best,최고,Best,最高,最高
+Msg_WorldUnlockHint,월드 {0} 마지막 보스({0}-{1})를 이기면 열려요,Defeat the World {0} final boss ({0}-{1}) to unlock,ワールド{0}の最後のボス({0}-{1})を倒すと開放,擊敗世界{0}最終首領({0}-{1})即可開放
+Msg_WorldLocked,다른 월드는 아직 갈 수 없어요,Other worlds are not open yet,他のワールドにはまだ行けません,尚無法前往其他世界

@@ -6,11 +6,35 @@ using UnityEngine;
 [Serializable]
 public class MainCharacterStatus : CharacterStatus
 {
+    public StatManagedData GoldUpgradeStatData = new StatManagedData();
+
+    public void SetGoldUpgradeStatData(GoldUpgradeData _goldUpgradeData, int _curLevel)
+    {
+        StatType statType = (StatType)_goldUpgradeData.Upgrade_Stat_Id;
+        int diffLevel = _curLevel - _goldUpgradeData.Level_Start;
+        double statValue = _goldUpgradeData.Upgrade_Stat_Value + (_goldUpgradeData.Upgrade_Stat_Increase_Value * diffLevel);
+        GoldUpgradeStatData.SetStatDetailData(statType, _goldUpgradeData.Gold_Id.ToString(), statValue);
+        ConvertStatDataToStatValue(statType);
+    }
+
+    public StatManagedData StatPointStatData = new StatManagedData();
+
+    public void SetStatPointStatData(StatPointData _statPointData, int _curLevel)
+    {
+        StatType statType = (StatType)_statPointData.Upgrade_Stat_Id;
+        int diffLevel = _curLevel - _statPointData.Level_Start;
+        double statValue = _statPointData.Upgrade_Stat_Value + (_statPointData.Upgrade_Stat_Increase_Value * diffLevel);
+        StatPointStatData.SetStatDetailData(statType, _statPointData.StatPoint_Id.ToString(), statValue);
+        ConvertStatDataToStatValue(statType);
+    }
+
     // 스탯 출처(장비, 성장 등)가 생기면 StatManagedData 필드를 추가하고 아래 합산에 더한다.
     public void ConvertStatDataToStatValue(StatType statType)
     {
         double totalValue =
-            DefaultStatData.GetValue(statType);
+            DefaultStatData.GetValue(statType)
+            + GoldUpgradeStatData.GetValue(statType)
+            + StatPointStatData.GetValue(statType);
 
         ConvertStatDataToStatValue(statType, totalValue);
     }

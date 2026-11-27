@@ -106,6 +106,10 @@ public class MainCharacter : CharacterBase
 
             // 맞을 때마다 공격력 대비 최소~최대 배율 사이 랜덤 데미지
             BigDouble damage = _damage * Random.Range((float)Status.Damage_Min_Per, (float)Status.Damage_Max_Per);
+            // 치명타: Cri 확률로 Cri_Dmg 배율 (0.01 = 1%, 2 = 200%)
+            bool isCri = Random.value < Status.Cri;
+            if (isCri)
+                damage *= Status.Cri_Dmg;
             if (TryPredation(target, damage))
                 continue;
 
@@ -115,7 +119,7 @@ public class MainCharacter : CharacterBase
             // 여러 번 맞아도 겹치지 않게 체력바 위에서 좌우로 살짝 흩뿌림
             DamageText damageText = ObjectPoolManager.Instance.GetObject<DamageText>("Effect", DamageTextKey);
             damageText.key = DamageTextKey;
-            damageText.Play(new Vector3(target.transform.position.x + Random.Range(-0.15f, 0.15f), target.HpBar.transform.position.y + 0.15f, 0f), damage);
+            damageText.Play(new Vector3(target.transform.position.x + Random.Range(-0.15f, 0.15f), target.HpBar.transform.position.y + 0.15f, 0f), damage, isCri);
         }
         InGameManager.Instance.HitStop(_hitStopTime, _shake);
     }
@@ -126,8 +130,7 @@ public class MainCharacter : CharacterBase
         if (State != State.Attack || Hood.IsDevouring || InGameManager.Instance.IsBossChallenge || Random.value >= Status.Predation_Per)
             return false;
 
-        double hoodHpPer = DataManager.Instance.StatData.GetStatData(StatType.Hood_Predation_Hp_Per).Stat_Default_Value;
-        if (_target.CurHp - _damage > _target.GetTotalHp() * hoodHpPer)
+        if (_target.CurHp - _damage > _target.GetTotalHp() * Hood.PredationHpPer)
             return false;
 
         Hood.Devour(_target);

@@ -17,7 +17,9 @@ public class Monster_Idle : FSM
 
     public override void Update()
     {
-        if (Monster.IsTargetInRange(Monster.MonsterData.Monster_Detection_Range))
+        // 일반 몬스터는 공격 없이 공격 범위에서 멈춰 섬
+        if (Monster.IsTargetInRange(Monster.MonsterData.Monster_Detection_Range)
+            && !(Monster.MonsterData.Monster_Type == MonsterType.NormalMonster && Monster.IsTargetInRange(Monster.MonsterData.Monster_Attack_Range)))
             Monster.ChangeState(State.Move);
     }
 }
@@ -43,7 +45,7 @@ public class Monster_Move : FSM
 
         if (Monster.IsTargetInRange(Monster.MonsterData.Monster_Attack_Range))
         {
-            Monster.ChangeState(State.Attack);
+            Monster.ChangeState(Monster.MonsterData.Monster_Type == MonsterType.NormalMonster ? State.Idle : State.Attack);
             return;
         }
 

@@ -7,18 +7,20 @@ public class DamageText : PoolinObject
     const float RiseDistance = 0.5f;
     const float LifeTime = 0.7f;
     const float FadeTime = 0.3f;
+    static readonly Color NormalColor = new(1f, 0.9f, 0.4f);   // 프리팹 기본 색
+    static readonly Color CriColor = new(1f, 0.35f, 0.25f);
 
     [SerializeField] TextMeshPro text = null;
 
     Vector3 startPosition = Vector3.zero;
     float timer = 0f;
 
-    public void Play(Vector3 _position, BigDouble _damage)
+    public void Play(Vector3 _position, BigDouble _damage, bool _isCri)
     {
         startPosition = _position;
         transform.position = _position;
         text.text = _damage.ToDouble().ToString("N0");
-        text.alpha = 1f;
+        text.color = _isCri ? CriColor : NormalColor;
         timer = 0f;
     }
 

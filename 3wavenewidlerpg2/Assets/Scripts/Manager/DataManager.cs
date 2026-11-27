@@ -16,6 +16,10 @@ public class DataManager : Singleton<DataManager>
     public SerializableStatData StatData = new();
     public SerializableMonsterData MonsterData = new();
     public SerializableSkillData SkillData = new();
+    public SerializableGoldUpgradeData GoldUpgradeData = new();
+    public SerializableCharLevelData CharLevelData = new();
+    public SerializableStatPointData StatPointData = new();
+    public SerializableHoodData HoodData = new();
 
     [Header("Stage Data")]
     public SerializableWorldData WorldData = new();
