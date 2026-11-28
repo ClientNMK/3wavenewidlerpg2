@@ -21,6 +21,8 @@ public class StageData : ChartDataBase
     public double Boss_Monster_Penetrate;
     public double Gold_Value;
     public double Exp_Value;
+    public double Hood_Exp_Value;      // 일반 몬스터 포식 보상
+    public double Boss_Hood_Exp_Value; // 스테이지 보스 마무리 포식 보상
     public int DropItem_Id;
     public double DropItem_Value;
     public float DropItem_Rate;
@@ -45,6 +47,8 @@ public class StageData : ChartDataBase
         this.Boss_Monster_Penetrate = GameUtils.GameUtils.TryParse<double>("Boss_Monster_Penetrate", jsonData);
         this.Gold_Value = GameUtils.GameUtils.TryParse<double>("Gold_Value", jsonData);
         this.Exp_Value = GameUtils.GameUtils.TryParse<double>("Exp_Value", jsonData);
+        this.Hood_Exp_Value = GameUtils.GameUtils.TryParse<double>("Hood_Exp_Value", jsonData);
+        this.Boss_Hood_Exp_Value = GameUtils.GameUtils.TryParse<double>("Boss_Hood_Exp_Value", jsonData);
         this.DropItem_Id = GameUtils.GameUtils.TryParse<int>("DropItem_Id", jsonData);
         this.DropItem_Value = GameUtils.GameUtils.TryParse<double>("DropItem_Value", jsonData);
         this.DropItem_Rate = GameUtils.GameUtils.TryParse<float>("DropItem_Rate", jsonData);

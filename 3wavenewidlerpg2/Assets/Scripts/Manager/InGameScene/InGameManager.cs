@@ -26,6 +26,9 @@ public class InGameManager : MonoBehaviour
     [Header("Bg")]
     public SpriteRenderer BgRenderer = null;
 
+    public InGameMission Mission = new();
+    public InGameCostume Costume = new();
+
     private void Start()
     {
         GameManager.Instance.gameType = GameType.InGame;
@@ -44,6 +47,8 @@ public class InGameManager : MonoBehaviour
         SpawnMonsters();
         RefreshStageUI();
         ShowIdleReward();
+        Mission.Start();
+        Costume.Start();
     }
 
     // 방치(오프라인) 보상: 최고 스테이지 골드·경험치 × 1분당 처치 수 × 비운 분 (최소 미만이면 없음, 최대에서 멈춤)
@@ -70,6 +75,19 @@ public class InGameManager : MonoBehaviour
     bool isAutoBoss = false;        // 자동 보스 도전 (저장 전까지 이번 플레이만)
     float bossTimer = 0f;
     public bool IsBossChallenge { get { return isBossChallenge; } }
+    bool isBossDevouring = false;   // 스테이지 보스 체력 0 = 클리어 확정, 후드가 삼키는 동안 (시간 초과·쓰러짐·포기로 실패하지 않음)
+
+    // 스테이지 보스(MonsterChart Type 2)는 체력이 0이 되는 순간 쓰러지는 대신 후드가 삼킴 (던전·도전 보스, Type 3은 일반 처치)
+    public bool TryBossDevour(Monster _boss)
+    {
+        if (!isBossChallenge || dungeon != null || _boss.MonsterData.Monster_Type != MonsterType.BossMonster)
+            return false;
+
+        isBossDevouring = true;
+        UIInGameScene.SetBossStage(GetBossTitle(_boss), 0f, bossTimer);
+        MainCharacter.Hood.Devour(_boss);
+        return true;
+    }
     DungeonData dungeon = null;     // 던전·도전 중이면 그 단계 (아니면 스테이지 보스)
     string dungeonName = null;
     readonly Dictionary<int, int> dungeonClearedSteps = new();      // Dungeon_Type별 깬 최고 단계 (저장 없이 이번 플레이만)
@@ -87,12 +105,17 @@ public class InGameManager : MonoBehaviour
 
         dungeon = _step;
         dungeonName = _name;
+        // 미션 '컨텐츠 플레이'는 던전(1000번대)만
+        if (_step.Dungeon_Type / 1000 == 1)
+            Mission.Add(MissionProgressType.DungeonPlay, 1);
         isBossStarting = true;
         StartCoroutine(CoStartBossChallenge());
     }
 
     StageData CurStageData { get { return DataManager.Instance.StageData.GetStageData(stageId); } }
     int BossChallengeCount { get { return (int)DataManager.Instance.SystemData.GetFloat("Boss_Challenge_Count"); } }
+    // 보스 도전은 최고 스테이지에서만 (스테이지 이동으로 온 깬 스테이지는 일반 몬스터만)
+    bool IsClearedStage { get { return stageId < UserManager.Instance.MaxStageId; } }
 
     void SpawnMonsters()
     {
@@ -153,10 +176,19 @@ public class InGameManager : MonoBehaviour
     const float BossReadyTime = 0.3f;   // 보스전 끝 검은 화면 유지 시간 (시작은 보스 등장 연출)
     Vector3 playerStartPosition = Vector3.zero;
 
+    // 깬 스테이지에서는 보스 도전 버튼이 최고 스테이지로 이동
+    public void OnClickBossButton()
+    {
+        if (IsClearedStage)
+            MoveStage(UserManager.Instance.MaxStageId);
+        else
+            StartBossChallenge();
+    }
+
     // 일반 몬스터를 Boss_Challenge_Count마리 잡으면 도전 가능
     public void StartBossChallenge()
     {
-        if (isBossChallenge || isBossStarting || killCount < BossChallengeCount || MainCharacter.State == State.Dead)
+        if (isBossChallenge || isBossStarting || IsClearedStage || killCount < BossChallengeCount || MainCharacter.State == State.Dead)
             return;
 
         isBossStarting = true;
@@ -184,9 +216,14 @@ public class InGameManager : MonoBehaviour
             SpawnMonster(DataManager.Instance.MonsterData.GetMonsterData(dungeon.Monster_Id), dungeon.Monster_Attack, dungeon.Monster_Hp, dungeon.Monster_Penetrate, BossPosition);
         else
             SpawnMonster(DataManager.Instance.MonsterData.GetMonsterData(stageData.Boss_Monster_Id), stageData.Boss_Monster_Attack, stageData.Boss_Monster_Hp, stageData.Boss_Monster_Penetrate, BossPosition);
-        // 검은 화면 위에서 등장 연출 → 연출이 끝나면 검은 화면을 걷고 다시 움직이며 제한 시간 시작
-        yield return UIInGameScene.CoBossIntro();
-        yield return UIInGameScene.CoFadeBlack(1f, 0f, BossFadeTime);
+        // 검은 화면 위에서 등장 연출 → 다시 움직이며 제한 시간 시작. 일반 보스는 BOSS 문장, 던전·도전은 이름 컷인(어둠을 걷는 것까지)
+        if (dungeon != null)
+            yield return UIInGameScene.CoBossCutIn(Monsters[0].MonsterData, string.Format(StringManager.Instance.GetStringText("Msg_DungeonTitle"), dungeonName, dungeon.Step));
+        else
+        {
+            yield return UIInGameScene.CoBossIntro();
+            yield return UIInGameScene.CoFadeBlack(1f, 0f, BossFadeTime);
+        }
         Time.timeScale = 1f;
         isBossChallenge = true;
         isBossStarting = false;
@@ -199,6 +236,7 @@ public class InGameManager : MonoBehaviour
     void EndBossChallenge(bool _isClear)
     {
         isBossChallenge = false;
+        isBossDevouring = false;
         // 클리어하면 VICTORY 연출, 첫 클리어 보상(맨 앞, firstCount개)도 그 장면에서
         List<UIRewardPopup.Reward> clearRewards = new();
         int firstCount = 0;
@@ -230,7 +268,10 @@ public class InGameManager : MonoBehaviour
             if (_isClear)
             {
                 if (DataManager.Instance.StageData.HasStageData(stageId + 1))
+                {
                     stageId++;
+                    UIInGameScene.HuntStats.ResetStats();
+                }
                 UserManager.Instance.SetMaxStage(stageId);
             }
             // 성공·실패 모두 처음부터 다시 Boss_Challenge_Count마리 (던전에서 돌아오면 그대로)
@@ -277,6 +318,9 @@ public class InGameManager : MonoBehaviour
     public void MoveStage(int _stageId)
     {
         stageId = _stageId;
+        if (IsClearedStage && !UserManager.Instance.IsHuntSaved)
+            UserManager.Instance.SetHuntStage(_stageId, false);
+        UIInGameScene.HuntStats.ResetStats();
         killCount = 0;
         StartCoroutine(CoMoveStage());
     }
@@ -298,7 +342,7 @@ public class InGameManager : MonoBehaviour
     // 포기 = 시간 초과와 같은 실패 (같은 스테이지 일반 몬스터로)
     public void GiveUpBossChallenge()
     {
-        if (isBossChallenge)
+        if (isBossChallenge && !isBossDevouring)
             FailBossChallenge(UIBossDefeat.Reason.GiveUp);
     }
 
@@ -341,6 +385,7 @@ public class InGameManager : MonoBehaviour
 
     private void Update()
     {
+        Mission.Update(Time.deltaTime);
         if (!isBossChallenge && !isBossStarting && !isBossFailing && !isStageChanging)
         {
             spawnTimer += Time.deltaTime;
@@ -351,7 +396,7 @@ public class InGameManager : MonoBehaviour
             }
             return;
         }
-        if (!isBossChallenge)
+        if (!isBossChallenge || isBossDevouring)
             return;
 
         bossTimer -= Time.deltaTime;
@@ -379,10 +424,10 @@ public class InGameManager : MonoBehaviour
         if (isBossChallenge)
             return;
 
-        StageData stageData = CurStageData;
         int count = Mathf.Min(killCount, BossChallengeCount);
-        UIInGameScene.SetStageText(StageName, count, BossChallengeCount);
-        UIInGameScene.SetBossButton(count >= BossChallengeCount, BossChallengeCount, isAutoBoss);
+        UIInGameScene.SetStageText(StageName, count, BossChallengeCount, IsClearedStage);
+        StageData best = DataManager.Instance.StageData.GetStageData(UserManager.Instance.MaxStageId);
+        UIInGameScene.SetBossButton(count >= BossChallengeCount, BossChallengeCount, isAutoBoss, IsClearedStage ? $"{best.World_Id}-{best.Stage_Number}" : null);
         if (isAutoBoss)
             StartBossChallenge();
     }
@@ -400,7 +445,7 @@ public class InGameManager : MonoBehaviour
     const float RestartTime = 3f;
     void HandleMainCharacterDeadComplete(CharacterBase _character)
     {
-        if (isBossChallenge)
+        if (isBossChallenge && !isBossDevouring)
         {
             FailBossChallenge(UIBossDefeat.Reason.Dead);
             return;
@@ -419,7 +464,7 @@ public class InGameManager : MonoBehaviour
     const float ImpactFrameTime = 1f / 30f;
     const int ImpactScreenOrder = -9995;        // 배경(-10000) 바로 위, 캐릭터 아래
     static readonly bool[] ImpactWhiteFrames = { true, false, false, true, false };
-    static readonly Vector2[] ImpactShakePixels = { new(7f, -3f), new(-6f, 3f), new(5f, -2f), new(-4f, 2f), new(2f, -1f), new(-1f, 1f) };
+    public static readonly Vector2[] ImpactShakePixels = { new(7f, -3f), new(-6f, 3f), new(5f, -2f), new(-4f, 2f), new(2f, -1f), new(-1f, 1f) };
     static readonly Color ImpactWhiteColor = new Color32(0xff, 0xfa, 0xf4, 0xff);
     static readonly Color ImpactBlackColor = new Color32(0x0b, 0x09, 0x10, 0xff);
     static readonly Color NoTintColor = new Color(0f, 0f, 0f, 0f);
@@ -487,19 +532,20 @@ public class InGameManager : MonoBehaviour
         }
         _effect.SetColor(Color.white);
         Time.timeScale = 1f;
-        PlayImpactShake();
+        PlayImpactShake(ImpactShakePixels, 64f);
     }
 
-    public void PlayImpactShake()
+    // 1프레임(1/30초)마다 _pixels 순서대로 흔들림 (_pixelsPerUnit: 문서 px 기준)
+    public void PlayImpactShake(Vector2[] _pixels, float _pixelsPerUnit)
     {
-        StartCoroutine(CoImpactShake());
+        StartCoroutine(CoImpactShake(_pixels, _pixelsPerUnit));
     }
 
-    IEnumerator CoImpactShake()
+    IEnumerator CoImpactShake(Vector2[] _pixels, float _pixelsPerUnit)
     {
-        foreach (Vector2 offset in ImpactShakePixels)
+        foreach (Vector2 offset in _pixels)
         {
-            shakeOffset = offset / 64f;
+            shakeOffset = offset / _pixelsPerUnit;
             yield return new WaitForSecondsRealtime(ImpactFrameTime);
         }
         shakeOffset = Vector3.zero;
@@ -531,7 +577,6 @@ public class InGameManager : MonoBehaviour
     }
 
     const string GoldDropKey = "icon_goods_gold";   // 굿즈 차트 골드 Icon
-    const string HoodExpDropKey = "icon_goods_hood_exp";    // 굿즈 차트 Hood_Exp Icon
     double gold = 0;    // 재화 저장 전까지 이번 플레이에서 모은 골드만 표시
     public double Gold { get { return gold; } }
 
@@ -574,8 +619,16 @@ public class InGameManager : MonoBehaviour
         return true;
     }
 
-    // 후드 레벨업 재화 (스테이지 DropItem, 저장 전까지 이번 플레이만)
+    // 후드 레벨업 재화 Hood_Exp (포식으로 얻음, 저장 전까지 이번 플레이만)
     public double HoodGoods { get; private set; } = 0;
+
+    // 포식 보상 Hood_Exp: 일반 몬스터 Hood_Exp_Value(일반 처치 보상에 더해), 스테이지 보스 마무리 포식 Boss_Hood_Exp_Value
+    public void GiveDevourHoodExp(Monster _target)
+    {
+        double value = _target.MonsterData.Monster_Type == MonsterType.BossMonster ? CurStageData.Boss_Hood_Exp_Value : CurStageData.Hood_Exp_Value;
+        HoodGoods += value;
+        UIInGameScene.AddHoodExpLog(value);
+    }
 
     public double Jewel { get; private set; } = 0;     // 보석 (저장 전까지 이번 플레이만)
 
@@ -612,24 +665,8 @@ public class InGameManager : MonoBehaviour
     void HandleMonsterDead(CharacterBase _monster)
     {
         Monsters.Remove((Monster)_monster);
-        StageData stageData = CurStageData;
-        UIInGameScene.AddKillLog(stageData.Gold_Value, stageData.Exp_Value);
-        gold += stageData.Gold_Value;
-        UIInGameScene.SetGold(gold);
-        AddExp(stageData.Exp_Value);
-        if (Random.value < stageData.DropItem_Rate)
-        {
-            HoodGoods += stageData.DropItem_Value;
-            UIInGameScene.AddHoodExpLog(stageData.DropItem_Value);
-            GoodsDrop hoodExpDrop = ObjectPoolManager.Instance.GetObject<GoodsDrop>("Goods", HoodExpDropKey);
-            hoodExpDrop.key = HoodExpDropKey;
-            hoodExpDrop.Play(_monster.transform.position, MainCharacter.transform.localScale);
-        }
-
-        GoodsDrop goldDrop = ObjectPoolManager.Instance.GetObject<GoodsDrop>("Goods", GoldDropKey);
-        goldDrop.key = GoldDropKey;
-        goldDrop.Play(_monster.transform.position, MainCharacter.transform.localScale);
-
+        Mission.Add(MissionProgressType.MonsterKill, 1);
+        // 보스(스테이지·던전·도전)는 처치 보상 없이 VICTORY의 클리어 보상만
         if (isBossChallenge)
         {
             // 남은 체력이 반올림돼 1%로 남아 보이지 않게 잡은 순간 0%로
@@ -637,6 +674,16 @@ public class InGameManager : MonoBehaviour
             EndBossChallenge(true);
             return;
         }
+
+        StageData stageData = CurStageData;
+        UIInGameScene.AddKillLog(stageData.Gold_Value, stageData.Exp_Value);
+        gold += stageData.Gold_Value;
+        UIInGameScene.SetGold(gold);
+        AddExp(stageData.Exp_Value);
+
+        GoodsDrop goldDrop = ObjectPoolManager.Instance.GetObject<GoodsDrop>("Goods", GoldDropKey);
+        goldDrop.key = GoldDropKey;
+        goldDrop.Play(_monster.transform.position, MainCharacter.transform.localScale);
 
         killCount++;
         RefreshStageUI();

@@ -20,7 +20,7 @@ public class Hood : MonoBehaviour
     const float BiteFlashInterval = 0.05f;
     const float MonsterSideOffset = 0.3f;   // 몬스터 옆 거리
     static readonly Vector3 MouthOffset = new Vector3(2f, 24f, 0f) / 64f;   // 후드 128 캔버스 (66, 88)
-    static readonly Vector3 MarkOffset = new Vector3(0f, 63f, 0f) / 64f;    // 몬스터 128 캔버스 머리 꼭대기 2~3px 위
+    static readonly Vector3 MarkOffset = new Vector3(0f, 73f, 0f) / 64f;    // 아이콘(20×20) 가운데, 몬스터 128 캔버스 머리 꼭대기 위
     static readonly Vector3 BurstOffset = new Vector3(6f, -19f, 0f) / 64f;  // 포식 링: 후드 pivot에서 오른쪽 6, 아래 19
     static readonly Vector3 TrailOffset = new Vector3(-4f, 0f, 0f) / 64f;   // 이동 꼬리: 후드 pivot에서 왼쪽 4
     const string BurstKey = "devour_burst";
@@ -61,9 +61,10 @@ public class Hood : MonoBehaviour
         SetSkin();
     }
 
-    void SetSkin()
+    // 후드 코스튬을 입었으면 레벨 스킨(HoodChart Resorce) 대신 코스튬 스킨 (레벨 구간이 바뀌어도 유지)
+    public void SetSkin()
     {
-        SkeletonAnim.Skeleton.SetSkin(CurHoodData.Resorce);
+        SkeletonAnim.Skeleton.SetSkin(InGameManager.Instance.Costume.HoodSkin ?? CurHoodData.Resorce);
         SkeletonAnim.Skeleton.SetSlotsToSetupPose();
     }
 
@@ -147,6 +148,8 @@ public class Hood : MonoBehaviour
             MainCharacter.PlayEffect(BurstKey, PivotPosition(BurstOffset), Flip, SkeletonRenderer.sortingOrder + 1);
             _target.transform.localScale = Vector3.zero;
             _target.CurHp = BigDouble.Zero;
+            // 보스는 처치되면 다음 스테이지로 넘어가므로 그 전에 지급
+            InGameManager.Instance.GiveDevourHoodExp(_target);
             _target.ChangeState(State.Dead);
         }
 

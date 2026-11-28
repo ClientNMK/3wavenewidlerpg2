@@ -7,6 +7,22 @@
 - 상단 스테이지 바(frame_stage) 전체를 누르면 창이 열린다.
 - "Stage 1-3" 글자 바로 뒤(간격 4)에 "▼" 7pt #E6C27A를 붙여 누를 수 있음을 알린다.
 
+## 사냥터 (2026-11-28, 아래 표에 더함)
+시안: `Plan/mockups/review/stage_move_hunt.png` (① 보스 실패 후 2-2 ② 1-5 고름 ③ 1-5를 사냥터로 저장).
+보스를 못 잡아서 아래로 내려가 사냥할 곳을 매번 찾지 않게 한다. 칸 고르기 → 정보 → '이동' 흐름은 그대로.
+- 사냥터 정하기: 저장 버튼으로 고른 곳. 한 번도 저장 안 했으면 최고보다 낮은 스테이지로 마지막에 이동한 곳을 자동으로 쓴다(저장하면 자동은 멈춤). 저장 데이터에 남긴다.
+- 사냥터 칸: tag_hunt (칸 안 (6, 31) 36×12) + "사냥터" 8pt #2A1A14. 최고 칸의 tag_best와 같은 자리(겹치면 '최고' 우선).
+- 사냥터 줄 (정보 줄 아래, y=400):
+  - 왼쪽: "지금 사냥터: 1-3" 9pt #C2A888 (44, 406). 사냥터가 없으면 "사냥터 없음".
+  - 오른쪽, 고른 칸이 최고보다 낮은 깬 곳일 때: hud_pill (214, 400) 106×24 + tag_hunt 12×12 (222, 406) + "사냥터로 저장" 9pt #FFF3DC (238, 406). 누르면 바로 저장(확인 창 없음).
+  - 고른 칸이 이미 사냥터: icon_check (238, 406) + "사냥터로 저장됨" 9pt #9BD65A (254, 406).
+  - 고른 칸이 최고 스테이지: 오른쪽 비움.
+- 아래 버튼 3개 (y=432, 88×34). 지금 그곳에 있으면 꺼짐.
+  - 사냥터: hud_pill + "사냥터 1-3" 11pt #FFF3DC (40, 432). 누르면 바로 이동. 꺼짐: 알파 0.45 + 글자 #C2A888.
+  - 최고: hud_pill + "최고 2-2" 11pt #FFF3DC (136, 432). 누르면 바로 이동. 꺼짐은 위와 같음.
+  - 이동: btn_main + "이동" 12pt #2A1A14 (232, 432). 고른 칸으로 이동. 지금 있는 칸을 고르면 btn_main_off.
+- 아래 표의 '최고로'·'이동' 버튼 줄은 이 3개로 바꾼다. 나머지(탭·띠·칸·정보 줄·팝업 크기)는 아래 표 그대로.
+
 ## 창 (지금 데이터 기준: 칸 한 줄)
 | 요소 | 부품 | 위치 | 크기 |
 |---|---|---|---|
@@ -51,5 +67,5 @@
 - 월드가 4개 이상이면 월드 탭도 가로 스크롤(탭 폭 88 고정).
 
 ## 부품
-- 새로 추가: stage_cell, stage_cell_best, stage_cell_lock, stage_cell_sel, tag_best, icon_lock, icon_check, frame_face
+- 새로 추가: tag_hunt (2026-11-28), stage_cell, stage_cell_best, stage_cell_lock, stage_cell_sel, tag_best, icon_lock, icon_check, frame_face
 - 기존: win_popup, win_title, btn_close, win_tab_on, win_tab_off, bar_track, bar_fill, win_rule_gem, win_row, icon_gold, icon_exp, hud_pill, btn_main, btn_main_off, frame_stage

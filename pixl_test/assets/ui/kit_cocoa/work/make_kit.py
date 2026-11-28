@@ -310,6 +310,7 @@ P += [
     ("stage_cell_lock", 48, 48, cell_box("rgba(0,0,0,.35)", "rgba(230,194,122,.2)"), [10, 10, 10, 10], "스테이지 칸 (잠김)"),
     ("stage_cell_sel", 60, 60, f'<div style="position:absolute;left:6px;top:6px;width:48px;height:48px;box-sizing:border-box;border:2px solid {GOLD};border-radius:10px;box-shadow:0 0 8px 3px rgba(242,181,68,.6)"></div>', None, "고른 칸 테두리+빛 (칸 위에 겹침, 사방 6 바깥)"),
     ("tag_best", 36, 12, box("#F2B544", "6px", False), [6, 6, 0, 0], "'최고' 꼬리표 판 (글자는 엔진)"),
+    ("tag_hunt", 36, 12, box("#7CC46A", "6px", False), [6, 6, 0, 0], "'사냥터' 꼬리표 판 (글자는 엔진)"),
     ("icon_lock", 14, 14, svg(14, f'<path d="M7.500 11V8a4.500 4.500 0 019 0v3" fill="none" stroke="{CREAM_HEX}" stroke-width="2.600"/><rect x="5" y="11" width="14" height="10" rx="2" fill="{CREAM_HEX}" stroke="{DARK}" stroke-width="1.800" stroke-linejoin="round"/>'), None, "자물쇠 (흐린 크림, 엔진에서 색 입혀도 됨)"),
     ("icon_check", 12, 12, svg(12, f'<circle cx="12" cy="12" r="10" fill="#9BD65A" stroke="{DARK}" stroke-width="2.400"/><path d="M7 12.500l3.300 3.300L17 9" fill="none" stroke="{DARK}" stroke-width="2.800" stroke-linecap="round" stroke-linejoin="round"/>'), None, "깬 곳 체크"),
     ("frame_face", 20, 20, f'<div style="width:100%;height:100%;box-sizing:border-box;border-radius:50%;border:1.5px solid {GOLD}"></div>', None, "지금 위치 얼굴 테두리 (안은 비어 있음, 초상화를 원형 마스크로 아래에)"),
@@ -332,6 +333,71 @@ P += [
     ("face_ring_lock", 44, 44, ring("rgba(230,194,122,.25)", 1.5), None, "잠긴 보스 얼굴 테두리"),
     ("face_ring_sel", 56, 56, f'<div style="position:absolute;left:6px;top:6px;width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:2px solid {GOLD};box-shadow:0 0 8px 3px rgba(242,181,68,.6)"></div>', None, "고른 보스 얼굴 테두리+빛 (사방 6 바깥)"),
 ]
+
+# 사냥 기록 창
+def stroke_icon(size, d, color, w=2.4):
+    return svg(size, f'<path d="{d}" fill="none" stroke="{color}" stroke-width="{w}" stroke-linecap="round" stroke-linejoin="round"/>')
+P += [
+    ("hud_panel", 40, 40, box(HUD, "11px"), [11, 11, 11, 11], "HUD 작은 판 (반투명 코코아 + 금선, 사냥 기록 창)"),
+    ("hud_panel_dark", 40, 40, box("rgba(26,16,12,.9)", "11px", False), [11, 11, 11, 11], "작은 판 위 확인 가림막"),
+    ("icon_chart", 14, 14, stroke_icon(14, "M4 20V10M10 20V4M16 20v-7M21 20H3", GOLD), None, "사냥 기록 아이콘 (막대 그래프)"),
+    ("icon_fold", 14, 14, stroke_icon(14, "M15 6l-6 6 6 6", CREAM_HEX), None, "접기 화살표"),
+    ("icon_reset", 12, 12, stroke_icon(12, "M4 12a8 8 0 1 0 2.600-5.900M4 4v4.500h4.500", "#FFF3DC"), None, "초기화 아이콘"),
+]
+
+# 보스전 진입: 이름 컷인
+P += [
+    ("enter_band", 120, 40, f'<div style="width:100%;height:100%;box-sizing:border-box;background:linear-gradient(90deg,rgba(26,14,18,.95),rgba(90,26,30,.95));border-top:2px solid {GOLD};border-bottom:2px solid {GOLD}"></div>', [0, 0, 4, 4], "보스 이름 컷인 가로 띠 (왼쪽 어두움 → 오른쪽 붉음, 가로로 늘려 씀)"),
+    ("enter_line", 120, 2, '<div style="width:100%;height:100%;background:linear-gradient(90deg,rgba(255,231,160,0),rgba(255,231,160,.55))"></div>', None, "속도선 (오른쪽이 밝음, 엔진에서 여러 개 흘림)"),
+    ("enter_rule", 150, 2, f'<div style="width:100%;height:100%;background:linear-gradient(90deg,{GOLD},rgba(230,194,122,0))"></div>', None, "보스 이름 밑줄 (왼쪽 금색 → 오른쪽 사라짐)"),
+]
+
+# 상태이상 아이콘 (골드·보석과 같은 방식: 단색 면 + 어두운 외곽선 1.5 + 밝은 포인트)
+D = "#2A1A14"
+ST = {
+    "status_devour": f'<path d="M8 1.500c-3.600 0-6 2.700-6 6.300V14l1.800-1.200L5.500 14l1.300-1.200L8 14l1.200-1.200L10.500 14l1.700-1.200L14 14V7.800C14 4.200 11.600 1.500 8 1.500z" fill="#9A4E7A" stroke="{D}" stroke-width="1.500" stroke-linejoin="round"/>'
+                     f'<circle cx="6" cy="7" r="1.300" fill="#FFD966"/><circle cx="10" cy="7" r="1.300" fill="#FFD966"/><path d="M5.500 10h5l-1 1.300-1-.8-1 .8z" fill="#FFF3DC"/><path d="M4.500 4.300c.8-1 2-1.500 3-1.600" stroke="#D99ABE" stroke-width="1" fill="none" stroke-linecap="round"/>',
+    "status_poison": f'<path d="M8 1.500c-3.300 0-5.500 2.200-5.500 5.200 0 1.900 1 3.200 2.200 3.900v2.400h6.600v-2.400c1.200-.7 2.200-2 2.200-3.900 0-3-2.200-5.200-5.500-5.200z" fill="#7CC46A" stroke="{D}" stroke-width="1.500" stroke-linejoin="round"/>'
+                     f'<circle cx="5.900" cy="7" r="1.400" fill="{D}"/><circle cx="10.100" cy="7" r="1.400" fill="{D}"/><path d="M7.200 9.800h1.600L8 8.700z" fill="{D}"/><path d="M6.700 13v-1.400M9.300 13v-1.400" stroke="{D}" stroke-width="1"/><path d="M4.300 4.600c.6-.9 1.500-1.400 2.500-1.600" stroke="#C8F0A8" stroke-width="1" fill="none" stroke-linecap="round"/>',
+    "status_burn": f'<path d="M8 1c.5 2.300 3.200 3.600 3.700 6.300.3-.6.400-1.300.3-2 1.300 1.300 1.700 2.700 1.700 4 0 3-2.400 5.200-5.700 5.200S2.300 12.300 2.300 9.300c0-2.200 1.300-3.500 2.300-4.500 0 1 .4 1.800 1 2.300C5.600 4.800 7 3.300 8 1z" fill="#EE7A5C" stroke="{D}" stroke-width="1.500" stroke-linejoin="round"/>'
+                   f'<path d="M8 7.300c.3 1.300 1.800 2 1.800 3.500 0 1.200-.8 2.100-1.800 2.100s-1.800-.9-1.800-2.100c0-1.200.9-1.900 1.800-3.500z" fill="#FFD966"/>',
+    "status_freeze": f'<path d="M8 1v14M2 4.500l12 7M2 11.500l12-7" stroke="{D}" stroke-width="3.400" stroke-linecap="round"/><path d="M8 1v14M2 4.500l12 7M2 11.500l12-7" stroke="#6FD0CF" stroke-width="1.800" stroke-linecap="round"/>'
+                     f'<path d="M6.300 2.500L8 4l1.700-1.500M6.300 13.500L8 12l1.700 1.500" stroke="#6FD0CF" stroke-width="1.200" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="8" r="1.400" fill="#E8FFFB"/>',
+    "status_stun": f'<path d="M8 1.300l1.900 4 4.400.5-3.300 3 .9 4.300L8 10.900 4.100 13.100 5 8.800l-3.300-3 4.400-.5z" fill="#F2B544" stroke="{D}" stroke-width="1.500" stroke-linejoin="round"/>'
+                   f'<path d="M6.800 5.600l1.200-2.400" stroke="#FFF3C4" stroke-width="1.100" stroke-linecap="round"/>',
+    "status_bleed": f'<path d="M8 1.300C9.800 4.400 13 7.200 13 10.200 13 13 10.800 15 8 15s-5-2-5-4.800C3 7.200 6.200 4.400 8 1.300z" fill="#D8433A" stroke="{D}" stroke-width="1.500" stroke-linejoin="round"/>'
+                    f'<path d="M5.600 10.200c0 1.200.7 2.100 1.700 2.400" stroke="#FFB0A4" stroke-width="1.200" fill="none" stroke-linecap="round"/>',
+}
+ST_USE = {"status_devour": "포식 (자두색 후드 얼굴, 금빛 눈)", "status_poison": "독 (초록 해골)", "status_burn": "화상 (산호 불꽃)",
+          "status_freeze": "빙결 (청록 눈결정)", "status_stun": "기절 (금색 별)", "status_bleed": "출혈 (빨간 핏방울)"}
+P += [(k, 16, 16, svg(16, v, 16), None, f"상태이상 아이콘: {ST_USE[k]}. 몬스터 머리 위 20×20 권장") for k, v in ST.items()]
+
+# 드롭 재화 (Goods 4 Drop) 가안: 꿈 조각 (보라 결정)
+P += [("icon_goods_drop", 16, 16, svg(16,
+    f'<path d="M5 1.800h6l3.200 4L8 14.800 1.800 5.800z" fill="#9A7CE0" stroke="{D}" stroke-width="1.500" stroke-linejoin="round"/>'
+    f'<path d="M1.800 5.800h12.400M5 1.800L6 5.800 8 14.800 10 5.800 11 1.800" stroke="#6E52B8" stroke-width=".9" fill="none" stroke-linejoin="round"/>'
+    f'<path d="M3.600 5.800L8 14.800 6 5.800z" fill="#B9A2F0"/><path d="M5.600 3L4.400 4.600" stroke="#F0E8FF" stroke-width="1.100" stroke-linecap="round"/>'
+    f'<path d="M13.300 1.200l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z" fill="#FFF3DC"/>', 16), None, "드롭 재화 Drop(Goods 4) 가안: 꿈 조각 보라 결정")]
+
+# 미션 창
+P += [
+    ("icon_ring", 36, 36, f'<div style="width:100%;height:100%;box-sizing:border-box;border-radius:50%;background:{HOLE};border:1.5px solid rgba(230,194,122,.55)"></div>', None, "미션 아이콘 바닥 원 (안에 20×20 아이콘)"),
+    ("icon_login", 20, 20, svg(20, f'<g fill="none" stroke="{GOLD}" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"><rect x="3.500" y="5" width="17" height="15" rx="2"/><path d="M3.500 10h17M8 3v4M16 3v4M9 15l2 2 4-4"/></g>'), None, "로그인 미션 아이콘 (달력 + 체크)"),
+]
+
+# 의상 창
+P += [
+    ("icon_costume_point", 18, 18, stroke_icon(18, "M9.500 6.500a2.500 2.500 0 115 .200c0 1.300-2.500 2-2.500 3.300M12 10l-9 7.500h18z", GOLD, 2.2), None, "코스튬 포인트 (옷걸이)"),
+    ("costume_stage", 328, 130, '<div style="width:100%;height:100%;border-radius:14px;background:radial-gradient(ellipse at 70% 75%,#5A3A2C 0%,#3A241B 50%,#22150F 100%)"></div>', None, "의상 미리보기 바닥 (위에 card_frame)"),
+    ("costume_shadow", 110, 16, '<div style="width:100%;height:100%;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.45),rgba(0,0,0,0) 70%)"></div>', None, "미리보기 발밑 그림자"),
+    ("costume_cell", 58, 58, '<div style="width:100%;height:100%;border-radius:10px;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.3),rgba(255,255,255,.08) 60%,rgba(38,24,19,.92))"></div>', None, "의상 칸 바닥 (엔진에서 등급 색 곱하기, 잠김 #6A5A4A)"),
+    ("costume_cell_line", 58, 58, '<div style="width:100%;height:100%;box-sizing:border-box;border-radius:10px;border:2px solid #FFFFFF"></div>', [12, 12, 12, 12], "의상 칸 테두리 (흰색, 엔진에서 등급 색)"),
+    ("tag_grade", 32, 16, box("#FFFFFF", "8px", False), [8, 8, 0, 0], "등급 꼬리표 판 (흰색, 엔진에서 등급 색, 글자는 엔진)"),
+    ("icon_costume", 16, 16, line_icon(16, "M8.500 4L3.500 7.200l2.200 3.800 2.300-1.200V20h8V9.800l2.300 1.200 2.200-3.800L15.500 4c-.6 1.600-2 2.500-3.500 2.500S9.100 5.600 8.500 4z"), None, "의상 창 여는 사이드 버튼 아이콘 (윗옷)"),
+]
+
+# 아래 스테이지에서 최고 스테이지 보스 도전
+P += [("icon_go_best", 16, 16, stroke_icon(16, "M6 12l6-6 6 6M6 19l6-6 6 6", DARK, 3), None, "최고 스테이지로 (위 화살표 2개, btn_main 위)")]
 
 # 격자 배치
 W = 400; PAD = 6; x = PAD; y = PAD; rowh = 0; items = []; html = []

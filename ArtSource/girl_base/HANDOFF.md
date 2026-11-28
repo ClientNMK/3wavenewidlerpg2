@@ -105,6 +105,17 @@ ArtSource/girl_base/
 │  ├─ frames/frame_000~053.png, blade_gale_x1.gif
 │  ├─ skill_003_demo_x2.gif           ← attack3 동작 + 몬스터 4마리가 끌려와 터지는 전체 예시
 │  └─ source/blade-gale.js, options.json
+├─ effects/skill_004/                 ← 스킬 4번 "화면 가르기" 이펙트 확정본 (2026-11-28, pixelfx 새 이펙트 melee/screen-cut, 크림·흰색)
+│  ├─ screen_cut.png / .json          ← 스프라이트 시트 (칸 480×200, 4열, 37프레임, 30fps, pivot (240, 100)). **2배로 확대해 화면 가운데에 사용**
+│  ├─ frames/frame_000~036.png, screen_cut_x1.gif
+│  ├─ skill_004_demo_third.gif        ← 실제 화면(900×1600)을 1/3로 줄인 전체 예시 (몬스터 46마리, 화면 어긋남, 데미지 숫자)
+│  └─ source/screen-cut.js, _lib.js, options.json
+├─ effects/skill_005/                 ← 스킬 5번 "단검 비" 이펙트 확정본 (2026-11-28, pixelfx 새 이펙트 melee/blade-drop · melee/blade-glint, 크림·흰색)
+│  ├─ blade_drop.png / .json          ← 낙하 단검 1개 (칸 112×220, 7열, 22프레임, 30fps, pivot (44, 184)). **2배로 확대, 여러 개를 시간차로 띄움**
+│  ├─ blade_glint.png / .json         ← 하늘의 번쩍임 (칸 200×200, 5열, 19프레임, 30fps, pivot (100, 100)). **2배로 확대**
+│  ├─ frames_blade_drop/, frames_blade_glint/, blade_drop_x1.gif, blade_glint_x1.gif
+│  ├─ skill_005_demo_third.gif        ← 실제 화면(900×1600)을 1/3로 줄인 전체 예시 (몬스터 46마리, 단검 116개)
+│  └─ source/blade-drop.js, blade-glint.js, options.json
 ├─ effects/vanish_burst/              ← vanish(사라짐)용 크림 반짝 링 확정본 (2026-11-26, pixelfx collect-burst 색만 변경)
 │  ├─ collect-burst.png / .json       ← 스프라이트 시트 (칸 112×108, 7열, 42프레임, 30fps, pivot (56, 94))
 │  ├─ frames/frame_000~041.png, vanish_burst_x1.gif
@@ -328,6 +339,27 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 - 회오리 몸통은 pixelfx `nature/tornado`를 1회용으로 고친 복사본
 - 다시 렌더: `node tools/render.mjs melee/blade-gale --sheet --no-actor --out <폴더>` (pixelfx 폴더에서)
 - 작업 파일: `pixl_test/assets/character/girl_base/work/skill_gale/` (1차 시안 GIF, 합성 스크립트)
+
+**완료:** 스킬 4번(skill_004) "화면 가르기" 이펙트 확정 (2026-11-28) → `effects/skill_004/`
+- 사용자 요청 "3초 만에 와 하게 하는 스킬" → 후보 5개 중 1번. 처음엔 광고 영상으로 오해해 확대 연출 영상을 만들었고(`pixl_test/assets/marketing/ad_hook1_screen_cut/`, 나중에 광고로 쓸 수 있음), 게임용 스킬로 다시 만듦
+- 모양: skill_002 지연 일섬(`melee/delayed-cut`)을 화면 폭으로 늘린 복사본 `melee/screen-cut`. 선이 화면 끝에서 끝까지 그어짐(0.05초) → 0.65초 걸려 있는 동안 빛 점이 선을 타고 흐름 → **0.7초(frame_021)** 에 굵게 번쩍이고 두 줄로 갈라지며 불꽃 170개·속도선 44줄
+- 선은 화면 가운데를 지나고 왼쪽 아래 → 오른쪽 위로 약 14도 기울어짐. 절반 크기로 그려 2배 확대해 쓰는 시트 (1배로 그리면 시트가 3840×4000이 되어 너무 큼) → 일섬의 점이 캐릭터보다 2배 굵음
+- 몬스터별 터짐은 새로 만들지 않고 `effects/hit_spark` 재사용
+- 캐릭터 동작: attack(평타) 재사용, 0.49초(frame_007)에 이펙트 시작. 전용 동작 없음
+- 화면 어긋남·순차 폭발·데미지 숫자는 엔진 연출: 수치는 `ENGINE_REQUEST.md` 4-4장, 데미지 숫자 스타일은 4-5장 (사용자가 데모의 숫자 크기·색을 인게임에 반영하고 싶다고 함)
+- 옵션(`source/options.json`): 기본값 그대로 (hold 0.65, sparkN 170, cuts 0, power 1.3)
+- 다시 렌더: `node tools/render.mjs melee/screen-cut --sheet --no-actor --out <폴더>` (pixelfx 폴더에서)
+- 작업 파일: `pixl_test/assets/character/girl_base/work/skill_004/` (절반 크기 데모 GIF, 합성 스크립트 skill004_demo.py)
+
+**완료:** 스킬 5번(skill_005) "단검 비" 이펙트 확정 (2026-11-28) → `effects/skill_005/`
+- "3초 훅" 후보 5번. 사용자가 데모를 보고 "바로 써도 될 것 같다"고 확정. 처음엔 7번으로 넣었다가 사용자 요청으로 5번으로 당김. 거대 후드 포식·연쇄 일섬은 데모만 있고 미확정, 번호 없음
+- `blade_drop`: 빛 단검이 오른쪽 위에서 비스듬히 떨어져(0.1초, **frame_003에 착지**) 바닥에 꽂힘 → 번쩍임·작은 바닥 링·불꽃 16개 → 0.36초까지 꽂혀 있다가 반짝이로 흩어짐. 한 장을 몬스터마다 + 빈 바닥에 여러 번 띄움
+- `blade_glint`: 네 갈래 빛이 0.36초 동안 커지다가(**frame_011에 터짐**) 번쩍이며 사라짐. 던진 단검이 사라진 자리에 1회
+- 위로 던지는 단검은 따로 그리지 않음: `blade_drop` frame_001을 위아래로 뒤집어 엔진이 위로 이동시킴
+- 캐릭터 동작: attack2 재사용. 타이밍·단검 배치는 엔진 연출 → `ENGINE_REQUEST.md` 4-6장
+- 옵션: 둘 다 기본값. 다시 렌더: `node tools/render.mjs melee/blade-drop --sheet --no-actor --out <폴더>` (blade-glint도 같음, pixelfx 폴더에서)
+- 작업 파일: `pixl_test/assets/character/girl_base/work/skill_rain/` (데모 GIF, 합성 스크립트 skill005_rain_demo.py)
+- 미확정 데모: 거대 후드 포식 `work/skill_hood_gulp/`(pixelfx `pets/hood-gulp`), 연쇄 일섬 `work/skill_chain/`(`melee/delayed-cut` 옵션만 줄인 표식)
 
 **현재 단계:** 기본형 모션 계속 제작 (2026-11-26)
 - **작업 순서 규칙 (사용자 결정, 2026-11-26): 기본형(girl_base) 모션을 먼저 다 정한 뒤에 후드를 한 번에 추가한다.** 기본형 모션을 만들거나 바꿀 때 hood_0을 다시 합성하지 않는다

@@ -1,4 +1,4 @@
-# ArtSource — 아트 작업 안내 (다른 PC에서 이어서 작업할 때 먼저 읽기)
+﻿# ArtSource — 아트 작업 안내 (다른 PC에서 이어서 작업할 때 먼저 읽기)
 
 작성: 2026-11-26. 방치형 RPG "소라게 후드 소녀" 아트 원본 폴더.
 **확정본만 여기에 둔다.** Unity가 자동으로 가져가지 않도록 `Assets` 밖에 있음. 게임에 넣을 때는 프로그래머가 `Assets`로 옮김.
@@ -42,6 +42,7 @@ ArtSource/
 │  ├─ animations/           ← idle run attack attack2 attack3 hurt dead roll dash vanish appear backstab
 │  ├─ effects/              ← attack_slash attack2_smear attack3_slash hit_spark skill_xslash (pixelfx로 제작)
 │  └─ tools/GifMaker.cs
+├─ costum_10001/   ← 메인 캐릭터 겨울 코스튬 (빨간 옷 + 귀마개, 게임에서 쓰는 11개 동작). HANDOFF
 ├─ hood_0/                  ← 0차 후드(깨진 알껍데기) — 보류 중, 기본형 확정 후 다시 합성
 │  ├─ HANDOFF.md            ← 후드 씌우기 방법 (후드만 잘라 기본형 위에 합성)
 │  ├─ layer/                ← 후드 레이어, 후드 디자인 원본, 프레임별 머리 좌표(csv)

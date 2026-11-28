@@ -28,13 +28,23 @@ public class MainCharacterStatus : CharacterStatus
         ConvertStatDataToStatValue(statType);
     }
 
+    public StatManagedData CostumeStatData = new StatManagedData();
+
+    // 코스튬 보유·착용 효과, 포인트 단계 (_key마다 따로, 빼려면 0)
+    public void SetCostumeStatData(StatType _statType, string _key, double _value)
+    {
+        CostumeStatData.SetStatDetailData(_statType, _key, _value);
+        ConvertStatDataToStatValue(_statType);
+    }
+
     // 스탯 출처(장비, 성장 등)가 생기면 StatManagedData 필드를 추가하고 아래 합산에 더한다.
     public void ConvertStatDataToStatValue(StatType statType)
     {
         double totalValue =
             DefaultStatData.GetValue(statType)
             + GoldUpgradeStatData.GetValue(statType)
-            + StatPointStatData.GetValue(statType);
+            + StatPointStatData.GetValue(statType)
+            + CostumeStatData.GetValue(statType);
 
         ConvertStatDataToStatValue(statType, totalValue);
     }

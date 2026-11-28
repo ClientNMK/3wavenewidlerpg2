@@ -13,6 +13,8 @@ public class UserManager : Singleton<UserManager>
     string rowInDate = string.Empty;
     public long LastAccessTime { get; private set; } = 0;  // 서버 시각 Unix 초
     public int MaxStageId { get; private set; } = 1;
+    public int HuntStageId { get; private set; } = 0;    // 사냥터 (0 = 없음)
+    public bool IsHuntSaved { get; private set; } = false; // 저장 버튼으로 정했으면 자동(마지막으로 내려간 곳)은 멈춤
 
     float saveTimer = 0f;
     public bool IsLoaded { get; private set; } = false;
@@ -44,6 +46,8 @@ public class UserManager : Singleton<UserManager>
             rowInDate = row["inDate"].ToString();
             LastAccessTime = GameUtils.GameUtils.TryParse<long>("LastAccessTime", row);
             MaxStageId = Mathf.Max(1, GameUtils.GameUtils.TryParse<int>("MaxStageId", row));
+            HuntStageId = GameUtils.GameUtils.TryParse<int>("HuntStageId", row);
+            IsHuntSaved = GameUtils.GameUtils.TryParse<bool>("IsHuntSaved", row);
             IsLoaded = true;
             _onComplete();
         });
@@ -54,6 +58,8 @@ public class UserManager : Singleton<UserManager>
         Param param = new Param();
         param.Add("LastAccessTime", LastAccessTime);
         param.Add("MaxStageId", MaxStageId);
+        param.Add("HuntStageId", HuntStageId);
+        param.Add("IsHuntSaved", IsHuntSaved);
         return param;
     }
 
@@ -70,6 +76,13 @@ public class UserManager : Singleton<UserManager>
             return;
         MaxStageId = _stageId;
         SaveAccessTime();
+    }
+
+    public void SetHuntStage(int _stageId, bool _isSaved)
+    {
+        HuntStageId = _stageId;
+        IsHuntSaved |= _isSaved;
+        Save();
     }
 
     void Save()

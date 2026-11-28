@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>미션 화면 목업</title>
+<style>
+@font-face { font-family: 'DNF'; src: url('../../3wavenewidlerpg2/Assets/Resource/Font/DNFBitBitv2.ttf'); }
+:root{
+  --gold:#E6C27A; --btn:#F2B544; --cream:#FFF3DC; --dim:#C2A888; --ink:#2A1A14;
+  --hud:rgba(58,34,24,.8); --nav:rgba(42,26,20,.92); --win:rgb(38,24,19);
+  --row:rgba(84,54,40,.75); --hole:rgba(0,0,0,.32); --off:rgba(120,96,80,.5);
+  --green:#9BD65A; --coral:#EE7A5C; --alert:#E2765E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1b1310;color:var(--cream);font-family:'DNF','Malgun Gothic',sans-serif;min-height:100vh;
+  display:flex;gap:28px;justify-content:center;align-items:flex-start;padding:24px 16px;flex-wrap:wrap}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+img{image-rendering:auto}
+
+/* 폰 360×640 논리 크기 */
+.phone{width:360px;height:640px;position:relative;overflow:hidden;border-radius:14px;flex:none;
+  background:#c9a66b url('../../3wavenewidlerpg2/Assets/Resource/Textures/Bg/bg_world_1.png') center/cover;
+  box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.field{position:absolute;inset:0}
+.field img{position:absolute;image-rendering:pixelated}
+
+/* 상단 HUD */
+.hud{position:absolute;left:0;right:0;top:0;padding:10px 10px 0;display:flex;gap:6px;align-items:flex-start}
+.portrait{width:52px;height:52px;border-radius:50%;background:var(--hud);border:1.5px solid var(--gold);position:relative;flex:none;overflow:hidden}
+.portrait img{width:64px;position:absolute;left:-6px;top:-4px;image-rendering:pixelated}
+.lv{position:absolute;left:8px;top:52px;background:var(--btn);color:var(--ink);font-size:9px;padding:1px 6px;border-radius:9px}
+.pill{height:22px;border-radius:11px;background:var(--hud);border:1.5px solid var(--gold);display:flex;align-items:center;gap:4px;padding:0 8px;font-size:10px}
+.pill img{width:14px;height:14px}
+.name{margin-top:4px}
+.goods{margin-left:auto;display:flex;gap:4px}
+.gem.bump{animation:bump .35s}
+@keyframes bump{40%{transform:scale(1.15)}}
+
+/* 창 */
+.win{position:absolute;left:0;right:0;bottom:56px;top:150px;background:var(--win);border-top:1.5px solid var(--gold);
+  border-radius:18px 18px 0 0;display:flex;flex-direction:column;padding:16px 10px 8px}
+.win::before{content:"";position:absolute;inset:4px 4px 0;border:1px solid rgba(230,194,122,.35);border-bottom:0;border-radius:14px 14px 0 0;pointer-events:none}
+.title{position:absolute;top:-12px;left:50%;transform:translateX(-50%);height:24px;padding:0 22px;border-radius:12px;
+  background:var(--row);border:1.5px solid var(--gold);font-size:11px;display:flex;align-items:center}
+.title::before,.title::after{content:"";position:absolute;top:50%;width:16px;height:1.5px;background:var(--gold)}
+.title::before{right:100%}.title::after{left:100%}
+.close{position:absolute;right:8px;top:-12px;width:24px;height:24px}
+.close img{width:24px}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.tab{height:26px;border-radius:10px;border:1.5px solid var(--gold);font-size:11px;color:var(--dim);position:relative;background:var(--hole)}
+.tab[aria-selected=true]{background:var(--gold);color:var(--ink)}
+.dot{position:absolute;right:-3px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--alert);display:none}
+.dot.on{display:block}
+
+.rule{height:8px;margin:8px 4px 6px;position:relative}
+.rule::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--gold);opacity:.8}
+.rule::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;background:var(--gold);transform:translate(-50%,-50%) rotate(45deg)}
+
+/* 요약 줄: 초기화 시간, 일일 포인트 */
+.info{display:flex;align-items:center;gap:6px;font-size:9px;color:var(--dim);padding:0 2px 6px}
+.info img{width:12px;height:12px}
+.info b{color:var(--cream);font-weight:400}
+.pts{margin-left:auto;display:flex;align-items:center;gap:5px}
+.ptsbar{width:70px;height:6px;border-radius:3px;background:var(--hole);overflow:hidden}
+.ptsbar i{display:block;height:100%;background:var(--btn);transition:width .3s}
+
+/* 목록 */
+.list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding:1px 2px 4px;scrollbar-width:none}
+.list::-webkit-scrollbar{display:none}
+.row{min-height:52px;border-radius:12px;background:var(--row);border:1.5px solid rgba(230,194,122,.55);display:flex;align-items:center;gap:8px;padding:6px 7px 6px 6px;transition:opacity .2s}
+.row.ready{border-color:var(--gold);box-shadow:inset 0 0 0 1px rgba(242,181,68,.25)}
+.row.done{opacity:.5}
+.badge{width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;background:#6a4a38}
+.badge img{width:18px;height:18px}
+.mid{flex:1;min-width:0}
+.desc{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog{display:flex;align-items:center;gap:5px;margin-top:4px}
+.bar{flex:1;height:7px;border-radius:4px;background:var(--hole);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);transition:width .3s}
+.row.done .bar i{background:var(--dim)}
+.num{font-size:9px;color:var(--dim);min-width:52px;text-align:right}
+.reward{display:flex;flex-direction:column;align-items:center;font-size:9px;width:30px;flex:none}
+.reward img{width:16px;height:16px}
+.reward small{font-size:8px;color:var(--dim)}
+.claim{width:58px;height:30px;border-radius:15px;font-size:10px;flex:none;background:var(--off);color:var(--dim);position:relative}
+.row.ready .claim{background:var(--btn);color:var(--ink)}
+.claim .x{position:absolute;right:-4px;top:-6px;background:var(--alert);color:#fff;font-size:8px;padding:1px 4px;border-radius:7px}
+.check{width:58px;height:30px;display:grid;place-items:center;flex:none}
+.check img{width:18px}
+
+.bottom{padding-top:6px}
+.all{width:100%;height:32px;border-radius:16px;font-size:11px;background:var(--off);color:var(--dim)}
+.all.on{background:var(--btn);color:var(--ink)}
+
+/* 하단 탭 */
+.nav{position:absolute;left:0;right:0;bottom:0;height:56px;background:var(--nav);border-top:1.5px solid var(--gold);display:grid;grid-template-columns:repeat(6,1fr)}
+.nav div{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:8px;color:var(--dim);position:relative}
+.nav img{width:22px;height:22px}
+.nav .on{color:var(--cream)}
+.nav .on::before{content:"";position:absolute;top:5px;width:30px;height:30px;border-radius:9px;background:var(--coral);z-index:-1}
+.nav .dot{right:16px;top:6px}
+
+.toast{position:absolute;left:50%;top:118px;transform:translate(-50%,-6px);background:var(--hud);border:1.5px solid var(--gold);border-radius:12px;padding:5px 12px;font-size:10px;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap;display:flex;gap:5px;align-items:center}
+.toast img{width:14px}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* 오른쪽 설명 */
+aside{width:340px;max-width:100%;font-family:'Malgun Gothic',sans-serif;font-size:13px;line-height:1.6;color:#e9dcc6}
+aside h1{font-size:17px;margin-bottom:4px;color:var(--cream)}
+aside h2{font-size:13px;margin:16px 0 6px;color:var(--gold)}
+aside .tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:8px;background:#3a2a20;color:var(--dim);margin-bottom:8px}
+aside ul{padding-left:18px}
+aside li{margin:2px 0}
+.ctl{display:flex;flex-wrap:wrap;gap:6px}
+.ctl button{background:#3a2a20;border:1px solid #6a5040;border-radius:8px;padding:5px 9px;font-family:'Malgun Gothic',sans-serif;font-size:12px;color:#f1e4cc}
+.ctl button:hover{border-color:var(--gold)}
+pre{background:#140e0b;border:1px solid #3a2a20;border-radius:8px;padding:8px;font-size:11px;white-space:pre-wrap;color:#cbb89a;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <div class="field">
+    <img src="../../ArtSource/girl_base/animations/idle/frames/frame_000.png" style="left:120px;top:70px;width:64px">
+    <img src="../../ArtSource/monsters/mob_slime_blue/animations/idle/frames/frame_000.png" style="left:220px;top:80px;width:48px">
+  </div>
+
+  <div class="hud">
+    <div class="portrait"><img src="../../ArtSource/girl_base/animations/idle/frames/frame_000.png" alt=""></div>
+    <span class="lv">Lv.1</span>
+    <div class="pill name">소라게 소녀</div>
+    <div class="goods">
+      <div class="pill"><img src="../../pixl_test/assets/ui/kit_cocoa/parts/icon_gold.png" alt="">137</div>
+      <div class="pill gem" id="gem"><img src="../../pixl_test/assets/ui/kit_cocoa/parts/icon_gem.png" alt=""><span id="gemN">0</span></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"><img src="../../pixl_test/assets/ui/kit_cocoa/parts/icon_gem.png" alt=""><span></span></div>
+
+  <section class="win" aria-label="미션">
+    <div class="title">미션</div>
+    <button class="close" aria-label="닫기"><img src="../../pixl_test/assets/ui/kit_cocoa/parts/btn_close.png" alt=""></button>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-t="1" aria-selected="true">일일<span class="dot"></span></button>
+      <button class="tab" role="tab" data-t="2" aria-selected="false">주간<span class="dot"></span></button>
+      <button class="tab" role="tab" data-t="3" aria-selected="false">반복<span class="dot"></span></button>
+    </div>
+    <div class="rule"></div>
+    <div class="info" id="info"></div>
+    <div class="list" id="list"></div>
+    <div class="bottom"><button class="all" id="all">모두 받기</button></div>
+  </section>
+
+  <nav class="nav">
+    <div><img src="../../pixl_test/assets/ui/kit_cocoa/parts/tab_grow.png" alt="">성장</div>
+    <div><img src="../../pixl_test/assets/ui/kit_cocoa/parts/tab_inventory.png" alt="">인벤토리</div>
+    <div><img src="../../pixl_test/assets/ui/kit_cocoa/parts/tab_skill.png" alt="">스킬</div>
+    <div class="on"><img src="../../pixl_test/assets/ui/kit_cocoa/parts/tab_mission.png" alt="">미션<span class="dot" id="navDot"></span></div>
+    <div><img src="../../pixl_test/assets/ui/kit_cocoa/parts/tab_content.png" alt="">컨텐츠</div>
+    <div><img src="../../pixl_test/assets/ui/kit_cocoa/parts/tab_shop.png" alt="">상점</div>
+  </nav>
+</div>
+
+<aside>
+  <h1>미션 화면 목업</h1>
+  <span class="tag">기획 목업 · 버려도 되는 시안 · 수치는 MissionChart 가안</span>
+  <p>받기, 모두 받기, 탭을 눌러 볼 수 있습니다. 아래 버튼으로 진행을 올려 상태 변화를 확인하세요.</p>
+
+  <h2>진행 올리기 (테스트)</h2>
+  <div class="ctl">
+    <button data-act="kill">몬스터 +100</button>
+    <button data-act="play">플레이 +5분</button>
+    <button data-act="dungeon">던전 +1</button>
+    <button data-act="ad">광고 +1</button>
+    <button data-act="reset1">일일 초기화</button>
+    <button data-act="reset2">주간 초기화</button>
+  </div>
+
+  <h2>화면 규칙</h2>
+  <ul>
+    <li>정렬: 받기 가능 → 진행 중 → 받음 순서.</li>
+    <li>일일 미션을 받으면 일일 포인트 +10, 주간 "일일 포인트 150"의 진행도가 오릅니다.</li>
+    <li>반복 미션은 받으면 진행도가 목표만큼 줄어듭니다. 목표의 2배 이상 쌓이면 버튼에 ×2가 붙고 한 번에 받습니다.</li>
+    <li>받을 것이 있으면 분류 탭과 하단 "미션" 탭에 알림 점.</li>
+    <li>모두 받기는 지금 보고 있는 분류만 받습니다.</li>
+  </ul>
+
+  <h2>정해야 할 것</h2>
+  <ul>
+    <li>모두 받기를 넣을지, 보고 있는 분류만인지 전체인지</li>
+    <li>초기화 시각 (목업은 한국 시간 0시, 주간은 월요일 0시)</li>
+    <li>미션 설명 문구 (StringChart 키 없음 → 목업 문구는 임시)</li>
+  </ul>
+
+  <h2>지금 상태</h2>
+  <pre id="state"></pre>
+</aside>
+
+<script>
+const K='../../pixl_test/assets/ui/kit_cocoa/parts/';
+// Progress_Type → 아이콘·배지 색
+const TYPE={1:['icon_check','#5f8f4a'],2:['icon_timer','#4f7fa8'],3:['icon_skull','#a85b4a'],4:['icon_ticket','#8a64b8'],5:['icon_ad','#b8893a'],6:['icon_check','#b8893a']};
+// MissionChart_Dev 가안 (설명은 임시 문구)
+const M=[
+ {id:101,t:1,p:1,desc:'접속하기',goal:1,rw:100,pt:10},
+ {id:102,t:1,p:2,desc:'10분 플레이하기',goal:600,rw:100,pt:10},
+ {id:103,t:1,p:3,desc:'몬스터 500마리 처치',goal:500,rw:100,pt:10},
+ {id:104,t:1,p:4,desc:'던전 3회 플레이',goal:3,rw:100,pt:10},
+ {id:105,t:1,p:5,desc:'광고 3회 보기',goal:3,rw:100,pt:10},
+ {id:201,t:2,p:6,desc:'일일 미션 포인트 150 모으기',goal:150,rw:200},
+ {id:202,t:2,p:1,desc:'접속하기',goal:1,rw:200},
+ {id:203,t:2,p:2,desc:'30분 플레이하기',goal:1800,rw:200},
+ {id:204,t:2,p:3,desc:'몬스터 2,000마리 처치',goal:2000,rw:200},
+ {id:205,t:2,p:4,desc:'던전 20회 플레이',goal:20,rw:200},
+ {id:206,t:2,p:5,desc:'광고 15회 보기',goal:15,rw:200},
+ {id:301,t:3,p:3,desc:'몬스터 1,000마리 처치',goal:1000,rw:10},
+ {id:302,t:3,p:2,desc:'100분 플레이하기',goal:6000,rw:10},
+ {id:303,t:3,p:4,desc:'던전 10회 플레이',goal:10,rw:10},
+];
+// 시작 상태: 받기 가능·진행 중·받음이 섞이게
+const S={gem:0,tab:1,points:20,prog:{},claimed:{}};
+Object.assign(S.prog,{101:1,102:600,103:340,104:3,105:1,201:20,202:1,203:900,204:1260,205:6,206:4,301:2150,302:2400,303:4});
+S.claimed[101]=true; S.claimed[202]=true;
+
+const $=id=>document.getElementById(id);
+const fmt=n=>n.toLocaleString('ko-KR');
+const val=m=>m.p===2?Math.floor(S.prog[m.id]/60):S.prog[m.id];          // 플레이타임은 분으로 표시
+const goalV=m=>m.p===2?m.goal/60:m.goal;
+const times=m=>m.t===3?Math.floor(S.prog[m.id]/m.goal):(!S.claimed[m.id]&&S.prog[m.id]>=m.goal?1:0);
+const state=m=>times(m)>0?'ready':(S.claimed[m.id]?'done':'run');
+const order={ready:0,run:1,done:2};
+
+function render(){
+  const ms=M.filter(m=>m.t===S.tab).sort((a,b)=>order[state(a)]-order[state(b)]||a.id-b.id);
+  $('list').innerHTML=ms.map(m=>{
+    const st=state(m),[ic,col]=TYPE[m.p],n=times(m);
+    const cur=m.t===3?S.prog[m.id]%m.goal+(n?m.goal:0):Math.min(S.prog[m.id],m.goal);
+    const shown=m.p===2?Math.floor(Math.min(cur,m.goal)/60):Math.min(cur,m.goal);
+    const pct=Math.min(1,cur/m.goal)*100;
+    const unit=m.p===2?'분':'';
+    const btn=st==='done'?`<div class="check"><img src="${K}icon_check.png" alt="받음"></div>`
+      :`<button class="claim" data-id="${m.id}" ${st==='ready'?'':'disabled'}>${st==='ready'?'받기':'진행 중'}${n>1?`<span class="x">×${n}</span>`:''}</button>`;
+    return `<div class="row ${st}">
+      <div class="badge" style="background:${col}"><img src="${K}${ic}.png" alt=""></div>
+      <div class="mid"><div class="desc">${m.desc}</div>
+        <div class="prog"><div class="bar"><i style="width:${pct}%"></i></div><span class="num">${fmt(shown)}${unit} / ${fmt(goalV(m))}${unit}</span></div></div>
+      <div class="reward"><img src="${K}icon_gem.png" alt="보석">${fmt(m.rw*Math.max(1,n))}${m.pt?`<small>+${m.pt}P</small>`:''}</div>
+      ${btn}</div>`;
+  }).join('');
+
+  const left=S.tab===1?resetLeft(1):S.tab===2?resetLeft(2):null;
+  $('info').innerHTML=(left?`<img src="${K}icon_timer.png" alt="">초기화까지 <b>${left}</b>`:'<span>초기화 없음 · 목표를 채울 때마다 받기</span>')
+    +(S.tab===1?`<span class="pts">일일 포인트 <b>${S.points}</b>/50<span class="ptsbar"><i style="width:${S.points/50*100}%"></i></span></span>`:'');
+
+  const readyTab=t=>M.some(m=>m.t===t&&times(m)>0);
+  document.querySelectorAll('.tab').forEach(b=>{b.setAttribute('aria-selected',+b.dataset.t===S.tab);b.querySelector('.dot').classList.toggle('on',readyTab(+b.dataset.t))});
+  $('navDot').classList.toggle('on',[1,2,3].some(readyTab));
+  $('all').classList.toggle('on',readyTab(S.tab));
+  $('gemN').textContent=fmt(S.gem);
+  $('state').textContent=M.map(m=>`${m.id} ${state(m).padEnd(5)} ${String(S.prog[m.id]).padStart(5)}/${m.goal}`).join('\n')+`\n일일 포인트 ${S.points}  보석 ${S.gem}`;
+}
+
+function resetLeft(t){
+  const now=new Date(),next=new Date(now);next.setHours(24,0,0,0);
+  if(t===2){const d=(8-next.getDay())%7;next.setDate(next.getDate()+d);}
+  const s=Math.floor((next-now)/1000),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),mi=Math.floor(s%3600/60);
+  return d?`${d}일 ${h}시간`:`${h}시간 ${mi}분`;
+}
+
+function claim(m){
+  const n=times(m);if(!n)return 0;
+  if(m.t===3)S.prog[m.id]-=m.goal*n;else S.claimed[m.id]=true;
+  if(m.pt){S.points+=m.pt;S.prog[201]+=m.pt;}
+  return m.rw*n;
+}
+function give(total){
+  if(!total)return;S.gem+=total;
+  const g=$('gem');g.classList.remove('bump');void g.offsetWidth;g.classList.add('bump');
+  const t=$('toast');t.querySelector('span').textContent=`보석 +${fmt(total)}`;t.classList.add('show');
+  clearTimeout(give.t);give.t=setTimeout(()=>t.classList.remove('show'),1200);
+}
+
+$('list').onclick=e=>{const b=e.target.closest('.claim');if(!b||b.disabled)return;give(claim(M.find(m=>m.id==b.dataset.id)));render();};
+$('all').onclick=()=>{let s=0;M.filter(m=>m.t===S.tab).forEach(m=>s+=claim(m));give(s);render();};
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{S.tab=+b.dataset.t;render();});
+document.querySelectorAll('.ctl button').forEach(b=>b.onclick=()=>{
+  const a=b.dataset.act,add=(p,v)=>M.filter(m=>m.p===p).forEach(m=>S.prog[m.id]+=v);
+  if(a==='kill')add(3,100);if(a==='play')add(2,300);if(a==='dungeon')add(4,1);if(a==='ad')add(5,1);
+  if(a==='reset1'){M.filter(m=>m.t===1).forEach(m=>{S.prog[m.id]=m.p===1?1:0;delete S.claimed[m.id]});S.points=0;}
+  if(a==='reset2'){M.filter(m=>m.t===2).forEach(m=>{S.prog[m.id]=m.p===1?1:0;delete S.claimed[m.id]});}
+  render();
+});
+render();setInterval(render,30000);
+
+// 화면 높이에 맞게 폰 확대 (최대 1.6배)
+function fit(){const z=Math.max(1,Math.min(1.6,(innerHeight-48)/640,(innerWidth-32)/360));$('phone').style.zoom=z;}
+addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>

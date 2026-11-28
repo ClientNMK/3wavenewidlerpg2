@@ -568,7 +568,7 @@ namespace GameUtils
             // 10000 미만
             else if (absNumber < 10000d)
             {
-                result = Math.Round(absNumber).ToString("0", CultureInfo.InvariantCulture);
+                result = Math.Round(absNumber).ToString("#,0", CultureInfo.InvariantCulture);
             }
             else
             {
@@ -630,7 +630,7 @@ namespace GameUtils
             else if (absNumber < new BigDouble(10000d))
             {
                 double value = Math.Abs(absNumber.Mantissa) * Math.Pow(10, absNumber.Exponent);
-                result = Math.Round(value).ToString("0", CultureInfo.InvariantCulture);
+                result = Math.Round(value).ToString("#,0", CultureInfo.InvariantCulture);
             }
             else
             {
@@ -722,27 +722,8 @@ namespace GameUtils
             // 예: 1.2345E12 / 10^12 = 1.2345
             double temp = number.Mantissa * Math.Pow(10, remainExponent);
 
-            // 상위 단위 정수부
-            long major = (long)Math.Floor(temp);
-
-            // 하위 단위 값
-            double minorRaw = (temp - major) * 10000d;
-            long minor = (long)Math.Round(minorRaw, MidpointRounding.AwayFromZero);
-
-            // carry 처리
-            if (minor >= 10000)
-            {
-                major += 1;
-                minor = 0;
-            }
-
-            string majorUnit = units[unitIndex];
-            string minorUnit = unitIndex > 0 ? units[unitIndex - 1] : "";
-
-            if (minor == 0)
-                return $"{major}{majorUnit}";
-
-            return $"{major}{majorUnit} {minor}{minorUnit}";
+            // 유효 숫자 4자리, 소수 최대 2자리: 1.23만, 12.34만, 246.6만, 1,234만 (kit_cocoa LAYOUT_battle '재화 숫자 표시')
+            return temp.ToString(temp < 100d ? "0.##" : temp < 1000d ? "0.#" : "#,0", CultureInfo.InvariantCulture) + units[unitIndex];
         }
         private static string FormatLargeNumber(double number, CurrencyType currencyType)
         {
@@ -762,28 +743,8 @@ namespace GameUtils
             if (unitIndex <= 0)
                 return Math.Round(number).ToString("0", CultureInfo.InvariantCulture);
 
-            // 상위 단위 정수부
-            long major = (long)Math.Floor(temp);
-
-            // 하위 단위 값 (반올림)
-            double minorRaw = (temp - major) * 10000d;
-            long minor = (long)Math.Round(minorRaw, MidpointRounding.AwayFromZero);
-
-            // carry 처리: 1234억 10000만 -> 1235억
-            if (minor >= 10000)
-            {
-                major += 1;
-                minor = 0;
-            }
-
-            string majorUnit = units[unitIndex];
-            string minorUnit = unitIndex > 0 ? units[unitIndex - 1] : "";
-
-            // 하위 단위가 0이면 생략
-            if (minor == 0)
-                return $"{major}{majorUnit}";
-
-            return $"{major}{majorUnit} {minor}{minorUnit}";
+            // 유효 숫자 4자리, 소수 최대 2자리: 1.23만, 12.34만, 246.6만, 1,234만 (kit_cocoa LAYOUT_battle '재화 숫자 표시')
+            return temp.ToString(temp < 100d ? "0.##" : temp < 1000d ? "0.#" : "#,0", CultureInfo.InvariantCulture) + units[unitIndex];
         }
         public static double ToCurrencyDouble(this string currencyString, CurrencyType stringType = CurrencyType.KR)
         {
@@ -2355,6 +2316,35 @@ namespace GameUtils
         // 기타 플랫폼에서는 false 반환
         return false;
 #endif
+        }
+
+        // 보이는 몸(지금 body 첨부 그림의 불투명 영역, 텍스처 Read/Write 필요)의 높이가 _height(캔버스 px)가 되게 배율을 넣고,
+        // 몸 아래 가운데를 목표 점에 두려면 그래픽 위치에 더할 값(캔버스 px)을 돌려줌. _flip은 좌우 반전
+        public static Vector2 FitSkeletonBody(SkeletonGraphic _graphic, float _height, bool _flip)
+        {
+            var attachment = (Spine.RegionAttachment)_graphic.Skeleton.FindSlot("body").Attachment;
+            var region = (Spine.AtlasRegion)attachment.Region;
+            var texture = (Texture2D)((Material)region.page.rendererObject).mainTexture;
+            // 아틀라스 y는 위 기준, GetPixels는 아래 기준
+            Color[] pixels = texture.GetPixels(region.x, texture.height - region.y - region.height, region.width, region.height);
+            int minX = region.width, maxX = -1, minY = region.height, maxY = -1;
+            for (int y = 0; y < region.height; y++)
+                for (int x = 0; x < region.width; x++)
+                    if (pixels[y * region.width + x].a > 0f)
+                    {
+                        minX = Mathf.Min(minX, x);
+                        maxX = Mathf.Max(maxX, x);
+                        minY = Mathf.Min(minY, y);
+                        maxY = Mathf.Max(maxY, y);
+                    }
+            // 스프라이트 1px의 스켈레톤 길이, SkeletonGraphic은 스켈레톤 1을 캔버스 100px로 그림
+            float unit = attachment.Width / region.width;
+            float scale = _height / ((maxY - minY + 1) * unit * 100f);
+            _graphic.rectTransform.localScale = new Vector3(_flip ? -scale : scale, scale, 1f);
+            // 몸 아래 가운데의 스켈레톤 좌표 (첨부 그림은 X·Y가 가운데)
+            float footX = attachment.X + ((minX + maxX + 1) * 0.5f - region.width * 0.5f) * unit;
+            float footY = attachment.Y + (minY - region.height * 0.5f) * unit;
+            return new Vector2((_flip ? footX : -footX) * 100f * scale, -footY * 100f * scale);
         }
     }
 }

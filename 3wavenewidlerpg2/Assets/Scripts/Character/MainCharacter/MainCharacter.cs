@@ -81,9 +81,17 @@ public class MainCharacter : CharacterBase
     const string HitSparkKey = "hit_spark";
     const string DamageTextKey = "DamageText";
     const float TakenTextHeight = 0.6f;     // 받은 피해 숫자 시작 높이 (몸 가운데쯤, 칸)
+    const float DamageTextHeight = 0.7f;    // 준 피해 숫자 시작 높이 (70px, 칸)
     const float HitSparkOffset = 19f / 64f; // 몬스터 기준점에서 공격자 쪽 앞면 바닥
 
     // 캐릭터 크기에 맞춰 이펙트 재생 (_flip: 1 = 그림 방향 그대로, -1 = 좌우 반전)
+    // 소녀 코스튬 스킨 (없는 그림은 기본 스킨 그대로)
+    public void SetCostumeSkin(string _skin)
+    {
+        SkeletonAnim.Skeleton.SetSkin(_skin);
+        SkeletonAnim.Skeleton.SetSlotsToSetupPose();
+    }
+
     public Effect PlayEffect(string _key, Vector3 _position, float _flip, int _sortingOrder)
     {
         Effect effect = ObjectPoolManager.Instance.GetObject<Effect>("Effect", _key);
@@ -94,10 +102,10 @@ public class MainCharacter : CharacterBase
         return effect;
     }
 
-    // 공격 범위 안 _count마리에 데미지 + 피격 연출, 히트스톱·흔들림은 한 번 (밀림·흔들림은 px)
-    public void HitTargets(BigDouble _damage, int _count, float _hitStopTime, float _knockback, float _shake, bool _spark)
+    // _targets에 데미지 + 피격 연출, 히트스톱·흔들림은 한 번 (밀림·흔들림은 px)
+    public void HitTargets(List<Monster> _targets, BigDouble _damage, float _hitStopTime, float _knockback, float _shake, bool _spark)
     {
-        foreach (Monster target in FindAttackTargets(_count))
+        foreach (Monster target in _targets)
         {
             float side = transform.position.x < target.transform.position.x ? -1f : 1f;
             if (_spark)
@@ -126,13 +134,13 @@ public class MainCharacter : CharacterBase
         return _isCri ? damage * Status.Cri_Dmg : damage;
     }
 
-    // 데미지 + 숫자 (여러 번 맞아도 겹치지 않게 체력바 위에서 좌우로 살짝 흩뿌림)
+    // 데미지 + 숫자 (몬스터 기준점 위 70px 가운데, ENGINE_REQUEST 4-5장)
     public void DamageTarget(Monster _target, BigDouble _damage, bool _isCri)
     {
         _target.TakeDamage(_damage, this, AttackType.Normal);
         DamageText damageText = ObjectPoolManager.Instance.GetObject<DamageText>("Effect", DamageTextKey);
         damageText.key = DamageTextKey;
-        damageText.Play(new Vector3(_target.transform.position.x + Random.Range(-0.15f, 0.15f), _target.HpBar.transform.position.y + 0.15f, 0f), _damage, _isCri);
+        damageText.Play(_target.transform.position + Vector3.up * DamageTextHeight, _damage, _isCri);
     }
 
     // 평타로 포식 상태이상(Predation_Per)이 뜨면, 이번 타격 후 체력이 후드 스탯 비율 이하가 될 일반 몬스터를 데미지 대신 후드가 잡아먹음 (보스 제외)
@@ -159,7 +167,7 @@ public class MainCharacter : CharacterBase
         public float RemainTime { get { return Mathf.Max(0f, SkillData.Cooltime - (Time.time - LastUseTime)); } }
     }
 
-    static readonly int[] EquipSkillIds = { 20001, 20002, 20003 };     // 스킬 장착 기능 전까지 1~3번 슬롯 고정
+    static readonly int[] EquipSkillIds = { 20001, 20002, 20003, 20004, 20005 };   // 스킬 장착 기능 전까지 1~5번 슬롯 고정
     public List<SkillSlot> SkillSlots = new();
     public SkillSlot CurSkillSlot = null;   // 지금 사용 중인 스킬
 

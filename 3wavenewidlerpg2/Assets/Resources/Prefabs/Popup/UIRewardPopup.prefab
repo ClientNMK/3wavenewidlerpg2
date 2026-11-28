@@ -529,13 +529,6 @@ MonoBehaviour:
   grid: {fileID: 2172358463482609230}
   slotTemplate: {fileID: 1560133887929451038}
   flyIconTemplate: {fileID: 5359946720205753595}
-  goodsIcons:
-  - GoodsId: 1
-    Icon: {fileID: 21300000, guid: 17f0a05005cb4b30a9294b98301a099a, type: 3}
-  - GoodsId: 3
-    Icon: {fileID: 21300000, guid: 005b5dd0b55a4118940c4d3696047576, type: 3}
-  - GoodsId: 5
-    Icon: {fileID: 21300000, guid: fba46ef8853741bc9f029782aa436f74, type: 3}
 --- !u!1 &3347549807880534230
 GameObject:
   m_ObjectHideFlags: 0
@@ -1077,6 +1070,7 @@ MonoBehaviour:
   frame: {fileID: 3745146801229925951}
   icon: {fileID: 9012015516621244221}
   amountText: {fileID: 2210843809138266640}
+  firstTag: {fileID: 0}
 --- !u!1 &7940049830631530550
 GameObject:
   m_ObjectHideFlags: 0

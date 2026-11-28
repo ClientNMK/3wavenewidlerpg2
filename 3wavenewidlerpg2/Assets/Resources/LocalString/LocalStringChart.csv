@@ -75,3 +75,71 @@ Name_Locked,잠김,Locked,ロック中,鎖定
 Msg_BeforeChallenge,도전 전,Not tried,挑戦前,尚未挑戰
 Msg_DungeonTitle,{0} · {1}단계,{0} · Stage {1},{0} · {1}段階,{0} · 第{1}階段
 Msg_ChallengeNotCleared,아직 안 깸 · 단계마다 강해져요,Not cleared · Stronger each stage,未クリア · 段階ごとに強くなります,尚未通關 · 每階段變強
+Name_HuntStats,사냥 기록,Hunt Log,狩りの記録,狩獵紀錄
+Msg_PerMinute,{0}/분,{0}/min,{0}/分,{0}/分
+Msg_HuntTime,잰 시간,Time,計測時間,計時
+Msg_KillPerMinute,분당 처치,Kills/min,分あたり討伐,每分擊殺
+Msg_KillCount,{0}마리,{0},{0}体,{0}隻
+Name_Reset,초기화,Reset,リセット,重置
+Msg_ResetConfirm1,기록을 지우고,Clear the log,記録を消して,清除紀錄
+Msg_ResetConfirm2,다시 잴까요?,and start again?,再計測しますか?,重新計時嗎?
+Name_BossLabel,BOSS,BOSS,BOSS,BOSS
+Msg_TotalKill,총 처치,Total kills,総討伐,總擊殺
+Name_Daily,일일,Daily,デイリー,每日
+Name_Weekly,주간,Weekly,ウィークリー,每週
+Name_Repeat,반복,Repeat,リピート,重複
+Msg_MissionReset,초기화 {0},Resets in {0},リセット {0},重置 {0}
+Msg_DaysHours,{0}일 {1:00}시간,{0}d {1:00}h,{0}日 {1:00}時間,{0}天 {1:00}小時
+Msg_RepeatInfo,목표를 채울 때마다 받을 수 있어요,Claim every time you reach the goal,目標を達成するたびに受け取れます,每次達成目標都能領取
+Name_ReceiveAll,모두 받기,Claim all,すべて受け取る,全部領取
+Msg_Done,완료,Done,完了,完成
+Name_Mission_101,로그인하기,Log in,ログインする,登入
+Name_Mission_102,10분 플레이하기,Play for 10 minutes,10分プレイする,遊玩10分鐘
+Name_Mission_103,몬스터 500마리 처치,Defeat 500 monsters,モンスターを500体討伐,擊敗500隻怪物
+Name_Mission_104,던전 3회 플레이,Play dungeons 3 times,ダンジョンを3回プレイ,遊玩地下城3次
+Name_Mission_105,광고 3회 보기,Watch 3 ads,広告を3回見る,觀看廣告3次
+Name_Mission_201,일일 미션 15개 완료,Complete 15 daily missions,デイリーミッションを15個完了,完成15個每日任務
+Name_Mission_202,로그인하기,Log in,ログインする,登入
+Name_Mission_203,30분 플레이하기,Play for 30 minutes,30分プレイする,遊玩30分鐘
+Name_Mission_204,"몬스터 2,000마리 처치","Defeat 2,000 monsters","モンスターを2,000体討伐","擊敗2,000隻怪物"
+Name_Mission_205,던전 20회 플레이,Play dungeons 20 times,ダンジョンを20回プレイ,遊玩地下城20次
+Name_Mission_206,광고 15회 보기,Watch 15 ads,広告を15回見る,觀看廣告15次
+Name_Mission_301,"몬스터 1,000마리 처치","Defeat 1,000 monsters","モンスターを1,000体討伐","擊敗1,000隻怪物"
+Name_Mission_302,100분 플레이하기,Play for 100 minutes,100分プレイする,遊玩100分鐘
+Name_Mission_303,던전 10회 플레이,Play dungeons 10 times,ダンジョンを10回プレイ,遊玩地下城10次
+Msg_TouchScreen,화면을 터치하세요,Tap the screen,画面をタッチしてください,請觸碰螢幕
+Msg_RepeatHunt,반복 사냥,Farming,周回狩り,重複狩獵
+Msg_GoBestMove,{0}로 이동,Go to {0},{0}へ移動,前往{0}
+Msg_GoBestHint,최고 스테이지로 돌아가서 보스에 도전해요,Return to your best stage to challenge the boss,最高ステージに戻ってボスに挑戦しよう,回到最高關卡挑戰首領
+Name_Costume,의상,Costume,衣装,服裝
+Name_Character,캐릭터,Character,キャラクター,角色
+Name_HaveEffect,보유 효과,Owned Effect,所持効果,持有效果
+Name_EquipEffect,착용 효과,Equip Effect,装着効果,穿戴效果
+Name_None,없음,None,なし,無
+Name_Equip,착용,Equip,装着,穿戴
+Msg_Equipped,착용 중,Equipped,装着中,穿戴中
+Msg_NotOwned,미보유,Not owned,未所持,未持有
+Name_CostumePoint,코스튬 포인트,Costume Points,コスチュームポイント,服裝點數
+Msg_CostumePointInfo,의상을 얻을 때마다 포인트가 쌓여요 (캐릭터·후드 함께),Earn points with every costume (Character & Hood),衣装を手に入れるたびにポイントが貯まります(キャラクター・フード共通),每獲得一件服裝就會累積點數(角色・兜帽共用)
+Msg_CostumePointGive,코스튬 포인트 +{0}p,Costume Points +{0}p,コスチュームポイント +{0}p,服裝點數 +{0}p
+Msg_CostumeClaimable,받을 보상 {0}개,{0} rewards to claim,受け取れる報酬 {0}個,可領取獎勵 {0}個
+Msg_CostumeNext,다음 {0}p · {1},Next {0}p · {1},次 {0}p · {1},下一階 {0}p · {1}
+Msg_Applied,적용 중,Active,適用中,生效中
+Name_Grade_1,일반,Common,ノーマル,普通
+Name_Grade_2,고급,Uncommon,レア,高級
+Name_Grade_3,희귀,Rare,スーパーレア,稀有
+Name_Grade_4,영웅,Epic,エピック,英雄
+Name_Grade_5,전설,Legendary,レジェンド,傳說
+Name_Grade_6,신화,Mythic,ミシック,神話
+Name_10001,겨울 외출복,Winter Outfit,冬のお出かけ服,冬季外出服
+Desc_10001,소녀가 입어요,Worn by the girl,少女が着ます,少女穿戴
+Name_11001,겨울 후드,Winter Hood,冬のフード,冬季兜帽
+Desc_11001,후드 정령이 입어요,Worn by the hood spirit,フードの精霊が着ます,兜帽精靈穿戴
+Name_Unequip,해제,Unequip,解除,卸下
+Name_HuntGround,사냥터,Hunt,狩場,狩獵場
+Msg_HuntStage,사냥터 {0},Hunt {0},狩場 {0},狩獵場 {0}
+Msg_HuntNone,사냥터 없음,No hunt spot,狩場なし,無狩獵場
+Msg_BestStage,최고 {0},Best {0},最高 {0},最高 {0}
+Msg_HuntCurrent,지금 사냥터: {0},Hunt spot: {0},現在の狩場: {0},目前狩獵場: {0}
+Msg_HuntSave,사냥터로 저장,Save as hunt,狩場に保存,設為狩獵場
+Msg_HuntSaved,사냥터로 저장됨,Saved as hunt,狩場に保存済み,已設為狩獵場

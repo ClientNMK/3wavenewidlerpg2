@@ -10,6 +10,7 @@ public class UIStageCell : MonoBehaviour
     public TMP_Text Label = null;
     public GameObject Check = null;
     public GameObject BestTag = null;
+    public GameObject HuntTag = null;
     public GameObject LockIcon = null;
     public GameObject Select = null;
     public GameObject Face = null;

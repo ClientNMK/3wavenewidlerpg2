@@ -2,13 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using Spine.Unity;
 
 // 성장 창 후드 탭: Hood_Exp를 먹여 후드 레벨업 (Plan/requests/Dev_Hood_LevelUp.md, UI_Hood_Window.md)
+// 누를 때마다 1레벨, 꾹 누르면 반복 (강화 버튼과 같음)
 public class UIHoodPage : MonoBehaviour
 {
-    const float FeedAnimTime = 0.8f;    // 오른 레벨 수와 상관없이 1초 안쪽
+    const float HoldDelay = 0.4f;
+    const float HoldInterval = 0.08f;
     const string TalkKeyFormat = "Hood_Talk_{0}";
 
     [SerializeField] SkeletonGraphic hoodSpine = null;
@@ -26,12 +29,25 @@ public class UIHoodPage : MonoBehaviour
 
     Hood Hood { get { return InGameManager.Instance.MainCharacter.Hood; } }
     bool bInitialized = false;
+    Coroutine holdCoroutine = null;
+    Coroutine effectCoroutine = null;
 
     public void Setup()
     {
         if (!bInitialized)
         {
-            feedButton.onClick.AddListener(OnClickFeedButton);
+            // 누르는 순간 1번, 계속 누르고 있으면 HoldDelay 뒤부터 HoldInterval마다 반복
+            var trigger = feedButton.gameObject.AddComponent<EventTrigger>();
+            AddTrigger(trigger, EventTriggerType.PointerDown, () =>
+            {
+                if (!feedButton.interactable)
+                    return;
+                ChangeTalk();
+                Feed();
+                holdCoroutine = StartCoroutine(CoHoldFeed());
+            });
+            AddTrigger(trigger, EventTriggerType.PointerUp, StopHold);
+            AddTrigger(trigger, EventTriggerType.PointerExit, StopHold);
             bInitialized = true;
         }
         levelUpEffect.enabled = false;  // 재생 중에 창을 닫았으면 멈춘 그림이 남아 있음
@@ -77,42 +93,43 @@ public class UIHoodPage : MonoBehaviour
         double nextValue = statData.Stat_Default_Value + data.GetStatValue(level + 1);
         valueText.text = string.Format("{0:0.##}% > {1:0.##}%", Hood.PredationHpPer * 100, nextValue * 100);
 
-        int addLevel = GetFeedLevel(out _);
-        feedText.text = string.Format("{0} (+{1})", StringManager.Instance.GetStringText("Name_HoodFeed"), addLevel);
-        feedButton.interactable = addLevel > 0;
+        feedText.text = StringManager.Instance.GetStringText("Name_HoodFeed");
+        feedButton.interactable = owned >= cost;
     }
 
-    // 가진 Hood_Exp로 오를 수 있는 레벨 수 (구간이 바뀌면 다음 구간 비용으로 이어서)
-    int GetFeedLevel(out double _totalCost)
+    void AddTrigger(EventTrigger _trigger, EventTriggerType _type, System.Action _action)
     {
-        double owned = InGameManager.Instance.HoodGoods;
-        int maxLevel = DataManager.Instance.HoodData.MaxLevel;
-        int level = Hood.Level;
-        _totalCost = 0;
-        while (level < maxLevel)
+        var entry = new EventTrigger.Entry { eventID = _type };
+        entry.callback.AddListener(_ => _action());
+        _trigger.triggers.Add(entry);
+    }
+
+    IEnumerator CoHoldFeed()
+    {
+        yield return new WaitForSecondsRealtime(HoldDelay);
+        while (feedButton.interactable)
         {
-            double cost = DataManager.Instance.HoodData.GetHoodData(level).GetCost(level);
-            if (_totalCost + cost > owned)
-                break;
-            _totalCost += cost;
-            level++;
+            Feed();
+            yield return new WaitForSecondsRealtime(HoldInterval);
         }
-        return level - Hood.Level;
     }
 
-    void OnClickFeedButton()
+    void StopHold()
     {
-        int startLevel = Hood.Level;
-        int addLevel = GetFeedLevel(out double totalCost);
-        InGameManager.Instance.TryUseHoodGoods(totalCost);
-        for (int i = 0; i < addLevel; i++)
-            Hood.LevelUp();
+        if (holdCoroutine != null)
+            StopCoroutine(holdCoroutine);
+        holdCoroutine = null;
+    }
 
-        // 후드는 idle 그대로, 레벨업 이펙트 1회
-        ChangeTalk();
-        StopAllCoroutines();
-        StartCoroutine(CoLevelUp(startLevel, addLevel));
-        StartCoroutine(CoLevelUpEffect());
+    // 1레벨: 비용을 쓰고 레벨업, 후드는 idle 그대로 레벨업 이펙트를 처음부터
+    void Feed()
+    {
+        InGameManager.Instance.TryUseHoodGoods(DataManager.Instance.HoodData.GetHoodData(Hood.Level).GetCost(Hood.Level));
+        Hood.LevelUp();
+        if (effectCoroutine != null)
+            StopCoroutine(effectCoroutine);
+        effectCoroutine = StartCoroutine(CoLevelUpEffect());
+        Refresh();
     }
 
     IEnumerator CoLevelUpEffect()
@@ -124,22 +141,5 @@ public class UIHoodPage : MonoBehaviour
             yield return new WaitForSecondsRealtime(LevelUpFrameTime);
         }
         levelUpEffect.enabled = false;
-    }
-
-    // 경험치 바가 오른 레벨 수만큼 차오르며 레벨 숫자가 올라감
-    IEnumerator CoLevelUp(int _startLevel, int _addLevel)
-    {
-        feedButton.interactable = false;
-        float segmentTime = FeedAnimTime / _addLevel;
-        for (int i = 0; i < _addLevel; i++)
-        {
-            for (float t = 0f; t < segmentTime; t += Time.unscaledDeltaTime)
-            {
-                expFill.fillAmount = t / segmentTime;
-                yield return null;
-            }
-            levelText.text = string.Format("Lv.{0}", _startLevel + i + 1);
-        }
-        Refresh();
     }
 }

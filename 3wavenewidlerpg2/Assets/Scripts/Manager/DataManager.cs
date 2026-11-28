@@ -25,4 +25,6 @@ public class DataManager : Singleton<DataManager>
     public SerializableWorldData WorldData = new();
     public SerializableStageData StageData = new();
     public SerializableDungeonData DungeonData = new();
+    public SerializableMissionData MissionData = new();
+    public SerializableCostumeData CostumeData = new();
 }

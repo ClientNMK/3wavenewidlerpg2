@@ -257,7 +257,8 @@ public class TitleManager : MonoBehaviour
         uiTitleScene.SetGuageBar(1f);
         uiTitleScene.SetActiveGaugeBar(false);
         uiTitleScene.SetActiveColorTweener(true);
-        uiTitleScene.SetLoadingText(StringManager.Instance.GetStringText("Msg_TouchToStart"));
+        uiTitleScene.SetLoadingText(string.Empty);
+        uiTitleScene.SetActiveTouchText(true);
 
         isComplete = true;
     }

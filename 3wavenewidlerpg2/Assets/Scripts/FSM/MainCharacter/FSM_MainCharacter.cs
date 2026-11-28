@@ -80,7 +80,7 @@ public class MainCharacter_Attack : FSM
         if (e.Data.Name.Equals("slash"))
             MainCharacter.PlayEffect(attack.SlashKey, MainCharacter.transform.position, MainCharacter.SkeletonAnim.Skeleton.ScaleX, MainCharacter.SkeletonRenderer.sortingOrder + 1);
         else if (e.Data.Name.Equals("damage"))
-            MainCharacter.HitTargets(MainCharacter.Status.Attack, (int)MainCharacter.Status.Attack_Number, attack.HitStopTime, attack.Knockback, attack.Shake, true);
+            MainCharacter.HitTargets(MainCharacter.FindAttackTargets((int)MainCharacter.Status.Attack_Number), MainCharacter.Status.Attack, attack.HitStopTime, attack.Knockback, attack.Shake, true);
     }
 
     private void HandleAnimComplete(TrackEntry trackEntry)
@@ -135,6 +135,40 @@ public class MainCharacter_Skill : FSM
     const int GaleLoopStart = 8;
     const int GaleLoopEnd = 29;
     const float GaleBlastPush = 40f * PixelSize;       // 바깥쪽으로 밀림
+    // 스킬 4 (Skill_004): attack 0.49초에 화면 가르기 (ENGINE_REQUEST 4-4, 화면 900×1600·100 PPU 기준 px → ÷100칸)
+    const string ScreenCutResource = "Skill_004";
+    const string AttackAnimName = "attack";
+    const string ScreenCutKey = "screen_cut";
+    const string HitSparkKey = "hit_spark";
+    const float ScreenSplitStart = 0.3f;               // 선을 경계로 화면이 어긋나기 시작
+    const float ScreenCutHitTime = 0.7f;               // frame_021 화면이 붙음 = 타격
+    const float ScreenCutFirstDelay = 0.02f;           // 붙은 뒤 가까운 몬스터부터 차례로 터짐
+    const float ScreenCutChainTime = 0.35f;            // 캐릭터와 거리 9칸(900px)마다
+    const float ScreenCutChainDistance = 9f;
+    const float ScreenCutFlashTime = 0.07f;
+    const float ScreenCutPush = 0.18f;                 // 캐릭터 반대쪽으로 18px
+    const float ScreenCutSparkOffset = 0.04f;          // hit_spark는 몬스터 기준점 4px 아래
+    // 스킬 5 (Skill_005): attack2에 단검을 던져 화면 전체에 단검 비 (ENGINE_REQUEST 4-6, 시간은 던지는 순간 기준, 화면 px → ÷100칸)
+    const string BladeRainResource = "Skill_005";
+    const string Attack2AnimName = "attack2";
+    const string BladeThrowKey = "blade_throw";
+    const string BladeGlintKey = "blade_glint";
+    const string BladeDropKey = "blade_drop";
+    static readonly Vector3 BladeThrowStart = new(0.2f, 1.2f, 0f);     // 캐릭터 기준점에서
+    const float BladeThrowX = 2.1f;                                     // 캐릭터 x + 210px
+    const float BladeThrowTop = 1.5f;                                   // 화면 위에서 150px
+    const float BladeThrowTime = 0.22f;
+    const float BladeGlintBurst = 0.36f;                                // glint frame_011 = 비 시작
+    const float BladeLandDelay = 0.1f;                                  // 시트 시작 후 착지(frame_003), 비 시작부터 첫 착지까지도 0.1초
+    const float BladeMonsterSweep = 0.6f;                               // 화면 위 → 아래로 훑는 시간
+    const float BladeMonsterRandom = 0.14f;
+    const int BladeFillerCount = 70;                                    // 빈 바닥에 떨어지는 단검
+    const float BladeFillerSweep = 0.85f;
+    const float BladeFillerRandom = 0.3f;
+    const float BladeMonsterOffset = 0.06f;                             // 몬스터 기준점 6px 위
+    const float BladeShakeMin = 3f;
+    const float BladeShakeMax = 5f;
+    static readonly Vector2[] ScreenCutShakePixels = { new(16f, -8f), new(-14f, 8f), new(12f, -6f), new(-10f, 4f), new(8f, -4f), new(-6f, 2f), new(4f, -2f), new(-2f, 2f) };
     const float HideTime = 0.2f;
     const float VanishSpeed = 3f;           // vanish 0.28초 → 약 0.09초
     const float BehindRangeRate = 0.8f;     // 몬스터 중심에서 평타 사거리의 이 비율만큼 뒤에 나타남 (사거리 안이라 항상 맞음)
@@ -156,18 +190,22 @@ public class MainCharacter_Skill : FSM
     {
         remainCount = MainCharacter.CurSkillSlot.SkillData.Skill_Count;
         lastTarget = null;
-        if (IsBladeGale)
-            Attack3();
+        if (SkillAttackAnimName != null)
+            PlayAttack();
         else
             Vanish();
     }
 
     bool IsBladeGale { get { return MainCharacter.CurSkillSlot.SkillData.Resource.Equals(BladeGaleResource); } }
+    bool IsScreenCut { get { return MainCharacter.CurSkillSlot.SkillData.Resource.Equals(ScreenCutResource); } }
+    bool IsBladeRain { get { return MainCharacter.CurSkillSlot.SkillData.Resource.Equals(BladeRainResource); } }
+    // 스킬 3·4·5는 전용 동작 없이 평타 동작 (없으면 vanish → backstab)
+    string SkillAttackAnimName { get { return IsBladeGale ? Attack3AnimName : IsScreenCut ? AttackAnimName : IsBladeRain ? Attack2AnimName : null; } }
 
-    // 스킬 3은 전용 동작 없이 attack3 (평타와 같은 공격 속도)
-    void Attack3()
+    // 평타와 같은 공격 속도
+    void PlayAttack()
     {
-        MainCharacter.SkeletonAnim.AnimationState.SetAnimation(0, Attack3AnimName, false);
+        MainCharacter.SkeletonAnim.AnimationState.SetAnimation(0, SkillAttackAnimName, false);
         MainCharacter.SkeletonAnim.timeScale = (float)MainCharacter.Status.TotalAttackSpeed;
         MainCharacter.SetFlip(MainCharacter.Target.transform.position.x < MainCharacter.transform.position.x ? -1 : 1);
     }
@@ -227,10 +265,14 @@ public class MainCharacter_Skill : FSM
         if (MainCharacter.State != State.Skill)
             return;
 
-        if (IsBladeGale)
+        if (SkillAttackAnimName != null)
         {
-            if (e.Data.Name.Equals("slash"))
-                MainCharacter.StartCoroutine(CoBladeGale(MainCharacter.CurSkillSlot.SkillData));
+            // attack2는 slash 이벤트가 없어 damage(휘두르는 순간)에 던짐
+            SkillData skill = MainCharacter.CurSkillSlot.SkillData;
+            if (IsBladeRain && e.Data.Name.Equals("damage"))
+                MainCharacter.StartCoroutine(CoBladeRain(skill));
+            else if (!IsBladeRain && e.Data.Name.Equals("slash"))
+                MainCharacter.StartCoroutine(IsBladeGale ? CoBladeGale(skill) : CoScreenCut(skill));
             return;
         }
         bool isDelayedCut = MainCharacter.CurSkillSlot.SkillData.Resource.Equals(DelayedCutResource);
@@ -245,7 +287,7 @@ public class MainCharacter_Skill : FSM
         {
             // 휘두르는 순간 (attack3 타격감 수치)
             SkillData skill = MainCharacter.CurSkillSlot.SkillData;
-            MainCharacter.HitTargets(MainCharacter.Status.Attack * skill.Damage, skill.Max_Hits, 0.12f, 6f, 3f, true);
+            MainCharacter.HitTargets(MainCharacter.FindAttackTargets(skill.Max_Hits), MainCharacter.Status.Attack * skill.Damage, 0.12f, 6f, 3f, true);
         }
     }
 
@@ -259,7 +301,8 @@ public class MainCharacter_Skill : FSM
         yield return new WaitForSeconds(DelayedCutTime);
         yield return InGameManager.Instance.CoImpactFrame(cut);
 
-        targets.RemoveAll(x => x.State == State.Dead);
+        // 그 사이 죽었거나 스테이지 이동·보스전 등으로 정리돼 풀에 들어간 몬스터는 빼고
+        targets.RemoveAll(x => !InGameManager.Instance.Monsters.Contains(x));
         foreach (Monster target in targets)
         {
             target.SetMaterialColor(Color.white);
@@ -271,7 +314,8 @@ public class MainCharacter_Skill : FSM
             target.SetMaterialTintColor(new Color(0f, 0f, 0f, 0f));
             target.SkeletonAnim.timeScale = 1f;
         }
-        MainCharacter.HitTargets(MainCharacter.Status.Attack * _skill.Damage, _skill.Max_Hits, 0f, 6f, 0f, true);
+        // 휘두를 때 멈춘 몬스터를 그대로 (그 사이 캐릭터 목표가 바뀌거나 없어질 수 있음)
+        MainCharacter.HitTargets(targets, MainCharacter.Status.Attack * _skill.Damage, 0f, 6f, 0f, true);
     }
 
     // 회오리가 앞으로 가며 범위 안 몬스터를 끌어오고 10번 베고, 1.2초에 터지며 밀어냄
@@ -291,7 +335,7 @@ public class MainCharacter_Skill : FSM
         for (float timer = 0f; timer < GaleBlastTime + extraTime; timer += Time.deltaTime)
         {
             // 따라가던 몬스터가 죽으면 다른 몬스터로
-            if (chase == null || chase.State == State.Dead)
+            if (chase == null || !InGameManager.Instance.Monsters.Contains(chase))
             {
                 galeTargets.Remove(chase);
                 chase = FindGaleTarget(gale.transform.position);
@@ -331,7 +375,7 @@ public class MainCharacter_Skill : FSM
         yield return new WaitForSecondsRealtime(GaleBlastStopTime);
         Time.timeScale = 1f;
         SetWhite(targets, false);
-        InGameManager.Instance.PlayImpactShake();
+        InGameManager.Instance.PlayImpactShake(InGameManager.ImpactShakePixels, 64f);
         foreach (Monster monster in targets)
         {
             MainCharacter.DamageTarget(monster, MainCharacter.RollDamage(damage, out bool isCri), isCri);
@@ -345,6 +389,117 @@ public class MainCharacter_Skill : FSM
     {
         IEnumerable<Monster> byDistance = InGameManager.Instance.Monsters.OrderBy(x => Vector2.Distance(x.transform.position, _position));
         return byDistance.FirstOrDefault(x => !galeTargets.Contains(x)) ?? byDistance.FirstOrDefault();
+    }
+
+    // 선이 그어지면 게임 정지(캐릭터는 frame_007 자세, 이펙트는 계속) → 0.3초 화면이 어긋남 → 0.7초 붙으며 흔들림, 화면 안 몬스터가 가까운 순으로 터짐
+    IEnumerator CoScreenCut(SkillData _skill)
+    {
+        Camera camera = InGameManager.Instance.MainCamera;
+        Vector3 center = new Vector3(camera.transform.position.x, camera.transform.position.y, 0f);
+        MainCharacter.PlayEffect(ScreenCutKey, center, 1f, FrontSortingOrder);
+        float halfHeight = camera.orthographicSize;
+        Rect view = new Rect(center.x - halfHeight * camera.aspect, center.y - halfHeight, halfHeight * camera.aspect * 2f, halfHeight * 2f);
+        Vector3 origin = MainCharacter.transform.position;
+        List<Monster> targets = InGameManager.Instance.Monsters.Where(x => view.Contains(x.transform.position))
+            .OrderBy(x => Vector2.Distance(x.transform.position, origin)).ToList();
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(ScreenSplitStart);
+        yield return InGameManager.Instance.UIInGameScene.CoScreenSplit(ScreenCutHitTime - ScreenSplitStart);
+        Time.timeScale = 1f;
+        InGameManager.Instance.PlayImpactShake(ScreenCutShakePixels, 100f);
+
+        BigDouble damage = MainCharacter.Status.Attack * _skill.Damage;
+        float timer = 0f;
+        foreach (Monster monster in targets)
+        {
+            float explodeTime = ScreenCutFirstDelay + Vector2.Distance(monster.transform.position, origin) / ScreenCutChainDistance * ScreenCutChainTime;
+            for (; timer < explodeTime; timer += Time.unscaledDeltaTime)
+                yield return null;
+            if (!InGameManager.Instance.Monsters.Contains(monster))
+                continue;
+            MainCharacter.StartCoroutine(CoScreenCutExplode(monster, origin, damage));
+        }
+    }
+
+    // 흰 번쩍임 0.07초 → 피격, 캐릭터 반대쪽으로 밀림, hit_spark
+    IEnumerator CoScreenCutExplode(Monster _monster, Vector3 _origin, BigDouble _damage)
+    {
+        SetWhite(new List<Monster> { _monster }, true);
+        yield return new WaitForSecondsRealtime(ScreenCutFlashTime);
+        SetWhite(new List<Monster> { _monster }, false);
+        if (!InGameManager.Instance.Monsters.Contains(_monster))
+            yield break;
+        Vector3 position = _monster.transform.position;
+        MainCharacter.PlayEffect(HitSparkKey, position + Vector3.down * ScreenCutSparkOffset, position.x < _origin.x ? -1f : 1f, _monster.SkeletonRenderer.sortingOrder + 1);
+        MainCharacter.DamageTarget(_monster, MainCharacter.RollDamage(_damage, out bool isCri), isCri);
+        if (_monster.State != State.Dead)
+            _monster.SetPosition(position + (position - _origin).normalized * ScreenCutPush);
+    }
+
+    // 단검을 화면 위로 던짐 → 빛 → 화면 안 몬스터마다 1개 + 빈 바닥 70개가 위에서 아래로 떨어짐 (착지 = 타격), 몬스터는 계속 움직임
+    IEnumerator CoBladeRain(SkillData _skill)
+    {
+        Camera camera = InGameManager.Instance.MainCamera;
+        float halfHeight = camera.orthographicSize;
+        float halfWidth = halfHeight * camera.aspect;
+        Rect view = new Rect(camera.transform.position.x - halfWidth, camera.transform.position.y - halfHeight, halfWidth * 2f, halfHeight * 2f);
+        Vector3 start = MainCharacter.transform.position + BladeThrowStart;
+        Vector3 end = new Vector3(MainCharacter.transform.position.x + BladeThrowX, view.yMax - BladeThrowTop, 0f);
+        // blade_drop frame_001을 위아래로 뒤집어 던짐
+        Effect thrown = MainCharacter.PlayEffect(BladeThrowKey, start, 1f, FrontSortingOrder);
+        thrown.transform.localScale = Vector3.Scale(thrown.transform.localScale, new Vector3(1f, -1f, 1f));
+        for (float t = 0f; t < BladeThrowTime; t += Time.deltaTime)
+        {
+            thrown.transform.position = Vector3.Lerp(start, end, t / BladeThrowTime);
+            yield return null;
+        }
+        MainCharacter.PlayEffect(BladeGlintKey, end, 1f, FrontSortingOrder);
+        yield return new WaitForSeconds(BladeGlintBurst);
+
+        // 착지 시각 (비 시작 기준): 화면 위에서 아래로 훑고 무작위로 조금씩 어긋남
+        List<(float land, Monster monster, Vector3 position)> drops = new();
+        foreach (Monster monster in InGameManager.Instance.Monsters.Where(x => view.Contains(x.transform.position)))
+            drops.Add((BladeLandDelay + (view.yMax - monster.transform.position.y) / view.height * BladeMonsterSweep + Random.Range(0f, BladeMonsterRandom), monster, Vector3.zero));
+        for (int i = 0; i < BladeFillerCount; i++)
+        {
+            Vector3 position = new Vector3(Random.Range(view.xMin, view.xMax), Random.Range(view.yMin, view.yMax), 0f);
+            drops.Add((BladeLandDelay + (view.yMax - position.y) / view.height * BladeFillerSweep + Random.Range(0f, BladeFillerRandom), null, position));
+        }
+        drops.Sort((a, b) => a.land.CompareTo(b.land));
+
+        // 비가 끝날 때까지 프레임마다 3~5px 무작위 흔들림
+        Vector2[] shake = new Vector2[Mathf.CeilToInt(drops[drops.Count - 1].land * 30f)];
+        for (int i = 0; i < shake.Length; i++)
+            shake[i] = Random.insideUnitCircle.normalized * Random.Range(BladeShakeMin, BladeShakeMax);
+        InGameManager.Instance.PlayImpactShake(shake, 100f);
+
+        BigDouble damage = MainCharacter.Status.Attack * _skill.Damage;
+        float timer = 0f;
+        foreach (var drop in drops)
+        {
+            for (; timer < drop.land - BladeLandDelay; timer += Time.deltaTime)
+                yield return null;
+            if (drop.monster == null)
+                MainCharacter.PlayEffect(BladeDropKey, drop.position, 1f, FrontSortingOrder);
+            else if (InGameManager.Instance.Monsters.Contains(drop.monster))
+            {
+                MainCharacter.PlayEffect(BladeDropKey, drop.monster.transform.position + Vector3.up * BladeMonsterOffset, 1f, FrontSortingOrder);
+                MainCharacter.StartCoroutine(CoBladeHit(drop.monster, damage));
+            }
+        }
+    }
+
+    // 착지하면 흰 번쩍임 0.07초 → 피격
+    IEnumerator CoBladeHit(Monster _monster, BigDouble _damage)
+    {
+        yield return new WaitForSeconds(BladeLandDelay);
+        if (!InGameManager.Instance.Monsters.Contains(_monster))
+            yield break;
+        SetWhite(new List<Monster> { _monster }, true);
+        yield return new WaitForSeconds(ScreenCutFlashTime);
+        SetWhite(new List<Monster> { _monster }, false);
+        if (InGameManager.Instance.Monsters.Contains(_monster))
+            MainCharacter.DamageTarget(_monster, MainCharacter.RollDamage(_damage, out bool isCri), isCri);
     }
 
     // 회오리 중심에서 범위 안, 가까운 순으로 _count마리
@@ -366,10 +521,10 @@ public class MainCharacter_Skill : FSM
         if (MainCharacter.State != State.Skill)
             return;
 
-        if (trackEntry.Animation.Name.Equals(Attack3AnimName))
+        if (trackEntry.Animation.Name.Equals(SkillAttackAnimName))
         {
             if (--remainCount > 0)
-                Attack3();
+                PlayAttack();
             else
                 MainCharacter.ChangeState(State.Idle);
             return;

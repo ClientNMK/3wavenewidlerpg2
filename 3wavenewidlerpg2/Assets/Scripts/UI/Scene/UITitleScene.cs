@@ -15,6 +15,7 @@ public class UITitleScene : UIScene
     [SerializeField] ColorTweener loadingTextColorTweener = null;
     [SerializeField] RectTransform gaugePanel = null;
     [SerializeField] Image gaugeBarImage = null;
+    [SerializeField] GameObject touchText = null;       // 로딩이 끝나면 "화면을 터치하세요"
 
     private void Start()
     {
@@ -49,6 +50,10 @@ public class UITitleScene : UIScene
             StopAllCoroutines();
             StartCoroutine(CoSetGuageBar(_fillAmount));
         }
+    }
+    public void SetActiveTouchText(bool _bActive)
+    {
+        touchText.SetActive(_bActive);
     }
     public void SetActiveGaugeBar(bool _bActive)
     {

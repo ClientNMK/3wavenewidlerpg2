@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8">
+<!-- 타이틀 로고 A (소녀 태수 키우기, 가제). 360 논리 크기로 그리고 3배로 내보낸다 -->
+<style>
+@font-face { font-family: DNF; src: url('../../../../../3wavenewidlerpg2/Assets/Resource/Font/DNFBitBitv2.ttf'); }
+html, body { margin: 0; background: transparent; }
+body { width: 360px; height: 220px; font-family: DNF, sans-serif; text-align: center; line-height: 1; padding-top: 30px; box-sizing: border-box; }
+.t { position: relative; display: inline-block; isolation: isolate; color: #FFF3DC; }
+.t::before, .t::after { content: attr(data-t); position: absolute; left: 0; top: 0; }
+.t::before { z-index: -2; -webkit-text-stroke: var(--o, 15px) #E6C27A; }
+.t::after { z-index: -1; -webkit-text-stroke: var(--i, 10px) #2A1A14; }
+.rule { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; }
+.rule i { height: 1.5px; width: 44px; background: #E6C27A; }
+.dia { width: 7px; height: 7px; background: #E6C27A; transform: rotate(45deg); }
+</style>
+<div><span class="t" data-t="소녀 태수" style="font-size:60px">소녀 태수</span></div>
+<div class="rule">
+  <i></i><span class="dia"></span>
+  <span class="t" data-t="키우기" style="font-size:30px;--o:11px;--i:7px;margin:0 6px">키우기</span>
+  <span class="dia"></span><i></i>
+</div>

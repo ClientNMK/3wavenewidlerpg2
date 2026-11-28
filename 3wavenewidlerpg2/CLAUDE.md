@@ -14,6 +14,8 @@
 - DNFBitBitv2 SDF는 Dynamic이라 1024 아틀라스가 차면 새 한글이 빠짐 → Multi Atlas Textures 켜 둠 (끄지 말 것).
 - 프로젝트는 Linear 색 공간 + Straight Alpha → Spine 텍스처 임포트 sRGB 켜기 (꺼지면 색이 밝게 바램).
 - RectMask2D 안의 SkeletonGraphic은 RectTransform 크기로 잘라낼지 판단 → Rect를 그림 크기만큼 (작으면 통째로 안 그려짐).
+- 새 몬스터 Spine 텍스처는 Read/Write 켜기 (보스 이름 컷인이 첫 idle 프레임 픽셀로 보이는 몸 크기를 잼).
+- Spine 아틀라스를 2의 거듭제곱이 아닌 크기로 늘리면 텍스처 Non-Power of 2 = None (기본 ToNearest면 줄어들어 픽셀 측정이 깨짐).
 
 # CLAUDE.md
 

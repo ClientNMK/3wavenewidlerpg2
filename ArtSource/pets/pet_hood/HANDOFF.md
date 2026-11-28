@@ -1,4 +1,4 @@
-# HANDOFF — 정령 펫: 후드 (pet_hood)
+﻿# HANDOFF — 정령 펫: 후드 (pet_hood)
 
 확정일: 2026-11-26 (디자인 교체: 어두운 그림자 A·B → 크림 망토 C1). **이 폴더에는 확정본만 둡니다.**
 
@@ -24,6 +24,10 @@ ArtSource/pets/pet_hood/
 │  ├─ pose/hood_001_skin_shell_se.png
 │  └─ animations/idle (8장, 0.12초), devour (13장, 0.08초)
 ├─ hood_001_skin_shell_preview_x3.gif
+├─ costum_11001/               ← 코스튬: 겨울 (빨간 뜨개 후드 + 흰 털 테두리 + 방울, 망토 빨강, 2026-11-28). 메인 캐릭터 `costum_10001`와 한 벌. 구성은 hood_001과 같음
+│  ├─ pose/costum_11001_se.png
+│  └─ animations/idle (8장, 0.12초), devour (13장, 0.08초)
+├─ costum_11001_preview_x3.gif
 └─ effects/
    ├─ devour_burst/                    ← hood_001 포식 이펙트 확정본 (2026-11-26): 호박색 반짝 링
    │  ├─ collect-burst.png / .json     ← 칸 112×108, 7열, 42프레임, 30fps, pivot (56, 94)
@@ -42,7 +46,7 @@ ArtSource/pets/pet_hood/
 
 각 동작 폴더에 `<동작>_strip.png`(가로 스트립), `<동작>_x1.gif`(원본, 투명), `<동작>_preview_x3.gif`(확인용)가 있다.
 
-**코스튬 이름 규칙**: `hood_00N_skin_<이름>` (MonsterChart의 Skin 방식 참고). 차트에 코스튬 열이 생기면 그 이름에 맞춘다.
+**코스튬 이름 규칙**: `Chart/CostumeChart_Dev.xlsx`의 `Skin_Name`과 같게 (후드 코스튬은 Data_Id 11001~, 예: `costum_11001`). 그전에 만든 조개 모자 `hood_001_skin_shell`은 차트에 아직 없어 옛 이름 그대로.
 
 포식 상태 표식(몬스터 머리 위 아이콘)은 상태이상 아이콘 체계로 확정: `ArtSource/ui/status_icons/status_devour.png` (16×16, 그쪽 HANDOFF 참고). 이전 이빨 입 표식(`devour_mark/`)은 색이 안 맞아 삭제함.
 
@@ -114,6 +118,10 @@ ArtSource/pets/pet_hood/
 | 조개 모자 오브젝트 | `45702588-79e3-4d0f-bcea-42f9cd9159b9` | 48→96×96 |
 | └ idle | group `6ca9e8dd-240a-4f5a-bf5a-2ff9a8db8fde` | 8프레임(+끝 1), 0~7 사용 (7번에서 살짝 눈 깜빡임) |
 | └ devour | group `59524a09-9f78-4898-ab55-8f1bd3daa64c` ("devour2") | 수정: 빨간 혀만 지움(소라 줄무늬 산호색은 건드리지 않게 색 범위 따로: h≤12, s≥0.6, l 0.48~0.62), frame_012를 idle frame_000으로 교체. 첫 devour `992d6bcb…`은 갈색 덩어리가 튀어서 탈락 |
+| 겨울 코스튬 디자인 | edit_image job `8df99d8c-f3c9-4e93-9c02-a3e4d73c7796` index 0 | hood_001 기본 자세의 후드만 빨간 뜨개 후드로 바꾼 정지 그림 |
+| 겨울 코스튬 동작 | transfer_outfit job `aa8efd33-…`(idle 0~6), `d83cabaa-…`(idle 7 + devour 0~5), `0e24205b-…`(devour 6~12) | 빨갛게 색만 바꾼 hood_001 idle·devour 21장을 (24,40)에서 80×80으로 잘라 옷 갈아입힘 → 같은 자리로 되돌림 → 크림 망토를 빨강(색상 355°)으로 바꿈. 포식 타이밍은 hood_001과 같음 |
+
+겨울 코스튬 알려진 점: idle 5번에서 눈을 감음, devour 2·3번 입 안이 빨강(혀 자국), devour 6번 입 옆 검은 조각 (사용자 확인 후 그대로 확정). 작업 파일: pixl_test `assets\character\costume_winter\hood_winter\`
 
 정렬: 96×96 원본을 128×128에 hood_001·hood_002는 (dx=17, dy=42), 조개 모자는 (dx=16, dy=42)로 배치 (몸 아래 끝 69행 → 111행).
 

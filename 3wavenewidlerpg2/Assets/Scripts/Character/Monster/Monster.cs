@@ -6,6 +6,7 @@ public class Monster : CharacterBase
 {
     public MonsterData MonsterData = null;
     public float SkillReadyTime = 0f;
+    bool isFinishDevour = false;    // 스테이지 보스 마무리 포식 중 (삼킨 뒤 Hood가 Dead로)
 
     // 도전 보스는 Challenge_Skill_Cooltime마다 공격 대신 스킬
     public bool IsSkillReady { get { return MonsterData.Monster_Type == MonsterType.ChallengeBoss && Time.time >= SkillReadyTime; } }
@@ -38,6 +39,7 @@ public class Monster : CharacterBase
         Status.Move_Speed = MonsterData.Monster_Move_Speed;
         Status.Attack_Speed = MonsterData.Monster_Attack_Speed;
         SkillReadyTime = Time.time + DataManager.Instance.SystemData.GetFloat("Challenge_Skill_Cooltime");
+        isFinishDevour = false;
 
         // 피격 연출 도중 풀에 반환됐을 수 있어 초기화
         SetMaterialColor(Color.white);
@@ -46,6 +48,17 @@ public class Monster : CharacterBase
         SetScale(MonsterData.Monster_Scale);
         HpBar.gameObject.SetActive(true);
         Setup();
+    }
+
+    // 체력이 0이 되면 스테이지 보스는 쓰러지는 대신 후드가 삼킴
+    public override void ChangeState(State _State)
+    {
+        if (_State == State.Dead && !isFinishDevour && InGameManager.Instance.TryBossDevour(this))
+        {
+            isFinishDevour = true;
+            return;
+        }
+        base.ChangeState(_State);
     }
 
     public override void SetupSpine()
