@@ -77,6 +77,8 @@ public class UIInGameScene : MonoBehaviour
     [SerializeField] Sprite dotStepOnSprite = null;
     [SerializeField] Sprite dotStepOffSprite = null;
     [SerializeField] Button goldUpgradeButton = null;
+    [SerializeField] Button contentButton = null;       // 하단 컨텐츠 탭
+    [SerializeField] RectTransform navOn = null;        // 하단 탭 켜짐 표시 (열린 창의 탭으로 옮김)
     [SerializeField] GameObject[] hideOnWindow = null;  // 창이 열린 동안 숨김 (창 뒤로 비쳐 보이므로)
 
     // 보스 등장 연출 (kit_cocoa LAYOUT_battle.md '보스 등장 연출', 0.9초로 줄임)
@@ -125,13 +127,21 @@ public class UIInGameScene : MonoBehaviour
         SetAutoBoss(false);
         cameraZoomButton.onClick.AddListener(InGameManager.Instance.ToggleCameraZoom);
         goldUpgradeButton.onClick.AddListener(() => PopupManager.Instance.ShowPopup<UIGoldUpgradePopup>());
+        contentButton.onClick.AddListener(() => PopupManager.Instance.ShowPopup<UIContentPopup>());
+        navOn.gameObject.SetActive(false);
         nicknameText.text = BackEnd.Backend.UserNickName;
     }
 
-    public void SetActiveBattleHud(bool _active)
+    // 하단 탭 창이 열리면 전투 HUD를 숨기고 그 탭에 켜짐 표시, 닫히면(null) 되돌림
+    public void SetTabWindow(UIPopup _window)
     {
         foreach (GameObject obj in hideOnWindow)
-            obj.SetActive(_active);
+            obj.SetActive(_window == null);
+        navOn.gameObject.SetActive(_window != null);
+        if (_window == null)
+            return;
+        navOn.SetParent((_window is UIContentPopup ? contentButton : goldUpgradeButton).transform, false);
+        navOn.SetAsFirstSibling();
     }
 
     // 캐릭터 슬롯이 만들어진 뒤 호출
@@ -363,9 +373,9 @@ public class UIInGameScene : MonoBehaviour
             group.alpha = _active ? TopInfoBossAlpha : 1f;
     }
 
-    public void SetBossStage(string _bossName, float _hpRate, float _remainTime)
+    public void SetBossStage(string _title, float _hpRate, float _remainTime)
     {
-        stageText.text = string.Format(StringManager.Instance.GetStringText("Msg_BossName"), _bossName);
+        stageText.text = _title;
         killCountText.text = string.Format("{0:0}%", _hpRate * 100f);
         stageProgressFill.fillAmount = _hpRate;
         int seconds = Mathf.CeilToInt(_remainTime);

@@ -7,13 +7,9 @@ using TMPro;
 // 스테이지 이동 (kit_cocoa LAYOUT_stage.md). 깬 스테이지와 최고 스테이지로만 이동, 못 간 스테이지·월드는 잠김
 public class UIStageMovePopup : UIPopup
 {
-    const int CellsPerRow = 5;
-    const int StagesPerGroup = 10;          // 한 월드에 10개가 넘으면 10개마다 구분 줄
-    const float CellPitch = 116f;           // 칸 가로 간격 58 ×2
-    const float RowHeight = 124f;           // 칸 세로 간격 62 ×2 (칸 목록 기본 높이 = 한 줄)
+    const float CellPitch = 116f;           // 칸 가로 간격 58 ×2, 한 줄로 늘어놓고 가로 스크롤
     const float CellSize = 96f;
-    const float GroupHeaderHeight = 40f;
-    const float MaxAreaHeight = 400f;       // 칸 목록은 200(×2)까지 늘고 그다음부터 스크롤
+    const float CellPadding = 12f;          // 고른 칸 테두리·체크가 칸 밖으로 나와 잘리지 않게 영역 안쪽 여백
     const float TabAreaWidth = 560f;
     const float TabSpacing = 8f;
     const float ScrollTabWidth = 176f;      // 월드 4개 이상이면 탭 폭 고정 + 가로 스크롤
@@ -26,9 +22,6 @@ public class UIStageMovePopup : UIPopup
     static readonly Color DarkColor = new Color32(0x2a, 0x1a, 0x14, 0xff);
     static readonly Color BossClearColor = new Color32(0x9b, 0xd6, 0x5a, 0xff);
 
-    [SerializeField] RectTransform window = null;           // 칸 목록이 늘어난 만큼 위로 올려 화면 가운데 유지
-    [SerializeField] RectTransform panel = null;
-    [SerializeField] RectTransform bottom = null;           // 구분선 아래 전부 (칸 목록이 늘어난 만큼 내림)
     [SerializeField] Button closeButton = null;
 
     [Header("World")]
@@ -42,11 +35,10 @@ public class UIStageMovePopup : UIPopup
     [SerializeField] Image worldFill = null;
 
     [Header("Cell")]
-    [SerializeField] RectTransform cellArea = null;
+    [SerializeField] RectTransform cellViewport = null;
     [SerializeField] RectTransform cellContent = null;
-    [SerializeField] GameObject cellFade = null;            // 위아래 흐림 (스크롤할 때만)
+    [SerializeField] GameObject cellFade = null;            // 좌우 흐림 (스크롤할 때만)
     [SerializeField] UIStageCell cellTemplate = null;
-    [SerializeField] GameObject groupTemplate = null;
     [SerializeField] Sprite cellSprite = null;
     [SerializeField] Sprite cellBestSprite = null;
     [SerializeField] Sprite cellLockSprite = null;
@@ -73,8 +65,6 @@ public class UIStageMovePopup : UIPopup
     int curStageId = 0;
     int maxStageId = 0;
     int selectedStageId = 0;
-    float bottomY = 0f;
-    float panelHeight = 0f;
 
     public override void Init()
     {
@@ -82,8 +72,7 @@ public class UIStageMovePopup : UIPopup
             return;
 
         PopupType = PopupType.Modal;
-        bottomY = bottom.anchoredPosition.y;
-        panelHeight = panel.sizeDelta.y;
+        touchPanel.onClick.AddListener(OnClickTouchPanel);
         closeButton.onClick.AddListener(OnClickCloseButton);
         bestButton.onClick.AddListener(() => Move(maxStageId));
         moveButton.onClick.AddListener(() => Move(selectedStageId));
@@ -103,14 +92,6 @@ public class UIStageMovePopup : UIPopup
                 worlds.Add(new());
             worlds[worlds.Count - 1].Add(stage);
         }
-
-        // 가장 긴 월드에 맞춰 창 크기를 정해 탭을 바꿔도 창이 흔들리지 않음
-        float areaHeight = Mathf.Min(worlds.Max(x => GetContentHeight(x.Count)), MaxAreaHeight);
-        float extra = areaHeight - RowHeight;
-        cellArea.sizeDelta = new Vector2(cellArea.sizeDelta.x, areaHeight);
-        panel.sizeDelta = new Vector2(panel.sizeDelta.x, panelHeight + extra);
-        bottom.anchoredPosition = new Vector2(0f, bottomY - extra);
-        window.anchoredPosition = new Vector2(0f, extra * 0.5f);
 
         StageData cur = DataManager.Instance.StageData.GetStageData(curStageId);
         StageData best = DataManager.Instance.StageData.GetStageData(maxStageId);
@@ -164,15 +145,8 @@ public class UIStageMovePopup : UIPopup
         for (int i = 0; i < _stages.Count; i++)
         {
             StageData stage = _stages[i];
-            if (_stages.Count > StagesPerGroup && i % StagesPerGroup == 0)
-            {
-                GameObject group = Instantiate(groupTemplate, cellContent);
-                ((RectTransform)group.transform).anchoredPosition = new Vector2(0f, -(GetCellY(i, _stages.Count) - GroupHeaderHeight));
-                group.GetComponentInChildren<TMP_Text>().text = $"{GetStageNumber(stage)} ~ {_stages[Mathf.Min(i + StagesPerGroup, _stages.Count) - 1].Stage_Number}";
-            }
-
             UIStageCell cell = Instantiate(cellTemplate, cellContent);
-            ((RectTransform)cell.transform).anchoredPosition = new Vector2(i % StagesPerGroup % CellsPerRow * CellPitch, -GetCellY(i, _stages.Count));
+            ((RectTransform)cell.transform).anchoredPosition = new Vector2(CellPadding + i * CellPitch, -CellPadding);
             bool isCellLocked = isLocked || stage.Stage_Id > maxStageId;
             bool isBest = !isCellLocked && stage.Stage_Id == maxStageId;
             cell.Bg.sprite = isCellLocked ? cellLockSprite : isBest ? cellBestSprite : cellSprite;
@@ -189,9 +163,9 @@ public class UIStageMovePopup : UIPopup
                 cell.Button.onClick.AddListener(() => Select(stage.Stage_Id));
             cells.Add(cell);
         }
-        float contentHeight = GetContentHeight(_stages.Count);
-        cellContent.sizeDelta = new Vector2(cellContent.sizeDelta.x, contentHeight);
-        cellFade.SetActive(contentHeight > cellArea.sizeDelta.y);
+        float contentWidth = CellPadding * 2f + (_stages.Count - 1) * CellPitch + CellSize;
+        cellContent.sizeDelta = new Vector2(contentWidth, cellContent.sizeDelta.y);
+        cellFade.SetActive(contentWidth > cellViewport.rect.width);
 
         // 잠긴 월드: 칸은 모두 잠김, 안내 문구, 이동 버튼 꺼짐
         lockedHintText.gameObject.SetActive(isLocked);
@@ -211,7 +185,7 @@ public class UIStageMovePopup : UIPopup
         // 지금 있는 월드면 지금 칸, 아니면 그 월드에서 갈 수 있는 마지막 칸
         Select(_stages.Exists(x => x.Stage_Id == curStageId) ? curStageId : Mathf.Min(maxStageId, _stages[_stages.Count - 1].Stage_Id));
         int index = _stages.FindIndex(x => x.Stage_Id == selectedStageId);
-        ScrollTo(GetCellY(index, _stages.Count) - (cellArea.sizeDelta.y - CellSize) * 0.5f);
+        ScrollTo(CellPadding + index * CellPitch - (cellViewport.rect.width - CellSize) * 0.5f);
     }
 
     void Select(int _stageId)
@@ -236,28 +210,15 @@ public class UIStageMovePopup : UIPopup
         moveButton.image.sprite = _isOn ? moveOnSprite : moveOffSprite;
     }
 
-    void ScrollTo(float _y)
+    void ScrollTo(float _x)
     {
-        cellContent.anchoredPosition = new Vector2(0f, Mathf.Clamp(_y, 0f, Mathf.Max(0f, cellContent.sizeDelta.y - cellArea.sizeDelta.y)));
+        cellContent.anchoredPosition = new Vector2(-Mathf.Clamp(_x, 0f, Mathf.Max(0f, cellContent.sizeDelta.x - cellViewport.rect.width)), 0f);
     }
 
     void Move(int _stageId)
     {
         PopupManager.Instance.ClosePopup(this);
         InGameManager.Instance.MoveStage(_stageId);
-    }
-
-    // 10개마다 구분 줄(10개 넘는 월드만) + 한 줄 5칸
-    float GetCellY(int _index, int _count)
-    {
-        float header = _count > StagesPerGroup ? GroupHeaderHeight : 0f;
-        int inGroup = _index % StagesPerGroup;
-        return _index / StagesPerGroup * (header + StagesPerGroup / CellsPerRow * RowHeight) + header + inGroup / CellsPerRow * RowHeight;
-    }
-
-    float GetContentHeight(int _count)
-    {
-        return GetCellY(_count - 1, _count) + RowHeight;
     }
 
     string GetStageNumber(StageData _stage)

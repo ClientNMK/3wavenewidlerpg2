@@ -1,0 +1,699 @@
+{
+ "frames": [
+  {
+   "filename": "delayed-cut 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 1",
+   "frame": {
+    "x": 300,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 2",
+   "frame": {
+    "x": 600,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 3",
+   "frame": {
+    "x": 900,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 4",
+   "frame": {
+    "x": 1200,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 5",
+   "frame": {
+    "x": 0,
+    "y": 190,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 6",
+   "frame": {
+    "x": 300,
+    "y": 190,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 7",
+   "frame": {
+    "x": 600,
+    "y": 190,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 8",
+   "frame": {
+    "x": 900,
+    "y": 190,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 9",
+   "frame": {
+    "x": 1200,
+    "y": 190,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 10",
+   "frame": {
+    "x": 0,
+    "y": 380,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 11",
+   "frame": {
+    "x": 300,
+    "y": 380,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 12",
+   "frame": {
+    "x": 600,
+    "y": 380,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 13",
+   "frame": {
+    "x": 900,
+    "y": 380,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 14",
+   "frame": {
+    "x": 1200,
+    "y": 380,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 15",
+   "frame": {
+    "x": 0,
+    "y": 570,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 16",
+   "frame": {
+    "x": 300,
+    "y": 570,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 17",
+   "frame": {
+    "x": 600,
+    "y": 570,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 18",
+   "frame": {
+    "x": 900,
+    "y": 570,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 19",
+   "frame": {
+    "x": 1200,
+    "y": 570,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 20",
+   "frame": {
+    "x": 0,
+    "y": 760,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 21",
+   "frame": {
+    "x": 300,
+    "y": 760,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 22",
+   "frame": {
+    "x": 600,
+    "y": 760,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 23",
+   "frame": {
+    "x": 900,
+    "y": 760,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 24",
+   "frame": {
+    "x": 1200,
+    "y": 760,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 25",
+   "frame": {
+    "x": 0,
+    "y": 950,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 26",
+   "frame": {
+    "x": 300,
+    "y": 950,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 27",
+   "frame": {
+    "x": 600,
+    "y": 950,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 28",
+   "frame": {
+    "x": 900,
+    "y": 950,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  },
+  {
+   "filename": "delayed-cut 29",
+   "frame": {
+    "x": 1200,
+    "y": 950,
+    "w": 300,
+    "h": 190
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 190
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 190
+   },
+   "duration": 33
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "delayed-cut.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 1500,
+   "h": 1140
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "delayed-cut",
+    "from": 0,
+    "to": 29,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "melee/delayed-cut",
+   "name": "Delayed cut",
+   "fps": 30,
+   "loop": false,
+   "frames": 30,
+   "frameSize": [
+    300,
+    190
+   ],
+   "pivot": [
+    80,
+    130
+   ],
+   "columns": 5
+  }
+ }
+}

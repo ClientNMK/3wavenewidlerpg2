@@ -5,6 +5,10 @@ using UnityEngine;
 public class Monster : CharacterBase
 {
     public MonsterData MonsterData = null;
+    public float SkillReadyTime = 0f;
+
+    // 도전 보스는 Challenge_Skill_Cooltime마다 공격 대신 스킬
+    public bool IsSkillReady { get { return MonsterData.Monster_Type == MonsterType.ChallengeBoss && Time.time >= SkillReadyTime; } }
 
     public override void Init()
     {
@@ -17,6 +21,7 @@ public class Monster : CharacterBase
         FSMMain[(int)State.Idle] = new Monster_Idle(this);
         FSMMain[(int)State.Move] = new Monster_Move(this);
         FSMMain[(int)State.Attack] = new Monster_Attack(this);
+        FSMMain[(int)State.Skill] = new Monster_Skill(this);
         FSMMain[(int)State.Dead] = new Monster_Dead(this);
 
         bInitialized = true;
@@ -32,6 +37,7 @@ public class Monster : CharacterBase
         Status.Penetrate = _penetrate;
         Status.Move_Speed = MonsterData.Monster_Move_Speed;
         Status.Attack_Speed = MonsterData.Monster_Attack_Speed;
+        SkillReadyTime = Time.time + DataManager.Instance.SystemData.GetFloat("Challenge_Skill_Cooltime");
 
         // 피격 연출 도중 풀에 반환됐을 수 있어 초기화
         SetMaterialColor(Color.white);

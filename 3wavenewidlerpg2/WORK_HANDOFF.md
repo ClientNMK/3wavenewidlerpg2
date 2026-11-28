@@ -26,7 +26,7 @@
 | SystemChart | Roll_Cooltime 5, Roll_Distance 2, Boss_Challenge_Time 15, Boss_Challenge_Count 10, Attack_Splash_Range 1.5, Skill_Slot_Max 5 |
 | MonsterChart | Resource(프리팹 이름), Skin_Name(1~4 = 기본·파랑·분홍·금색 슬라임), 이동속도·감지·공격 범위·공격 속도·크기 |
 | StageChart | Monster_Id / Monster_Spawn_Count는 "1, 2, 3"처럼 짝 배열. 보스 Id·체력·공격력, Gold_Value, Exp_Value |
-| SkillChart | 20000번 고정 장착 (Cooltime, Damage, Max_Hits 사용) |
+| SkillChart | 20001·20002·20003을 1~3번 슬롯에 고정 장착 (Cooltime, Duration, Skill_Count, Damage, Max_Hits, Resource 사용) |
 | WorldChart | World_Resource = 배경 이름 (스테이지의 World_Id로 찾음, `Assets/Resource/Textures/Bg`) |
 | GoodsChart | 골드 Icon `icon_goods_gold` = 드롭 프리팹 이름 |
 | StringChart | 문자열 (String_Id, Kr, En, Ja, TW). 원본 `Chart/StringChart_Dev.xlsx`. 차트 로드가 끝나면 로컬 CSV 대신 이 값을 씀 (`TitleManager.CompleteTitleLoading`). 고정 글자는 `UILocalizeText`에 키 입력 |
@@ -49,7 +49,7 @@
   - attack3: 0.21초 베기, 0.28초 타격 (히트스톱 0.12, 밀림 6px, 흔들림 3px)
   - 재생 속도 = 공격 속도
 - 대시(State.Dash, 코드 이름은 Roll): 자동 전투 중, 쿨타임이 차고 적이 `평타 사거리 + Roll_Distance × 0.5`보다 멀 때. frame_002~006 동안 ease-out 이동, 평타 사거리 앞에서 멈춤, 잔상(Afterimage)
-- 스킬 20000: vanish(약 0.09초, 3배속, 2026-11-27부터 hurt frame_005 맞은 자세에서 흩어짐) → 0.2초 숨음 → 목표 몬스터 뒤(평타 사거리 80%)로 순간이동, **몬스터를 바라봄** → backstab(공격 속도 따라감) → 0.21초 기본 X베기(xslash), 0.28초 타격 1번 (공격력 × Damage, 최대 Max_Hits마리)
+- 스킬 20001(Skill_001): vanish(약 0.09초, 3배속, 2026-11-27부터 hurt frame_005 맞은 자세에서 흩어짐) → 0.2초 숨음 → 목표 몬스터 뒤(평타 사거리 80%)로 순간이동, **몬스터를 바라봄** → backstab(공격 속도 따라감) → 0.21초 기본 X베기(xslash), 0.28초 타격 1번 (공격력 × Damage, 최대 Max_Hits마리)
 - 포식: 평타(스킬 제외) 타격마다 Predation_Per 확률로 포식 상태이상 → 이번 타격 후 일반 몬스터 체력이 최대 체력 × 후드 1001 이하가 되면(처치될 타격 포함) 데미지 대신 후드가 그 몬스터 옆으로 날아가(0.16초) devour로 삼킴(입으로 끌려가며 작아지다 0.4초에 처치, 물어뜯는 동안 Tint Black 청록 번쩍임, 끝나면 캐릭터 뒤로 복귀, 보스전 제외, 삼키는 중엔 다음 포식 없음). Hood_Exp 보상은 아직 없음
 
 ### 후드 (`Hood`, `ArtSource/pets/pet_hood`)
@@ -65,6 +65,7 @@
 ### 몬스터 (`Monster`, `FSM_Monster`)
 - 슬라임 `monster_stage_001`(스킨 1~4), 단풍 버섯 `monster_stage_002`(스킨 1 주황·2 빨강·3 보라·4 파랑, attack 없음). 차트 `Resource`·`Skin_Name`으로 고름
 - 일반 몬스터는 공격 없음(2026-11-27): 감지 범위 안이면 추적, 공격 범위에서 멈춰 섬. 보스만 attack 모션 + 투사체(스킨별 색) → 보스 Resource는 attack이 있는 몬스터여야 함
+- 뿔 보스 `monster_dungeon_2001`(Monster_Type 3 = ChallengeBoss, 스킨 "0", 192 캔버스): attack 창 찌르기(근접, 이벤트 hit), SystemChart `Challenge_Skill_Cooltime`(첫 등장부터 셈)마다 공격 대신 skill 땅 찍기. 스킬 피해 = 공격력 × SystemChart `Challenge_Skill_Per`, 체력 `Challenge_2Phase_Hp_Per` 이하면 페이즈2(8갈래 가시). 이펙트 `Prefabs/Effect/monster_dungeon_2001_*`, 값은 ArtSource HANDOFF. 가시 타격 거리 0.5칸(코드 상수). 배경 `bg_dungeon_2001`
 - 피격: 검은 실루엣 번쩍임 + 밀림, 데미지 숫자, 타격 불꽃
 - 사망: dead 모션 후 풀 반환, 금화 드롭(통통 튀고 캐릭터에게 날아감)
 
@@ -92,7 +93,7 @@
 ### UI
 - 상단 HUD(hud_kit 부품 0.75배): 초상화+레벨, 닉네임, 골드·보석, 스테이지 바(Stage 1-1, 처치 수), 보스 도전 버튼, 자동 토글
 - 청록 유리 UI(`pixl_test/shellgirl-ui-glass` → `Assets/Resource/Textures/UI/Glass`, Bilinear): 초상화 자개 프레임, 명패(닉네임), 남색 백판 = 스테이지 정보판 + 처치 진행바(Filled), 금빛 버튼 = 보스 도전(아래 가운데, 스킬 슬롯 위)
-- 오른쪽 아래: 대시 쿨타임 박스(항상 자동) + 그 왼쪽 스킬 슬롯 5칸(`UISkillSlot`, 누르면 자동 사용 ON/OFF, 1번 = 20000 고정, 2~5번 빈 칸) / 처치 기록은 슬롯 줄 위(1초 후 0.5초 페이드)
+- 오른쪽 아래: 대시 쿨타임 박스(항상 자동) + 그 왼쪽 스킬 슬롯 5칸(`UISkillSlot`, 누르면 자동 사용 ON/OFF, 1~3번 = 20001~20003 고정, 4~5번 빈 칸) / 처치 기록은 슬롯 줄 위(1초 후 0.5초 페이드)
 - 카메라 버튼(사이드 버튼 아래, hud_round + icon_zoom, 아래 점 3개 = 지금 단계): 멀리(크기 8, 가운데 고정) → 중간(6) → 가까이(4.5). 중간·가까이는 캐릭터를 따라가고 배경 밖은 안 보임. 몬스터 찾는 범위는 멀리 화면(`BattleArea`) 그대로
 - UI 테스트(코코아+금선 키트, `Textures/UI/Cocoa`, Bilinear, 1080 기준 부품이라 Image PPU Multiplier 1.5): 상단 HUD(`HUD/Cocoa`: 초상화·이름·재화·스테이지 바·사이드 버튼) + 하단 탭 6개(성장·인벤토리·스킬·미션·컨텐츠·상점, 성장만 동작 = 성장 창 강화·레벨·후드·전직·어빌리티 탭) + 강화 팝업(성장 창). 배치는 `pixl_test/assets/ui/kit_cocoa/preview/assembled_from_parts_x2.png`, 기준 `Plan/UI_Style_Guide.md`. 예전 HUD 부품은 꺼 둠. 강화 탭 x1/x10/x100 = 한 번에 올릴 레벨 수(구간 비용 합산), 레벨 탭 목록은 5줄 보이는 세로 스크롤, 보스 도전(시안 boss_challenge_states): 스테이지 바 아래 버튼 — 진행 중 hud_pill+흐린 해골+안내(Msg_BossChallengeHint), 도전 가능 btn_main+해골+알림 점 / 보스전 중 스테이지 바 = 해골+보스 이름+체력 %(빨간 바), 아래 남은 시간+포기(= 시간 초과 실패), 이름·재화 흐리게. 실패(시간 초과·사망·포기) 시 처치 수 0으로 초기화. 자동 보스 도전 = 보스 버튼 왼쪽 "자동" 스위치(켜면 처치 수가 차는 순간 도전, 실패하면 꺼짐, 저장 없음). 보스 도전을 누르면 검은 화면 동안 보스 배치 → 보스 등장 연출 1.2초(게임 정지, `UIInGameScene.CoBossIntro`) → 제한 시간 시작.  배치 기준 `pixl_test/assets/ui/kit_cocoa/LAYOUT_battle.md`(360×640 ×2). 상단 "자동 전투" 판은 모양만(항상 켜짐). 상단 왼쪽(`Cocoa/TopLeft`: 초상화·레벨·이름·경험치)과 가운데(`Cocoa/TopCenter`: 스테이지 바·보스 도전·보스전)만 Scale 0.85, 나머지 HUD는 100%. 버튼 빛·비네트 효과는 아직 없음. 사이드 버튼은 모양만
 - 체력바: 캐릭터·몬스터 머리 위, 화면에서 같은 크기

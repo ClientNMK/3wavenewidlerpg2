@@ -24,4 +24,5 @@ public class DataManager : Singleton<DataManager>
     [Header("Stage Data")]
     public SerializableWorldData WorldData = new();
     public SerializableStageData StageData = new();
+    public SerializableDungeonData DungeonData = new();
 }

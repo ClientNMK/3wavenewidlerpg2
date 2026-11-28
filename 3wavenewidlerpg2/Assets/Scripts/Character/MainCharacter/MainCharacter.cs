@@ -80,16 +80,18 @@ public class MainCharacter : CharacterBase
 
     const string HitSparkKey = "hit_spark";
     const string DamageTextKey = "DamageText";
+    const float TakenTextHeight = 0.6f;     // 받은 피해 숫자 시작 높이 (몸 가운데쯤, 칸)
     const float HitSparkOffset = 19f / 64f; // 몬스터 기준점에서 공격자 쪽 앞면 바닥
 
     // 캐릭터 크기에 맞춰 이펙트 재생 (_flip: 1 = 그림 방향 그대로, -1 = 좌우 반전)
-    public void PlayEffect(string _key, Vector3 _position, float _flip, int _sortingOrder)
+    public Effect PlayEffect(string _key, Vector3 _position, float _flip, int _sortingOrder)
     {
         Effect effect = ObjectPoolManager.Instance.GetObject<Effect>("Effect", _key);
         effect.key = _key;
         Vector3 scale = transform.localScale;
         scale.x *= _flip;
         effect.Play(_position, scale, _sortingOrder);
+        return effect;
     }
 
     // 공격 범위 안 _count마리에 데미지 + 피격 연출, 히트스톱·흔들림은 한 번 (밀림·흔들림은 px)
@@ -104,24 +106,33 @@ public class MainCharacter : CharacterBase
                 PlayEffect(HitSparkKey, sparkPosition, SkeletonAnim.Skeleton.ScaleX, target.SkeletonRenderer.sortingOrder + 1);
             }
 
-            // 맞을 때마다 공격력 대비 최소~최대 배율 사이 랜덤 데미지
-            BigDouble damage = _damage * Random.Range((float)Status.Damage_Min_Per, (float)Status.Damage_Max_Per);
-            // 치명타: Cri 확률로 Cri_Dmg 배율 (0.01 = 1%, 2 = 200%)
-            bool isCri = Random.value < Status.Cri;
-            if (isCri)
-                damage *= Status.Cri_Dmg;
+            BigDouble damage = RollDamage(_damage, out bool isCri);
             if (TryPredation(target, damage))
                 continue;
 
-            target.TakeDamage(damage, this, AttackType.Normal);
+            DamageTarget(target, damage, isCri);
             target.PlayHitReaction(-side, _hitStopTime, _knockback);
-
-            // 여러 번 맞아도 겹치지 않게 체력바 위에서 좌우로 살짝 흩뿌림
-            DamageText damageText = ObjectPoolManager.Instance.GetObject<DamageText>("Effect", DamageTextKey);
-            damageText.key = DamageTextKey;
-            damageText.Play(new Vector3(target.transform.position.x + Random.Range(-0.15f, 0.15f), target.HpBar.transform.position.y + 0.15f, 0f), damage, isCri);
         }
-        InGameManager.Instance.HitStop(_hitStopTime, _shake);
+        // 히트스톱을 따로 연출하는 공격(스킬 2 임팩트 프레임)은 0으로 넘김
+        if (_hitStopTime > 0f)
+            InGameManager.Instance.HitStop(_hitStopTime, _shake);
+    }
+
+    // 맞을 때마다 공격력 대비 최소~최대 배율 사이 랜덤 데미지, 치명타는 Cri 확률로 Cri_Dmg 배율 (0.01 = 1%, 2 = 200%)
+    public BigDouble RollDamage(BigDouble _damage, out bool _isCri)
+    {
+        BigDouble damage = _damage * Random.Range((float)Status.Damage_Min_Per, (float)Status.Damage_Max_Per);
+        _isCri = Random.value < Status.Cri;
+        return _isCri ? damage * Status.Cri_Dmg : damage;
+    }
+
+    // 데미지 + 숫자 (여러 번 맞아도 겹치지 않게 체력바 위에서 좌우로 살짝 흩뿌림)
+    public void DamageTarget(Monster _target, BigDouble _damage, bool _isCri)
+    {
+        _target.TakeDamage(_damage, this, AttackType.Normal);
+        DamageText damageText = ObjectPoolManager.Instance.GetObject<DamageText>("Effect", DamageTextKey);
+        damageText.key = DamageTextKey;
+        damageText.Play(new Vector3(_target.transform.position.x + Random.Range(-0.15f, 0.15f), _target.HpBar.transform.position.y + 0.15f, 0f), _damage, _isCri);
     }
 
     // 평타로 포식 상태이상(Predation_Per)이 뜨면, 이번 타격 후 체력이 후드 스탯 비율 이하가 될 일반 몬스터를 데미지 대신 후드가 잡아먹음 (보스 제외)
@@ -148,7 +159,7 @@ public class MainCharacter : CharacterBase
         public float RemainTime { get { return Mathf.Max(0f, SkillData.Cooltime - (Time.time - LastUseTime)); } }
     }
 
-    const int EquipSkillId = 20000;     // 스킬 장착 기능 전까지 1번 슬롯 고정
+    static readonly int[] EquipSkillIds = { 20001, 20002, 20003 };     // 스킬 장착 기능 전까지 1~3번 슬롯 고정
     public List<SkillSlot> SkillSlots = new();
     public SkillSlot CurSkillSlot = null;   // 지금 사용 중인 스킬
 
@@ -157,7 +168,8 @@ public class MainCharacter : CharacterBase
         int slotMax = (int)DataManager.Instance.SystemData.GetFloat("Skill_Slot_Max");
         for (int i = 0; i < slotMax; i++)
             SkillSlots.Add(new SkillSlot());
-        SkillSlots[0].SkillId = EquipSkillId;
+        for (int i = 0; i < EquipSkillIds.Length; i++)
+            SkillSlots[i].SkillId = EquipSkillIds[i];
     }
 
     // 자동 전투 중 앞 슬롯부터, 자동 사용이 켜져 있고 쿨타임이 찬 스킬 사용
@@ -198,7 +210,15 @@ public class MainCharacter : CharacterBase
     // 공격할 몬스터가 없이 멈춰 있을 때만 피격 모션 재생 (피격 모션이 공격을 계속 끊지 않도록)
     public override void TakeDamage(BigDouble damageAmount, CharacterBase eventInstigator, AttackType attackType)
     {
+        BigDouble prevHp = CurHp;
         base.TakeDamage(damageAmount, eventInstigator, attackType);
+        // 받은 피해 숫자는 캐릭터 몸에서 아래로
+        if (prevHp > CurHp)
+        {
+            DamageText damageText = ObjectPoolManager.Instance.GetObject<DamageText>("Effect", DamageTextKey);
+            damageText.key = DamageTextKey;
+            damageText.Play(new Vector3(transform.position.x + Random.Range(-0.15f, 0.15f), transform.position.y + TakenTextHeight, 0f), damageAmount, false, true);
+        }
 
         if (State == State.Idle && FindTarget() == null)
             ChangeState(State.Hit);

@@ -8,6 +8,7 @@ public enum MonsterType
 {
     NormalMonster = 1,
     BossMonster,
+    ChallengeBoss,      // 쿨타임마다 스킬(땅 찍기)
 }
 
 public enum MonsterDetectionType

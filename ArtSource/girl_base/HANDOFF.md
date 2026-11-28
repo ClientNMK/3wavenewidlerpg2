@@ -13,12 +13,13 @@ ArtSource/girl_base/
 ├─ concept/shellgirl_concept_sheet.png ← 콘셉트 시트 (확정)
 ├─ pose/girl_base_se_p2.png           ← 기본 포즈 p2, 96×96 (확정)
 ├─ pose/girl_base_se_p2_x3.png        ← 3배 확대 미리보기
+├─ portrait/portrait_girl_base.png    ← HUD 초상화 (2026-11-28 확정). 기본 포즈 (31,14)부터 44×44를 3배(132×132) 최근접 확대. 원형 마스크는 엔진, Point 필터
 ├─ animations/idle/                   ← idle 확정본 (2026-11-25)
 │  ├─ frames/frame_000~007.png        ← 128×128, 바닥선 y=112, 중심 x=64, 투명 배경
 │  ├─ idle_strip.png                  ← 가로 스트립 (칸 128px, 8칸)
 │  ├─ idle_x1.gif                     ← 원본 크기, 투명, 0.12초/프레임
 │  └─ idle_preview_x3.gif             ← 확인용 3배, 베이지 배경 + 빨간 바닥선
-├─ animations/run/                    ← run 확정본 (2026-11-25)
+├─ animations/run/                    ← run 확정본 (2026-11-28 새 동작으로 교체, **8프레임** frame_000~007, 스트립 8칸)
 │  ├─ frames/frame_000~005.png        ← 128×128, 바닥선 y=112, 중심 x=64, 투명 배경
 │  ├─ run_strip.png                   ← 가로 스트립 (칸 128px, 6칸)
 │  ├─ run_x1.gif                      ← 원본 크기, 투명, 0.08초/프레임 (약 12fps)
@@ -94,6 +95,16 @@ ArtSource/girl_base/
 │  ├─ xslash_impact_demo_x3.gif       ← 평타 동작에 겹친 예시 (어느 스킬 동작에 붙일지는 미정)
 │  ├─ source/double-slash-big.js, _lib.js, options.json
 │  └─ backstab/                       ← backstab용 (교차점을 캐릭터 가까이 49px로, flipX로 뒤쪽에 사용): xslash_backstab.png/.json, frames/, options.json, backstab_xslash_demo_x3.gif
+├─ effects/skill_002/                 ← 스킬 2번 "지연 일섬" 이펙트 확정본 (2026-11-28, pixelfx 새 이펙트 melee/delayed-cut, 크림·흰색)
+│  ├─ delayed_cut.png / .json         ← 스프라이트 시트 (칸 300×190, 5열, 30프레임, 30fps, pivot (80, 130))
+│  ├─ frames/frame_000~029.png, delayed_cut_x1.gif
+│  ├─ skill_002_demo_x2.gif           ← vanish → backstab 동작에 겹친 전체 예시 (임팩트 프레임·흔들림 포함)
+│  └─ source/delayed-cut.js, _lib.js, options.json
+├─ effects/skill_003/                 ← 스킬 3번 "칼바람 돌풍" 이펙트 확정본 (2026-11-28, pixelfx 새 이펙트 melee/blade-gale, 크림·흰색)
+│  ├─ blade_gale.png / .json          ← 스프라이트 시트 (칸 360×270, 7열, 54프레임, 30fps, pivot (180, 215))
+│  ├─ frames/frame_000~053.png, blade_gale_x1.gif
+│  ├─ skill_003_demo_x2.gif           ← attack3 동작 + 몬스터 4마리가 끌려와 터지는 전체 예시
+│  └─ source/blade-gale.js, options.json
 ├─ effects/vanish_burst/              ← vanish(사라짐)용 크림 반짝 링 확정본 (2026-11-26, pixelfx collect-burst 색만 변경)
 │  ├─ collect-burst.png / .json       ← 스프라이트 시트 (칸 112×108, 7열, 42프레임, 30fps, pivot (56, 94))
 │  ├─ frames/frame_000~041.png, vanish_burst_x1.gif
@@ -121,7 +132,8 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 | 디자인 | 웨이브 애쉬 크림 머리, 금빛 눈, 진갈색 원피스+금단추, 금방울 달린 큰 빨간 리본, 크림 프릴, 갈색 부츠 |
 | 단검 | 낮게 역수로 쥐고 칼날은 아래·뒤로, 앞쪽 손 |
 | idle 규칙 | **다리는 절대 움직이지 않고 상체·옷·머리카락만 흔들림** |
-| run 규칙 | 몸·다리는 옆모습(east) 달리기, **얼굴은 idle과 같은 반측면 각도로 고정**(고개 좌우로 돌리지 않음), 머리카락은 흔들림 |
+| run 규칙 | (2026-11-28 교체) **몸과 얼굴 모두 반측면(south-east)**, 팔을 앞뒤로 흔들고 머리·몸이 같이 튀는 8프레임 달리기. 이전 규칙(몸은 옆모습 + 얼굴만 반측면 고정)은 어색해서 폐기 |
+| run 수정 (2026-11-28) | 머리가 6프레임 모두 같은 높이에 떠 있어 어색 → 윗몸(64~97행) 위아래 [1,0,-1,-1,1,0]px, 머리(0~69행) [1,0,-1,-1,3,2]px로 옮김(4·5프레임은 몸이 2px 내려가 있던 것에 맞춤). 다리(90행 아래)는 그대로. 생성 비용 0. 같은 날 새 동작으로 교체되어 이 수정본은 git 기록에만 남음. **hood_0/run은 이전 run 기준이라 다시 합성 필요** |
 | attack 규칙 | 반측면 그대로 유지(정면으로 돌지 않음), 역수 단검 한 자루, 끝 프레임은 시작 자세로 복귀 |
 | hurt 규칙 | 앞에서 맞고 상체·머리가 뒤로 젖혀졌다 복귀. 반측면 유지, 발은 바닥에 붙음, 역수 단검 유지, 끝 프레임은 시작 자세. 빨간 피격 플래시는 엔진에서 처리 |
 | 애니메이션 속도 | idle 0.12초/프레임, run 0.08초/프레임, attack 0.07초/프레임, attack2 0.07초/프레임, attack3 0.07초/프레임, hurt 0.08초/프레임, dead 0.1초/프레임, vanish·appear 0.06초/프레임 (엔진에서 조절). 전체 정리는 `ENGINE_REQUEST.md` |
@@ -133,7 +145,8 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 | **girl_base_se_p2 (현재)** | `91ce750a-fd6e-4cbd-9898-4e0fe19fc089` | south-east = p2 포즈. 8방향 중 south-east만 사용 |
 | └ idle_a | group `3bc7cb70-8841-4595-9a13-09113d618925` | v3 custom 8프레임 (124×124). 다리 고정 후처리 + 정렬(dx=4, dy=8) → **확정** (`animations/idle/`) |
 | └ idle_b | group `96a5b540-90ec-40f2-ab8d-e576ff1ee375` | 다리 더 많이 움직임 (탈락) |
-| └ run | group `2be876c6-2c45-4e03-9b76-e1d3c3bff920` | skeleton-v3 `running-6-frames`. south-east는 다리가 대각선이라 탈락 → **east 방향** 사용 → 얼굴 수정 + 얼굴 고정 후처리 → **확정** (`animations/run/`) |
+| └ **run (현재)** | group `264da5f5-ffad-47cb-a367-dedc29aee75c` | pixminimax template_action `running`, south-east, 8프레임(124×124) → 128×128에 (dx=3, dy=5) 배치, 가장 낮은 발 111행, 머리 중심을 idle과 맞춤. 후처리 없음 → **확정** (2026-11-28). 같이 뽑은 후보: 전력 질주 `97840512-01fc-4aa6-b9fd-04f63ff97a74` → **sprint로 확정** (`animations/sprint/`, 8프레임 0.06초, (dx=2, dy=6) 배치, 이동 속도가 오르면 run 대신 재생), v3 custom `c2271023-4dc4-4d5a-811f-9ae466d5594e`(걷기처럼 보여 탈락) |
+| └ run (이전) | group `2be876c6-2c45-4e03-9b76-e1d3c3bff920` | skeleton-v3 `running-6-frames`. south-east는 다리가 대각선이라 탈락 → **east 방향** 사용 → 얼굴 수정 + 얼굴 고정 후처리 → **확정** (`animations/run/`) |
 | └ attack_dynamic_lunge | group `67be4926-2e7a-4bd9-a1a3-b0430730b952` | v3 custom 10프레임(+시작 1) south-east, end_frame = south-east 회전 이미지, 크게 당기기→내딛기→휘두르기 → 흩날린 조각 제거 + 정렬 → **확정** (`animations/attack/`, 2026-11-26) |
 | └ attack_dynamic_leap | group `04cc30ec-f0e8-466c-a2d3-b3566cacc958` | 뛰어올라 내려찍기, 중간에 몸이 정면으로 돎 (탈락) |
 | └ attack_slash_v2 | group `aa3ac889-d310-46d1-893b-e0fd12b3afd4` | 이전 확정본(동작이 작음) → 2026-11-26 attack_dynamic_lunge로 교체 |
@@ -293,6 +306,28 @@ Unity가 자동으로 가져가지 않도록 `Assets` 밖에 둔다. 게임에 �
 - 단검 수정: 3·7번에 단검이 없어서 `edit_image`(10회)로 오른손에 단검을 그려 넣고 머리 매칭으로 위치 복원(3: (−7,0), 7: (−9,−1)). 5번 앞쪽에 튀어나온 작은 칼끝은 직접 지움(32px). 같은 편집에서 5·6번은 찌르는 자세가 바뀌어버려 원본 사용 → **4~6번(찌르는 구간)은 수정 전과 같아서 위 X베기 이펙트 타이밍은 그대로 맞음**
 - 나타남 효과: `Dissolve.cs`의 `MaterializeInto(프레임들, 4, 출력, 4242)` — 4프레임 동안 발부터 위로 픽셀이 채워지고(채워지는 순간 밝게), 아직 안 채워진 곳은 위에서 내려오며 모이는 점으로 표시
 - 탈락: 내디뎌 찌르기(`9095ffa5-…`, 동작이 작음)
+
+**완료:** 스킬 2번(skill_002) "지연 일섬" 이펙트 확정 (2026-11-28) → `effects/skill_002/`
+- 사용자 요청 "메인 캐릭터 스킬에 미친 뽕맛" → 지연 일섬 + 임팩트 프레임 묶음, 1차 시안 뒤 "더 세게"로 강화판 확정
+- 모양: 휘두르는 순간 얇은 흰 선이 적을 관통해 길게 그어짐(0.05초) → 선이 걸린 채 빛 점이 적 쪽으로 흘러감(0.14초) → **0.2초(frame_006)** 에 선이 굵게 번쩍이고 위아래 두 줄로 갈라지며, 적을 중심으로 각도 다른 베기선 5줄이 0.03초 간격으로 꽂힘 + 불꽃 90개·속도선 22줄·조각
+- 선 위치(캐릭터 pivot 기준, 오른쪽을 볼 때): (−8, −31) → (178, −41), 적 중심은 선의 27% 지점 = 캐릭터 pivot 앞 **42px**, 높이 −34px
+- 옵션(`source/options.json`): 기본값 그대로 (hold 0.14, sparkN 90, cuts 5, power 1.5). power 1 / cuts 0 / sparkN 46이 1차 시안(약한 판)
+- 임팩트 프레임은 그림이 아니라 엔진 연출(색 반전): 수치는 `ENGINE_REQUEST.md` 4-2장
+- 캐릭터 동작은 **backstab 그대로 사용** (2026-11-28 사용자 확정, 전용 동작 없음). 데모도 vanish → backstab에 겹쳐 만듦
+- 다시 렌더: `node tools/render.mjs melee/delayed-cut --sheet --no-actor --out <폴더>` (pixelfx 폴더에서)
+- 작업 파일: `pixl_testssets\character\girl_base\work\skill_iai\` (1차 시안 GIF, 합성 스크립트)
+
+**완료:** 스킬 3번(skill_003) "칼바람 돌풍" 이펙트 확정 (2026-11-28) → `effects/skill_003/`
+- 사용자 요청 "skill_003도 뽕맛 나게, 돌풍이든 뭐든" → 기획안 4개 중 1번(끌어모으고 터뜨리는 범위기) 선택, 1차 시안 뒤 "더 세게"로 강화판 확정
+- 모양(이펙트 시간): 0~0.22초 회오리가 바닥에서 솟음 → 0.25초부터 0.08초 간격으로 회오리 안에서 흰 베기선 10번(마지막 0.97초), 바닥으로 바람선이 빨려 들어옴 → 1.0~1.2초 가늘고 밝게 조여듦 → **1.2초(frame_036) 폭발**: 3줄 베기(X + 세로), 빛기둥, 바닥 고리 2겹, 칼날 조각 28개, 불꽃 150개 → 1.75초 끝
+- 회오리는 시트 안에서 제자리. 앞으로 나아가기·몬스터 끌어오기는 엔진 연출 (수치는 `ENGINE_REQUEST.md` 4-3장)
+- 캐릭터 동작: attack3(내려찍기) 재사용, 찍는 순간 0.21초에 이펙트 시작. 전용 동작 없음
+- **배경색을 바꾸는 임팩트 프레임은 쓰지 않음** (1차 시안에 넣었다가 사용자가 "화면 색깔이 왜 달라지지?" → 뺌). 터질 때 몬스터 흰 번쩍임과 화면 흔들림만
+- **2026-11-28 수정:** 사용자 "잘 안 보인다, 더 흰색으로 아니면 더 두껍게" → 둘 다 적용. 팔레트를 흰색 쪽으로(`#8a7c6e … #fdfaf6 #ffffff`), 회오리 몸통 불투명도 약 2배, 앞쪽 바람 줄 굵기 1 → 2px(옵션 thick 2). 시트 크기·프레임 수·pivot·타이밍은 그대로
+- 옵션(`source/options.json`): 기본값 그대로 (height 134, cuts 10). 1차 시안은 height 104, cuts 7, 칸 280×210
+- 회오리 몸통은 pixelfx `nature/tornado`를 1회용으로 고친 복사본
+- 다시 렌더: `node tools/render.mjs melee/blade-gale --sheet --no-actor --out <폴더>` (pixelfx 폴더에서)
+- 작업 파일: `pixl_test/assets/character/girl_base/work/skill_gale/` (1차 시안 GIF, 합성 스크립트)
 
 **현재 단계:** 기본형 모션 계속 제작 (2026-11-26)
 - **작업 순서 규칙 (사용자 결정, 2026-11-26): 기본형(girl_base) 모션을 먼저 다 정한 뒤에 후드를 한 번에 추가한다.** 기본형 모션을 만들거나 바꿀 때 hood_0을 다시 합성하지 않는다

@@ -315,6 +315,24 @@ P += [
     ("frame_face", 20, 20, f'<div style="width:100%;height:100%;box-sizing:border-box;border-radius:50%;border:1.5px solid {GOLD}"></div>', None, "지금 위치 얼굴 테두리 (안은 비어 있음, 초상화를 원형 마스크로 아래에)"),
 ]
 
+# 던전·도전 (컨텐츠 창)
+def ring(bd, bw, extra=""):
+    return f'<div style="width:100%;height:100%;box-sizing:border-box;border-radius:50%;border:{bw}px solid {bd};{extra}"></div>'
+P += [
+    ("card_frame", 40, 40, f'<div style="width:100%;height:100%;box-sizing:border-box;border-radius:14px;border:1.5px solid {GOLD}"></div>', [14, 14, 14, 14], "던전 카드·보스 띠 금테 (안은 비어 있음, 그림 위에 겹침)"),
+    ("card_frame_lock", 40, 40, f'<div style="width:100%;height:100%;box-sizing:border-box;border-radius:14px;border:1.5px solid rgba(230,194,122,.35)"></div>', [14, 14, 14, 14], "잠긴 카드 테두리"),
+    ("card_shade", 120, 40, '<div style="width:100%;height:100%;border-radius:12.5px;background:linear-gradient(90deg,rgba(30,18,12,.92) 0%,rgba(30,18,12,.75) 50%,rgba(30,18,12,.15) 90%)"></div>', [13, 13, 13, 13], "카드 그림 위 어두운 그라데이션 (왼쪽 진함, 늘려 씀)"),
+    ("card_chip", 32, 24, box("rgba(0,0,0,.35)", "12px", False), [12, 12, 0, 0], "카드 안 보상 칸 바닥"),
+    ("icon_ticket", 16, 16, svg(16, f'<path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v2.500a2.500 2.500 0 000 5V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.500a2.500 2.500 0 000-5z" fill="#EE7A5C" stroke="{DARK}" stroke-width="1.800" stroke-linejoin="round"/><path d="M15 6v12" stroke="#FFD2C4" stroke-width="1.400" stroke-dasharray="2 2"/><path d="M8.500 10l1 2 2 .3-1.500 1.400.4 2-1.900-1-1.900 1 .4-2L5.500 12.300l2-.3z" fill="#FFF3DC"/>'), None, "던전 티켓"),
+    ("step_row", 40, 40, cell_box("rgba(84,54,40,.75)", "rgba(230,194,122,.45)").replace("10px", "12px"), [12, 12, 12, 12], "도전 단계 줄 (깬 단계)"),
+    ("step_row_next", 40, 40, cell_box("#5A3A1E", "#F2B544", 2).replace("10px", "12px"), [12, 12, 12, 12], "도전 단계 줄 (다음 도전)"),
+    ("step_row_lock", 40, 40, cell_box("rgba(0,0,0,.3)", "rgba(230,194,122,.18)").replace("10px", "12px"), [12, 12, 12, 12], "도전 단계 줄 (잠김)"),
+    ("step_row_sel", 52, 52, f'<div style="position:absolute;left:6px;top:6px;width:40px;height:40px;box-sizing:border-box;border:2px solid {GOLD};border-radius:12px;box-shadow:0 0 8px 3px rgba(242,181,68,.55)"></div>', [18, 18, 18, 18], "고른 단계 줄 테두리+빛 (줄 위에 겹침, 사방 6 바깥)"),
+    ("face_ring", 44, 44, ring("rgba(230,194,122,.55)", 1.5), None, "보스 얼굴 테두리 (초상화는 원형 마스크로 아래에)"),
+    ("face_ring_lock", 44, 44, ring("rgba(230,194,122,.25)", 1.5), None, "잠긴 보스 얼굴 테두리"),
+    ("face_ring_sel", 56, 56, f'<div style="position:absolute;left:6px;top:6px;width:44px;height:44px;box-sizing:border-box;border-radius:50%;border:2px solid {GOLD};box-shadow:0 0 8px 3px rgba(242,181,68,.6)"></div>', None, "고른 보스 얼굴 테두리+빛 (사방 6 바깥)"),
+]
+
 # 격자 배치
 W = 400; PAD = 6; x = PAD; y = PAD; rowh = 0; items = []; html = []
 for name, w, h, body, nine, use in P:

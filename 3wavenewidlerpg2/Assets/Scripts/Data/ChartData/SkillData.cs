@@ -12,7 +12,9 @@ public class SkillData : ChartDataBase
     public string TextCode_Name;
     public string TextCode_Desc;
     public int Skill_Type;
+    public int Skill_Count;     // 발사체 갯수 (근접 스킬은 순간이동·베기 반복 횟수)
     public float Cooltime;
+    public float Duration;      // 지속시간 (스킬 3 돌풍이 이만큼 돎)
     public int Max_Hits;
     public double Damage;
     public string Resource;
@@ -25,7 +27,9 @@ public class SkillData : ChartDataBase
         this.TextCode_Name = GameUtils.GameUtils.TryParse<string>("TextCode_Name", jsonData);
         this.TextCode_Desc = GameUtils.GameUtils.TryParse<string>("TextCode_Desc", jsonData);
         this.Skill_Type = GameUtils.GameUtils.TryParse<int>("Skill_Type", jsonData);
+        this.Skill_Count = GameUtils.GameUtils.TryParse<int>("Skill_Count", jsonData);
         this.Cooltime = GameUtils.GameUtils.TryParse<float>("Cooltime", jsonData);
+        this.Duration = GameUtils.GameUtils.TryParse<float>("Duration", jsonData);
         this.Max_Hits = GameUtils.GameUtils.TryParse<int>("Max_Hits", jsonData);
         this.Damage = GameUtils.GameUtils.TryParse<double>("Damage", jsonData);
         this.Resource = GameUtils.GameUtils.TryParse<string>("Resource", jsonData);

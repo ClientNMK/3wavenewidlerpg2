@@ -50,3 +50,28 @@ Name_Move,이동,Go,移動,前往
 Name_Best,최고,Best,最高,最高
 Msg_WorldUnlockHint,월드 {0} 마지막 보스({0}-{1})를 이기면 열려요,Defeat the World {0} final boss ({0}-{1}) to unlock,ワールド{0}の最後のボス({0}-{1})を倒すと開放,擊敗世界{0}最終首領({0}-{1})即可開放
 Msg_WorldLocked,다른 월드는 아직 갈 수 없어요,Other worlds are not open yet,他のワールドにはまだ行けません,尚無法前往其他世界
+Name_Content,컨텐츠,Content,コンテンツ,內容
+Name_Dungeon,던전,Dungeon,ダンジョン,地下城
+Name_Challenge,도전,Challenge,挑戦,挑戰
+Name_DungeonNumber,던전 {0},Dungeon {0},ダンジョン {0},地下城 {0}
+Msg_Seconds,{0}초,{0}s,{0}秒,{0}秒
+Msg_StepCleared,{0}단계 클리어,Stage {0} cleared,{0}段階クリア,第{0}階段通關
+Msg_NotCleared,아직 안 깸,Not cleared,未クリア,尚未通關
+Msg_StepReward,{0}단계 보상,Stage {0} reward,{0}段階報酬,第{0}階段獎勵
+Name_Sweep,소탕,Sweep,掃討,掃蕩
+Name_Enter,입장,Enter,入場,進入
+Msg_Preparing,준비 중,Coming soon,準備中,準備中
+Msg_DungeonUnlock,Stage {0}를 깨면 열려요,Clear Stage {0} to unlock,Stage {0}をクリアすると開放,通關 Stage {0} 後開放
+Name_ChallengeBoss,도전 보스 {0},Challenge Boss {0},挑戦ボス {0},挑戰首領 {0}
+Msg_ChallengeBest,최고 {0}단계 · 단계마다 강해져요,Best stage {0} · Stronger each stage,最高 {0}段階 · 段階ごとに強くなります,最高第{0}階段 · 每階段變強
+Msg_ChallengeLimit,제한 {0}초 · 티켓 없이 계속 도전,{0}s limit · Retry without tickets,制限 {0}秒 · チケットなしで挑戦,限時{0}秒 · 不需門票可持續挑戰
+Msg_ChallengeUnlock,도전 보스 {0}을 {1}단계까지 깨면 열려요,Clear Challenge Boss {0} up to stage {1} to unlock,挑戦ボス{0}を{1}段階までクリアすると開放,挑戰首領{0}通關至第{1}階段後開放
+Msg_StepLabel,단계,Stages,段階,階段
+Msg_Step,{0}단계,Stage {0},{0}段階,第{0}階段
+Msg_Received,받음,Claimed,受取済み,已領取
+Msg_FirstClear,첫 클리어,First clear,初回クリア,首次通關
+Msg_ChallengeStep,{0}단계 도전,Challenge stage {0},{0}段階に挑戦,挑戰第{0}階段
+Name_Locked,잠김,Locked,ロック中,鎖定
+Msg_BeforeChallenge,도전 전,Not tried,挑戦前,尚未挑戰
+Msg_DungeonTitle,{0} · {1}단계,{0} · Stage {1},{0} · {1}段階,{0} · 第{1}階段
+Msg_ChallengeNotCleared,아직 안 깸 · 단계마다 강해져요,Not cleared · Stronger each stage,未クリア · 段階ごとに強くなります,尚未通關 · 每階段變強

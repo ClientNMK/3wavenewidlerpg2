@@ -95,13 +95,13 @@ public class UIGoldUpgradePopup : UIPopup
     public override void ShowPopup()
     {
         base.ShowPopup();
-        InGameManager.Instance.UIInGameScene.SetActiveBattleHud(false);
+        InGameManager.Instance.UIInGameScene.SetTabWindow(this);
     }
 
     public override void ClosePopup()
     {
         base.ClosePopup();
-        InGameManager.Instance.UIInGameScene.SetActiveBattleHud(true);
+        InGameManager.Instance.UIInGameScene.SetTabWindow(null);
     }
 
     // 창이 열린 동안에도 전투는 계속되므로 골드·SP가 바뀌면 버튼 상태 갱신

@@ -65,10 +65,31 @@ public class InGameManager : MonoBehaviour
     int killCount = 0;
     bool isBossChallenge = false;
     bool isBossFailing = false;     // 실패 연출 동안 (히트스톱이 멈춤을 풀지 않게)
+    bool isStageChanging = false;   // 보스전 끝(VICTORY·검은 화면)·스테이지 이동 동안: 일반 몬스터 채우지 않음
     bool isBossStarting = false;    // 도전 시작(멈춤·검은 화면·등장 연출) 동안: 자동 도전 중복 시작·히트스톱 해제 막음
     bool isAutoBoss = false;        // 자동 보스 도전 (저장 전까지 이번 플레이만)
     float bossTimer = 0f;
     public bool IsBossChallenge { get { return isBossChallenge; } }
+    DungeonData dungeon = null;     // 던전·도전 중이면 그 단계 (아니면 스테이지 보스)
+    string dungeonName = null;
+    readonly Dictionary<int, int> dungeonClearedSteps = new();      // Dungeon_Type별 깬 최고 단계 (저장 없이 이번 플레이만)
+
+    public int GetDungeonClearedStep(int _dungeonType)
+    {
+        return dungeonClearedSteps.TryGetValue(_dungeonType, out int step) ? step : 0;
+    }
+
+    // 던전·도전 입장: 처치 수 조건 없이 보스전과 같은 흐름
+    public void StartDungeon(DungeonData _step, string _name)
+    {
+        if (isBossChallenge || isBossStarting || MainCharacter.State == State.Dead)
+            return;
+
+        dungeon = _step;
+        dungeonName = _name;
+        isBossStarting = true;
+        StartCoroutine(CoStartBossChallenge());
+    }
 
     StageData CurStageData { get { return DataManager.Instance.StageData.GetStageData(stageId); } }
     int BossChallengeCount { get { return (int)DataManager.Instance.SystemData.GetFloat("Boss_Challenge_Count"); } }
@@ -79,20 +100,23 @@ public class InGameManager : MonoBehaviour
         // 배경은 스테이지가 속한 월드의 World_Resource
         string worldResource = DataManager.Instance.WorldData.GetWorldData(stageData.World_Id).World_Resource;
         BgRenderer.sprite = ResourceManager.Instance.GetSprite(AtlasType.Bg, worldResource);
-        // Monster_Id[i]를 Monster_Spawn_Count[i]마리 등장
+        // Monster_Id[i]가 Monster_Spawn_Count[i]마리가 되게 모자란 만큼 등장
         for (int idx = 0; idx < stageData.Monster_Id.Length; idx++)
         {
             MonsterData monsterData = DataManager.Instance.MonsterData.GetMonsterData(stageData.Monster_Id[idx]);
-            for (int i = 0; i < stageData.Monster_Spawn_Count[idx]; i++)
+            int aliveCount = Monsters.FindAll(x => x.MonsterData == monsterData).Count;
+            for (int i = aliveCount; i < stageData.Monster_Spawn_Count[idx]; i++)
             {
-                // 화면 가운데 기준 위·왼쪽·오른쪽 반원 (너무 멀면 배경 밖으로 나감)
-                float angle = Random.Range(0f, Mathf.PI);
+                // 화면 가운데 기준 둘레 전체에서 무작위 (너무 멀면 배경 밖으로 나감)
+                float angle = Random.Range(0f, Mathf.PI * 2f);
                 float radius = Random.Range(SpawnRadiusMin, SpawnRadiusMax);
                 SpawnMonster(monsterData, stageData.Monster_Attack, stageData.Monster_Hp, stageData.Monster_Penetrate, new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * radius);
             }
         }
     }
 
+    const float SpawnInterval = 5f;     // 일반 몬스터는 5초마다 모자란 만큼 채움 (NightmareIdle 일반 스테이지와 같음)
+    float spawnTimer = 0f;
     const float SpawnRadiusMin = 2f;
     const float SpawnRadiusMax = 4.5f;  // 화면 가로 절반(약 4.5칸)까지
 
@@ -147,17 +171,26 @@ public class InGameManager : MonoBehaviour
         yield return UIInGameScene.CoFadeBlack(0f, 1f, BossFadeTime);
 
         ClearMonsters();
+        // 던전·도전은 그 던전 배경 (bg_dungeon_{Dungeon_Type}, 끝나면 SpawnMonsters가 월드 배경으로 되돌림)
+        if (dungeon != null)
+        {
+            Sprite dungeonBg = ResourceManager.Instance.GetSprite(AtlasType.Bg, $"bg_dungeon_{dungeon.Dungeon_Type}");
+            if (dungeonBg != null)
+                BgRenderer.sprite = dungeonBg;
+        }
         MainCharacter.SetPosition(BossPlayerPosition);
         MainCharacter.ChangeState(State.Idle);
-        MonsterData bossData = DataManager.Instance.MonsterData.GetMonsterData(stageData.Boss_Monster_Id);
-        SpawnMonster(bossData, stageData.Boss_Monster_Attack, stageData.Boss_Monster_Hp, stageData.Boss_Monster_Penetrate, BossPosition);
+        if (dungeon != null)
+            SpawnMonster(DataManager.Instance.MonsterData.GetMonsterData(dungeon.Monster_Id), dungeon.Monster_Attack, dungeon.Monster_Hp, dungeon.Monster_Penetrate, BossPosition);
+        else
+            SpawnMonster(DataManager.Instance.MonsterData.GetMonsterData(stageData.Boss_Monster_Id), stageData.Boss_Monster_Attack, stageData.Boss_Monster_Hp, stageData.Boss_Monster_Penetrate, BossPosition);
         // 검은 화면 위에서 등장 연출 → 연출이 끝나면 검은 화면을 걷고 다시 움직이며 제한 시간 시작
         yield return UIInGameScene.CoBossIntro();
         yield return UIInGameScene.CoFadeBlack(1f, 0f, BossFadeTime);
         Time.timeScale = 1f;
         isBossChallenge = true;
         isBossStarting = false;
-        bossTimer = DataManager.Instance.SystemData.GetFloat("Boss_Challenge_Time");
+        bossTimer = dungeon != null ? dungeon.Limit_Time : DataManager.Instance.SystemData.GetFloat("Boss_Challenge_Time");
         UIInGameScene.SetBossBattle(true);
         RefreshStageUI();
     }
@@ -166,32 +199,52 @@ public class InGameManager : MonoBehaviour
     void EndBossChallenge(bool _isClear)
     {
         isBossChallenge = false;
-        // 클리어하면 VICTORY 연출, 처음 클리어면 StageChart First_Clear 보상도 그 장면에서
+        // 클리어하면 VICTORY 연출, 첫 클리어 보상(맨 앞, firstCount개)도 그 장면에서
         List<UIRewardPopup.Reward> clearRewards = new();
-        if (_isClear && stageId == UserManager.Instance.MaxStageId && clearedStageIds.Add(stageId))
-            clearRewards.Add(new(CurStageData.First_Clear_Goods_Id, CurStageData.First_Clear_Value));
-        if (_isClear)
-        {
-            if (DataManager.Instance.StageData.HasStageData(stageId + 1))
-                stageId++;
-            UserManager.Instance.SetMaxStage(stageId);
-        }
-        else
+        int firstCount = 0;
+        if (!_isClear)
         {
             // 실패(시간 초과·사망·포기)하면 자동 도전도 꺼짐
             isAutoBoss = false;
             UIInGameScene.SetAutoBoss(false);
         }
-        // 성공·실패 모두 처음부터 다시 Boss_Challenge_Count마리
-        killCount = 0;
-        StartCoroutine(CoEndBossChallenge(_isClear, clearRewards));
+        if (dungeon != null)
+        {
+            // 던전·도전은 깼을 때만 단계가 오름, 처음 깬 단계면 FirstClear 보상 + 단계 보상
+            if (_isClear && dungeon.Step > GetDungeonClearedStep(dungeon.Dungeon_Type))
+            {
+                dungeonClearedSteps[dungeon.Dungeon_Type] = dungeon.Step;
+                if (dungeon.FirstClear_Reward_Id != 0)
+                    clearRewards.Add(new(dungeon.FirstClear_Reward_Id, dungeon.FirstClear_Reward_Value));
+                firstCount = clearRewards.Count;
+            }
+            if (_isClear && dungeon.Reward_Item_Id != 0)
+                clearRewards.Add(new(dungeon.Reward_Item_Id, dungeon.Reward_Item_Value));
+            dungeon = null;
+        }
+        else
+        {
+            if (_isClear && stageId == UserManager.Instance.MaxStageId && clearedStageIds.Add(stageId))
+                clearRewards.Add(new(CurStageData.First_Clear_Goods_Id, CurStageData.First_Clear_Value));
+            firstCount = clearRewards.Count;
+            if (_isClear)
+            {
+                if (DataManager.Instance.StageData.HasStageData(stageId + 1))
+                    stageId++;
+                UserManager.Instance.SetMaxStage(stageId);
+            }
+            // 성공·실패 모두 처음부터 다시 Boss_Challenge_Count마리 (던전에서 돌아오면 그대로)
+            killCount = 0;
+        }
+        StartCoroutine(CoEndBossChallenge(_isClear, clearRewards, firstCount));
     }
 
     // 검은 화면 동안 보스를 치우고 캐릭터를 처음 자리에 세운 뒤 일반 몬스터 등장
-    IEnumerator CoEndBossChallenge(bool _isClear, List<UIRewardPopup.Reward> _clearRewards)
+    IEnumerator CoEndBossChallenge(bool _isClear, List<UIRewardPopup.Reward> _clearRewards, int _firstCount)
     {
+        isStageChanging = true;
         if (_isClear)
-            yield return UIInGameScene.BossClear.CoPlay(_clearRewards, _clearRewards.Count);
+            yield return UIInGameScene.BossClear.CoPlay(_clearRewards, _firstCount);
         yield return UIInGameScene.CoFadeBlack(0f, 1f, BossFadeTime);
 
         ClearMonsters();
@@ -206,6 +259,7 @@ public class InGameManager : MonoBehaviour
         UIInGameScene.SetBossBattle(false);
         RefreshStageUI();
         yield return UIInGameScene.CoFadeBlack(1f, 0f, BossFadeTime);
+        isStageChanging = false;
         // 다음 스테이지 알림은 검은 화면이 걷힌 뒤
         if (_isClear)
             UIInGameScene.ShowStageBanner(StageName);
@@ -229,6 +283,7 @@ public class InGameManager : MonoBehaviour
 
     IEnumerator CoMoveStage()
     {
+        isStageChanging = true;
         yield return UIInGameScene.CoFadeBlack(0f, 1f, BossFadeTime);
         ClearMonsters();
         MainCharacter.SetPosition(playerStartPosition);
@@ -236,6 +291,7 @@ public class InGameManager : MonoBehaviour
         SpawnMonsters();
         RefreshStageUI();
         yield return UIInGameScene.CoFadeBlack(1f, 0f, BossFadeTime);
+        isStageChanging = false;
         UIInGameScene.ShowStageBanner(StageName);
     }
 
@@ -285,6 +341,16 @@ public class InGameManager : MonoBehaviour
 
     private void Update()
     {
+        if (!isBossChallenge && !isBossStarting && !isBossFailing && !isStageChanging)
+        {
+            spawnTimer += Time.deltaTime;
+            if (spawnTimer >= SpawnInterval)
+            {
+                spawnTimer = 0f;
+                SpawnMonsters();
+            }
+            return;
+        }
         if (!isBossChallenge)
             return;
 
@@ -296,7 +362,14 @@ public class InGameManager : MonoBehaviour
         }
         // 보스전에는 보스 한 마리만 있음
         Monster boss = Monsters[0];
-        UIInGameScene.SetBossStage(StringManager.Instance.GetStringText(boss.MonsterData.TextCode_Name), (float)(boss.CurHp.ToDouble() / boss.GetTotalHp().ToDouble()), bossTimer);
+        UIInGameScene.SetBossStage(GetBossTitle(boss), (float)(boss.CurHp.ToDouble() / boss.GetTotalHp().ToDouble()), bossTimer);
+    }
+
+    // 던전·도전이면 "던전 1 · 4단계", 아니면 보스 이름
+    string GetBossTitle(Monster _boss)
+    {
+        return dungeon != null ? string.Format(StringManager.Instance.GetStringText("Msg_DungeonTitle"), dungeonName, dungeon.Step)
+            : string.Format(StringManager.Instance.GetStringText("Msg_BossName"), StringManager.Instance.GetStringText(_boss.MonsterData.TextCode_Name));
     }
 
     string StageName { get { return $"Stage {CurStageData.World_Id}-{CurStageData.Stage_Number}"; } }
@@ -342,6 +415,15 @@ public class InGameManager : MonoBehaviour
     }
 
     const float ShakeTime = 0.15f;
+    // 임팩트 프레임 (스킬 2 지연 일섬, ENGINE_REQUEST 4-2): 5프레임 정지 동안 흰 화면+검은 실루엣 / 검은 화면+흰 실루엣, 풀리면 정해진 흔들림
+    const float ImpactFrameTime = 1f / 30f;
+    const int ImpactScreenOrder = -9995;        // 배경(-10000) 바로 위, 캐릭터 아래
+    static readonly bool[] ImpactWhiteFrames = { true, false, false, true, false };
+    static readonly Vector2[] ImpactShakePixels = { new(7f, -3f), new(-6f, 3f), new(5f, -2f), new(-4f, 2f), new(2f, -1f), new(-1f, 1f) };
+    static readonly Color ImpactWhiteColor = new Color32(0xff, 0xfa, 0xf4, 0xff);
+    static readonly Color ImpactBlackColor = new Color32(0x0b, 0x09, 0x10, 0xff);
+    static readonly Color NoTintColor = new Color(0f, 0f, 0f, 0f);
+    SpriteRenderer impactScreen = null;
     Vector3 cameraPosition = Vector3.zero;
     Vector3 shakeOffset = Vector3.zero;
 
@@ -372,6 +454,57 @@ public class InGameManager : MonoBehaviour
     }
 
     // 타격 순간 전체 정지 후 화면 흔들림 (흔들림은 px)
+    // 캐릭터·몬스터는 멈추고 이펙트(_effect, 정지 중에도 재생)는 계속, 끝나면 흔들림 시작
+    public IEnumerator CoImpactFrame(Effect _effect)
+    {
+        if (impactScreen == null)
+        {
+            impactScreen = new GameObject("ImpactScreen").AddComponent<SpriteRenderer>();
+            impactScreen.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 4f, 4f), new Vector2(0.5f, 0.5f), 1f);
+            impactScreen.transform.localScale = Vector3.one * 20f;     // 80칸, 화면을 다 덮음
+            impactScreen.sortingOrder = ImpactScreenOrder;
+        }
+        impactScreen.transform.position = new Vector3(MainCamera.transform.position.x, MainCamera.transform.position.y, 0f);
+        impactScreen.gameObject.SetActive(true);
+        List<CharacterBase> characters = new(Monsters) { MainCharacter };
+        Time.timeScale = 0f;
+        foreach (bool isWhite in ImpactWhiteFrames)
+        {
+            impactScreen.color = isWhite ? ImpactWhiteColor : ImpactBlackColor;
+            foreach (CharacterBase character in characters)
+            {
+                character.SetMaterialColor(isWhite ? Color.black : Color.white);
+                character.SetMaterialTintColor(isWhite ? NoTintColor : Color.white);
+            }
+            _effect.SetColor(isWhite ? Color.black : Color.white);
+            yield return new WaitForSecondsRealtime(ImpactFrameTime);
+        }
+        impactScreen.gameObject.SetActive(false);
+        foreach (CharacterBase character in characters)
+        {
+            character.SetMaterialColor(Color.white);
+            character.SetMaterialTintColor(NoTintColor);
+        }
+        _effect.SetColor(Color.white);
+        Time.timeScale = 1f;
+        PlayImpactShake();
+    }
+
+    public void PlayImpactShake()
+    {
+        StartCoroutine(CoImpactShake());
+    }
+
+    IEnumerator CoImpactShake()
+    {
+        foreach (Vector2 offset in ImpactShakePixels)
+        {
+            shakeOffset = offset / 64f;
+            yield return new WaitForSecondsRealtime(ImpactFrameTime);
+        }
+        shakeOffset = Vector3.zero;
+    }
+
     public void HitStop(float _hitStopTime, float _shakePixels)
     {
         StartCoroutine(CoHitStop(_hitStopTime, _shakePixels / 64f));
@@ -475,7 +608,7 @@ public class InGameManager : MonoBehaviour
         return true;
     }
 
-    // 일반 몬스터는 모두 잡으면 다시 등장, 보스를 잡으면 도전 성공
+    // 일반 몬스터는 5초마다 다시 채움(Update), 보스를 잡으면 도전 성공
     void HandleMonsterDead(CharacterBase _monster)
     {
         Monsters.Remove((Monster)_monster);
@@ -499,13 +632,13 @@ public class InGameManager : MonoBehaviour
 
         if (isBossChallenge)
         {
+            // 남은 체력이 반올림돼 1%로 남아 보이지 않게 잡은 순간 0%로
+            UIInGameScene.SetBossStage(GetBossTitle((Monster)_monster), 0f, bossTimer);
             EndBossChallenge(true);
             return;
         }
 
         killCount++;
         RefreshStageUI();
-        if (Monsters.Count == 0)
-            SpawnMonsters();
     }
 }
